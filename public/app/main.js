@@ -1,0 +1,157 @@
+import { el, clear } from "./dom.js";
+import { initStore, storeEvents } from "./store.js";
+import { startSync, syncEvents, getSyncState, requestSync } from "./sync.js";
+import { currentRoute, startRouter } from "./router.js";
+import { renderWorkout } from "./views/workout.js";
+import { renderHistory } from "./views/history.js";
+import { renderExercises, renderExerciseDetail } from "./views/exercises.js";
+import { renderStats } from "./views/stats.js";
+
+const view = document.getElementById("view");
+const pill = document.getElementById("sync-pill");
+const tabs = [...document.querySelectorAll(".tab")];
+
+const VIEWS = {
+  workout: renderWorkout,
+  history: renderHistory,
+  exercises: renderExercises,
+  exercise: renderExerciseDetail,
+  stats: renderStats
+};
+
+const TAB_FOR_ROUTE = {
+  workout: "workout",
+  history: "history",
+  exercises: "exercises",
+  exercise: "exercises",
+  stats: "stats"
+};
+
+let lastRouteKey = "";
+let deferredRender = false;
+let banner = null;
+
+function isEditing() {
+  const active = document.activeElement;
+  return Boolean(active) && view.contains(active) && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName);
+}
+
+function render() {
+  if (isEditing()) {
+    deferredRender = true;
+    return;
+  }
+  deferredRender = false;
+  const route = currentRoute();
+  const key = `${route.name}:${route.params.id || ""}`;
+  for (const tab of tabs) tab.setAttribute("aria-current", tab.dataset.route === TAB_FOR_ROUTE[route.name] ? "page" : "false");
+  clear(view);
+  (VIEWS[route.name] || renderWorkout)(view, route.params);
+  if (key !== lastRouteKey) {
+    lastRouteKey = key;
+    view.classList.remove("enter");
+    void view.offsetWidth;
+    view.classList.add("enter");
+    scrollTo({ top: 0, behavior: "instant" });
+  }
+}
+
+function paintPill() {
+  const state = getSyncState();
+  let status = "idle";
+  let label = "Synced";
+  if (state.status === "auth") {
+    status = "auth";
+    label = "Sign in";
+  } else if (state.status === "syncing") {
+    status = "syncing";
+    label = "Syncing";
+  } else if (state.status === "offline") {
+    status = "offline";
+    label = state.pending > 0 ? `Offline · ${state.pending}` : "Offline";
+  } else if (state.status === "error") {
+    status = "error";
+    label = "Retry";
+  } else if (state.pending > 0) {
+    status = "pending";
+    label = `Queued · ${state.pending}`;
+  }
+  pill.dataset.status = status;
+  pill.textContent = label;
+  paintBanner(state);
+}
+
+function paintBanner(state) {
+  if (state.status === "auth" && !banner) {
+    banner = el("div", { class: "banner" }, [
+      el("span", { text: "Access session expired. Your sets are safe and queued." }),
+      el("button", { class: "btn small", type: "button", text: "Sign in", onclick: signIn })
+    ]);
+    view.before(banner);
+  }
+  if (state.status !== "auth" && banner) {
+    banner.remove();
+    banner = null;
+  }
+}
+
+function signIn() {
+  location.href = `/?signin=${Date.now()}`;
+}
+
+function watchServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("/sw.js").then((registration) => {
+    registration.addEventListener("updatefound", () => {
+      const worker = registration.installing;
+      if (!worker) return;
+      worker.addEventListener("statechange", () => {
+        if (worker.state === "installed" && navigator.serviceWorker.controller) offerUpdate(worker);
+      });
+    });
+  });
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading) return;
+    reloading = true;
+    location.reload();
+  });
+}
+
+function offerUpdate(worker) {
+  const host = document.getElementById("toast-host");
+  const node = el("div", { class: "toast", style: "pointer-events:auto;display:flex;gap:10px;align-items:center" }, [
+    el("span", { text: "New version ready" }),
+    el("button", {
+      class: "btn small primary",
+      type: "button",
+      text: "Reload",
+      onclick: () => worker.postMessage({ type: "skip_waiting" })
+    })
+  ]);
+  host.append(node);
+}
+
+view.addEventListener("focusout", () => {
+  setTimeout(() => {
+    if (deferredRender && !isEditing()) render();
+  }, 0);
+});
+
+pill.addEventListener("click", () => {
+  if (getSyncState().status === "auth") signIn();
+  else requestSync();
+});
+
+async function boot() {
+  if (new URL(location.href).searchParams.has("signin")) history.replaceState({}, "", location.pathname);
+  await initStore();
+  storeEvents.addEventListener("changed", render);
+  syncEvents.addEventListener("state", paintPill);
+  startRouter(render);
+  paintPill();
+  await startSync();
+  watchServiceWorker();
+}
+
+boot();

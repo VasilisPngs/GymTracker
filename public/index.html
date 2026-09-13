@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GymTracker</title>
+<meta name="description" content="Private hypertrophy training log with offline-first sync.">
+<meta name="theme-color" content="#0b0c0f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GymTracker">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="brand" href="/" data-link>
+      <span class="brand-mark"></span>
+      <span class="brand-name">GymTracker</span>
+    </a>
+    <button id="sync-pill" class="pill" type="button" aria-live="polite">Synced</button>
+  </header>
+  <main id="view" class="view"></main>
+  <div id="timer-bar" class="timer-bar" hidden></div>
+  <nav class="tabbar">
+    <a class="tab" href="/" data-link data-route="workout">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6M8 6v12M16 6v12M20 9v6M8 12h8"/></svg>
+      <span>Train</span>
+    </a>
+    <a class="tab" href="/history" data-link data-route="history">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8"/></svg>
+      <span>History</span>
+    </a>
+    <a class="tab" href="/exercises" data-link data-route="exercises">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+      <span>Exercises</span>
+    </a>
+    <a class="tab" href="/stats" data-link data-route="stats">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V10M12 19V5M19 19v-6"/></svg>
+      <span>Stats</span>
+    </a>
+  </nav>
+</div>
+<div id="sheet-host"></div>
+<div id="toast-host" class="toast-host" role="status" aria-live="polite"></div>
+<script type="module" src="/app/main.js"></script>
+</body>
+</html>
