@@ -89,7 +89,7 @@ export function renderStats(container) {
         listNode.append(el("div", { class: "empty", text: t("noExerciseMatch") }));
         return;
       }
-      for (const row of matches.slice(0, 40)) {
+      for (const row of matches) {
         listNode.append(
           el("a", { class: "list-item", href: `/exercise/${row.exercise.id}`, "data-link": "" }, [
             el("span", { class: "grow" }, [

@@ -30,8 +30,6 @@ const cache = {
   program_exercises: new Map()
 };
 
-export const MAX_SETS = 12;
-
 const uid = () => crypto.randomUUID();
 export const now = () => Date.now();
 
@@ -383,7 +381,7 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
       deleted_at: null
     };
     entries.push({ table: "workout_exercises", row: link });
-    const count = Math.min(Math.max(planned.target_sets || 0, 0), MAX_SETS);
+    const count = Math.max(planned.target_sets || 0, 0);
     for (let index = 0; index < count; index += 1) {
       entries.push({
         table: "sets",

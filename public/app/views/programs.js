@@ -6,7 +6,6 @@ import {
   programsSorted,
   lastTrained,
   programExercises,
-  MAX_SETS,
   createProgram,
   updateProgram,
   deleteProgram,
@@ -88,7 +87,7 @@ function programRow(item) {
       onchange: (event) => updateProgramExercise(item.id, { notes: event.target.value.trim() || null })
     }),
     el("div", { class: "program-fields" }, [
-      field(t("colSets"), stepper(item.target_sets, 1, 0, (value) => updateProgramExercise(item.id, { target_sets: value === null ? null : Math.min(value, MAX_SETS) }))),
+      field(t("colSets"), stepper(item.target_sets, 1, 0, (value) => updateProgramExercise(item.id, { target_sets: value }))),
       field(t("colTargetReps"), stepper(item.target_reps, 1, 0, (value) => updateProgramExercise(item.id, { target_reps: value }))),
       field(t("colTargetWeight"), stepper(item.target_weight_kg, 2.5, 0, (value) => updateProgramExercise(item.id, { target_weight_kg: value }), { decimal: true })),
       field(t("colRest"), stepper(item.rest_seconds, 15, 0, (value) => updateProgramExercise(item.id, { rest_seconds: value })))

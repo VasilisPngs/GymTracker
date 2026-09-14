@@ -26,7 +26,7 @@ export function openExercisePicker(onPick) {
     if (matches.length === 0 && !needle) {
       listNode.append(el("div", { class: "empty", text: t("noExerciseMatch") }));
     }
-    for (const exercise of matches.slice(0, 40)) {
+    for (const exercise of matches) {
       listNode.append(
         el("button", { class: "list-item", type: "button", onclick: () => pick(exercise.id) }, [
           el("span", { text: exercise.name }),
