@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "gymtracker",
-      "database_id": "REPLACE_WITH_DATABASE_ID",
+      "database_id": "9fba0415-e994-42c4-8118-a5824b80f29d",
       "migrations_dir": "migrations"
     }
   ],
