@@ -29,7 +29,6 @@ const STRINGS = {
   nameRequired: ["Name is required", "Το όνομα είναι υποχρεωτικό"],
 
   programs: ["Programs", "Προγράμματα"],
-  noPrograms: ["No programs yet.", "Κανένα πρόγραμμα ακόμα."],
   newProgram: ["+ New program", "+ Νέο πρόγραμμα"],
   programNamePlaceholder: ["Name (e.g. Chest)", "Όνομα (π.χ. Στήθος)"],
   programEmpty: ["No exercises in this program yet.", "Καμία άσκηση σε αυτό το πρόγραμμα ακόμα."],
