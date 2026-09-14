@@ -67,6 +67,7 @@ const STRINGS = {
   lastSession: ["Last {date}: {sets}", "Τελευταία {date}: {sets}"],
   addSet: ["+ Set", "+ Σετ"],
   addWarmup: ["+ Warm-up", "+ Ζέσταμα"],
+  warmupMark: ["W", "Ζ"],
   colSet: ["#", "#"],
   colKg: ["kg", "kg"],
   colReps: ["reps", "επαν."],

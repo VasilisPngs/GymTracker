@@ -39,7 +39,7 @@ function setRow(set, index, rest) {
     el("button", {
       class: "set-index",
       type: "button",
-      text: set.is_warmup ? "W" : String(index + 1),
+      text: set.is_warmup ? t("warmupMark") : String(index + 1),
       title: t("setOptions"),
       style: "background:none;border:0;cursor:pointer",
       onclick: () => openSetMenu(set)
@@ -142,7 +142,7 @@ function exerciseBlock(workout, link) {
   );
 
   let index = 0;
-  for (const set of sets) {
+  for (const set of sets.filter((set) => set.is_warmup).concat(working)) {
     block.append(setRow(set, set.is_warmup ? index : index++, link.rest_seconds));
   }
 
