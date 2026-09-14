@@ -391,7 +391,6 @@ function startCard(container) {
   container.append(
     el("div", { class: "card" }, [
       el("h1", { text: t("readyToTrain") }),
-      el("p", { class: "muted", text: t("readyBody") }),
       planned ? el("div", { class: "tiny", text: t("todayIs", { name: planned }) }) : null,
       input,
       el("div", { class: "tiny", text: t("quickNames") }),

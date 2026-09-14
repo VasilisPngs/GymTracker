@@ -25,10 +25,6 @@ const STRINGS = {
   nameRequired: ["Name is required", "Το όνομα είναι υποχρεωτικό"],
 
   readyToTrain: ["Start a session", "Ξεκίνα προπόνηση"],
-  readyBody: [
-    "Name it however you train, or start without a name. Nothing here locks you into a programme, and it all works with no signal.",
-    "Ονόμασέ την όπως γυμνάζεσαι εσύ, ή ξεκίνα χωρίς όνομα. Κανένα πρόγραμμα δεν σε δεσμεύει, και όλα δουλεύουν χωρίς σήμα."
-  ],
   startSession: ["Start", "Έναρξη"],
   quickNames: ["Quick names", "Γρήγορα ονόματα"],
   createNamed: ["Create \u00ab{name}\u00bb", "Δημιουργία \u00ab{name}\u00bb"],
