@@ -102,7 +102,7 @@ function exerciseBlock(workout, link) {
   if (!exercise) return null;
   const sets = setsOf(link.id);
   const working = sets.filter((set) => !set.is_warmup);
-  const summary = summarizeSets(working.filter((set) => set.reps > 0));
+  const summary = summarizeSets(working.filter((set) => set.completed_at && set.reps > 0));
   const previous = lastPerformance(exercise.id, workout.id);
 
   const block = el("section", { class: "exercise-block" }, [

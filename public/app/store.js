@@ -216,8 +216,22 @@ export async function addSet(workoutExerciseId, values = {}) {
     created_at: now(),
     deleted_at: null
   };
-  await commit([{ table: "sets", row }]);
+  const link = byId("workout_exercises", workoutExerciseId);
+  const entries = [{ table: "sets", row }];
+  if (link && !row.is_warmup) {
+    const target = targetFromRows(link, existing.filter((set) => !set.is_warmup).length + 1);
+    if (target) entries.push({ table: "program_exercises", row: target });
+  }
+  await commit(entries);
   return row;
+}
+
+function targetFromRows(link, rows) {
+  const workout = byId("workouts", link.workout_id);
+  if (!workout || !workout.program_id) return null;
+  const planned = plannedFor(link, workout.program_id);
+  if (!planned || rows === 0 || planned.target_sets === rows) return null;
+  return { ...planned, target_sets: rows };
 }
 
 function plannedFor(link, programId) {
@@ -253,7 +267,13 @@ export async function updateSet(id, patch) {
 export async function deleteSet(id) {
   const current = byId("sets", id);
   if (!current) return;
-  await commit([{ table: "sets", row: { ...current, deleted_at: now() } }]);
+  const entries = [{ table: "sets", row: { ...current, deleted_at: now() } }];
+  const link = byId("workout_exercises", current.workout_exercise_id);
+  if (link && !current.is_warmup) {
+    const target = targetFromRows(link, setsOf(link.id).filter((set) => !set.is_warmup && set.id !== id).length);
+    if (target) entries.push({ table: "program_exercises", row: target });
+  }
+  await commit(entries);
 }
 
 export function programExercises(programId) {
@@ -430,7 +450,7 @@ export async function deleteExercise(id) {
 export const epley = (weight, reps) => (weight && reps ? weight * (1 + reps / 30) : 0);
 
 export function workingSets(workoutExerciseId) {
-  return setsOf(workoutExerciseId).filter((set) => !set.is_warmup && set.reps > 0);
+  return setsOf(workoutExerciseId).filter((set) => !set.is_warmup && set.completed_at && set.reps > 0);
 }
 
 export function describeSets(sets) {
