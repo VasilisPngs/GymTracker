@@ -151,7 +151,7 @@ async function sync(request, env) {
   try {
     for (const mutation of mutations) {
       const table = mutation && mutation.table;
-      if (!SCHEMA[table]) return json({ error: "unknown_table" }, 400);
+      if (!SCHEMA[table]) continue;
       if (!grouped.has(table)) grouped.set(table, new Map());
       const row = normalizeRow(table, mutation.row || {});
       grouped.get(table).set(row.id, row);

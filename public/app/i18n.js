@@ -16,6 +16,11 @@ const STRINGS = {
   sessionExpired: ["Access session expired. Your sets are safe and queued.", "Η συνεδρία Access έληξε. Τα σετ σου είναι ασφαλή και σε ουρά."],
   newVersion: ["New version ready", "Νέα έκδοση έτοιμη"],
   reload: ["Reload", "Επαναφόρτωση"],
+  storageBlocked: [
+    "Another GymTracker window is open with an older version. Close every other tab and reload.",
+    "Ένα άλλο παράθυρο GymTracker είναι ανοιχτό με παλιότερη έκδοση. Κλείσε τις άλλες καρτέλες και φόρτωσε ξανά."
+  ],
+  storageFailed: ["Local storage could not be opened.", "Η τοπική αποθήκευση δεν άνοιξε."],
 
   cancel: ["Cancel", "Άκυρο"],
   delete: ["Delete", "Διαγραφή"],

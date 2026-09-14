@@ -172,4 +172,12 @@ async function boot() {
   watchServiceWorker();
 }
 
-boot();
+boot().catch((error) => {
+  clear(view);
+  view.append(
+    el("div", { class: "empty" }, [
+      el("p", { text: String(error && error.message) === "database_blocked" ? t("storageBlocked") : t("storageFailed") }),
+      el("button", { class: "btn primary", type: "button", text: t("reload"), onclick: () => location.reload() })
+    ])
+  );
+});
