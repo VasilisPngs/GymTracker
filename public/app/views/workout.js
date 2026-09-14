@@ -1,4 +1,5 @@
 import { el, append, clear, formatDate, formatNumber, formatVolume, plural, openSheet, confirmSheet, toast } from "../dom.js";
+import { t, muscleGroupName, splitDayName, equipmentName, exerciseName } from "../i18n.js";
 import {
   MUSCLE_GROUPS,
   SPLIT_DAYS,
@@ -53,9 +54,9 @@ function stepper(value, step, min, onCommit, options = {}) {
     onCommit(next);
   };
   return el("div", { class: "stepper" }, [
-    el("button", { type: "button", text: "−", "aria-label": "decrease", onclick: () => bump(-step) }),
+    el("button", { type: "button", text: "−", "aria-label": t("ariaDecrease"), onclick: () => bump(-step) }),
     input,
-    el("button", { type: "button", text: "+", "aria-label": "increase", onclick: () => bump(step) })
+    el("button", { type: "button", text: "+", "aria-label": t("ariaIncrease"), onclick: () => bump(step) })
   ]);
 }
 
@@ -68,7 +69,7 @@ function setRow(set, index) {
       class: "set-index",
       type: "button",
       text: set.is_warmup ? "W" : String(index + 1),
-      title: "Set options",
+      title: t("setOptions"),
       style: "background:none;border:0;cursor:pointer",
       onclick: () => openSetMenu(set)
     }),
@@ -77,7 +78,7 @@ function setRow(set, index) {
     el(
       "select",
       {
-        "aria-label": "reps in reserve",
+        "aria-label": t("ariaRir"),
         style: "padding:9px 6px;text-align:center",
         onchange: (event) => updateSet(set.id, { rir: event.target.value === "" ? null : Number(event.target.value) })
       },
@@ -89,7 +90,7 @@ function setRow(set, index) {
       class: "check",
       type: "button",
       "aria-pressed": set.completed_at ? "true" : "false",
-      "aria-label": "complete set",
+      "aria-label": t("ariaCompleteSet"),
       text: "✓",
       onclick: () => {
         const completing = !set.completed_at;
@@ -102,11 +103,11 @@ function setRow(set, index) {
 
 function openSetMenu(set) {
   openSheet((close) => [
-    el("h2", { text: `Set options` }),
+    el("h2", { text: t("setOptions") }),
     el("button", {
       class: "btn block",
       type: "button",
-      text: set.is_warmup ? "Mark as working set" : "Mark as warm-up",
+      text: set.is_warmup ? t("markWorking") : t("markWarmup"),
       onclick: () => {
         updateSet(set.id, { is_warmup: set.is_warmup ? 0 : 1 });
         close();
@@ -115,7 +116,7 @@ function openSetMenu(set) {
     el("button", {
       class: "btn block danger",
       type: "button",
-      text: "Delete set",
+      text: t("deleteSet"),
       onclick: () => {
         deleteSet(set.id);
         close();
@@ -135,16 +136,16 @@ function exerciseBlock(workout, link) {
   const block = el("section", { class: "exercise-block" }, [
     el("div", { class: "exercise-head" }, [
       el("div", { class: "grow" }, [
-        el("div", { class: "exercise-title", text: exercise.name }),
+        el("div", { class: "exercise-title", text: exerciseName(exercise.name) }),
         el("div", { class: "tiny" }, [
-          el("span", { class: "badge", text: exercise.muscle_group }),
-          summary.count > 0 ? ` ${plural(summary.count, "set")} · ${formatVolume(summary.volume)} kg` : " no working sets yet"
+          el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) }),
+          summary.count > 0 ? ` ${plural(summary.count, "set")} · ${formatVolume(summary.volume)} kg` : ` ${t("noWorkingSets")}`
         ])
       ]),
       el("button", {
         class: "btn icon ghost",
         type: "button",
-        "aria-label": "exercise options",
+        "aria-label": t("ariaExerciseOptions"),
         text: "···",
         onclick: () => openExerciseMenu(workout, link, exercise)
       })
@@ -156,17 +157,17 @@ function exerciseBlock(workout, link) {
     const trend = summary.volume > 0 && previous.volume > 0 ? ` · ${delta >= 0 ? "▲" : "▼"} ${formatNumber(Math.abs(delta), 0)}%` : "";
     block.append(
       el("div", { class: "hint" }, [
-        `Last ${formatDate(previous.workout.performed_on)}: ${describeSets(previous.sets)}${trend}`
+        `${t("lastSession", { date: formatDate(previous.workout.performed_on), sets: describeSets(previous.sets) })}${trend}`
       ])
     );
   }
 
   block.append(
     el("div", { class: "set-grid header" }, [
-      el("span", { text: "#" }),
-      el("span", { text: "kg" }),
-      el("span", { text: "reps" }),
-      el("span", { text: "rir" }),
+      el("span", { text: t("colSet") }),
+      el("span", { text: t("colKg") }),
+      el("span", { text: t("colReps") }),
+      el("span", { text: t("colRir") }),
       el("span", { text: "" })
     ])
   );
@@ -181,13 +182,13 @@ function exerciseBlock(workout, link) {
       el("button", {
         class: "btn small grow",
         type: "button",
-        text: "+ Set",
+        text: t("addSet"),
         onclick: () => addSet(link.id)
       }),
       el("button", {
         class: "btn small",
         type: "button",
-        text: "+ Warm-up",
+        text: t("addWarmup"),
         onclick: () => addSet(link.id, { is_warmup: 1, rir: null })
       })
     ])
@@ -198,11 +199,11 @@ function exerciseBlock(workout, link) {
 
 function openExerciseMenu(workout, link, exercise) {
   openSheet((close) => [
-    el("h2", { text: exercise.name }),
+    el("h2", { text: exerciseName(exercise.name) }),
     el("button", {
       class: "btn block",
       type: "button",
-      text: "Open exercise history",
+      text: t("openExerciseHistory"),
       onclick: () => {
         close();
         navigate(`/exercise/${exercise.id}`);
@@ -212,7 +213,7 @@ function openExerciseMenu(workout, link, exercise) {
       el("button", {
         class: "btn grow",
         type: "button",
-        text: "Move up",
+        text: t("moveUp"),
         onclick: () => {
           moveWorkoutExercise(link.id, -1);
           close();
@@ -221,7 +222,7 @@ function openExerciseMenu(workout, link, exercise) {
       el("button", {
         class: "btn grow",
         type: "button",
-        text: "Move down",
+        text: t("moveDown"),
         onclick: () => {
           moveWorkoutExercise(link.id, 1);
           close();
@@ -231,10 +232,10 @@ function openExerciseMenu(workout, link, exercise) {
     el("button", {
       class: "btn block danger",
       type: "button",
-      text: "Remove from workout",
+      text: t("removeFromWorkout"),
       onclick: async () => {
         close();
-        const confirmed = await confirmSheet("Remove exercise", `Remove ${exercise.name} and its sets from this workout?`, "Remove");
+        const confirmed = await confirmSheet(t("removeExercise"), t("removeExerciseBody", { name: exerciseName(exercise.name) }), t("remove"));
         if (confirmed) removeWorkoutExercise(link.id);
       }
     })
@@ -254,13 +255,13 @@ function openExercisePicker(workout) {
       return matchesGroup && matchesQuery;
     });
     if (matches.length === 0) {
-      listNode.append(el("div", { class: "empty", text: "No exercise matches." }));
+      listNode.append(el("div", { class: "empty", text: t("noExerciseMatch") }));
     }
     for (const exercise of matches.slice(0, 40)) {
       listNode.append(
         el("button", { class: "list-item", type: "button", onclick: () => pick(exercise.id) }, [
-          el("span", { text: exercise.name }),
-          el("span", { class: "badge", text: exercise.muscle_group })
+          el("span", { text: exerciseName(exercise.name) }),
+          el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })
         ])
       );
     }
@@ -275,10 +276,10 @@ function openExercisePicker(workout) {
   paint();
 
   closeSheet = openSheet(() => [
-    el("h2", { text: "Add exercise" }),
+    el("h2", { text: t("addExercise").replace("+ ", "") }),
     el("input", {
       type: "search",
-      placeholder: "Search exercises",
+      placeholder: t("searchExercises"),
       oninput: (event) => {
         query = event.target.value;
         paint();
@@ -291,7 +292,7 @@ function openExercisePicker(workout) {
         el("button", {
           class: "chip",
           type: "button",
-          text: name,
+          text: name === "All" ? t("all") : muscleGroupName(name),
           "aria-pressed": (name === "All" && group === "") || name === group ? "true" : "false",
           onclick: (event) => {
             group = name === "All" ? "" : name;
@@ -306,7 +307,7 @@ function openExercisePicker(workout) {
     el("button", {
       class: "btn block",
       type: "button",
-      text: "Create new exercise",
+      text: t("createNewExercise"),
       onclick: () => {
         if (closeSheet) closeSheet();
         openExerciseCreator(query, (exercise) => addExerciseToWorkout(workout.id, exercise.id));
@@ -320,10 +321,10 @@ export function openExerciseCreator(initialName, onCreated) {
   let group = MUSCLE_GROUPS[0];
   let equipment = "Barbell";
   openSheet((close) => [
-    el("h2", { text: "New exercise" }),
+    el("h2", { text: t("newExercise") }),
     el("input", {
       type: "text",
-      placeholder: "Exercise name",
+      placeholder: t("exerciseNamePlaceholder"),
       value: name,
       oninput: (event) => {
         name = event.target.value;
@@ -332,19 +333,19 @@ export function openExerciseCreator(initialName, onCreated) {
     el(
       "select",
       { onchange: (event) => (group = event.target.value) },
-      MUSCLE_GROUPS.map((item) => el("option", { value: item, text: item }))
+      MUSCLE_GROUPS.map((item) => el("option", { value: item, text: muscleGroupName(item) }))
     ),
     el(
       "select",
       { onchange: (event) => (equipment = event.target.value) },
-      ["Barbell", "Dumbbell", "Machine", "Cable", "Bodyweight", "Other"].map((item) => el("option", { value: item, text: item }))
+      ["Barbell", "Dumbbell", "Machine", "Cable", "Bodyweight", "Other"].map((item) => el("option", { value: item, text: equipmentName(item) }))
     ),
     el("button", {
       class: "btn primary block",
       type: "button",
-      text: "Create",
+      text: t("create"),
       onclick: async () => {
-        if (!name.trim()) return toast("Name is required");
+        if (!name.trim()) return toast(t("nameRequired"));
         const exercise = await createExercise(name.trim(), group, equipment);
         close();
         if (onCreated) onCreated(exercise);
@@ -356,8 +357,8 @@ export function openExerciseCreator(initialName, onCreated) {
 function startCard(container) {
   container.append(
     el("div", { class: "card" }, [
-      el("h1", { text: "Ready to train" }),
-      el("p", { class: "muted", text: "Pick today's split day and start logging. Everything works offline." }),
+      el("h1", { text: t("readyToTrain") }),
+      el("p", { class: "muted", text: t("readyBody") }),
       el(
         "div",
         { class: "chips" },
@@ -365,7 +366,7 @@ function startCard(container) {
           el("button", {
             class: "chip",
             type: "button",
-            text: day,
+            text: splitDayName(day),
             onclick: async () => {
               const workout = await createWorkout(todayISO(), day);
               navigate(`/workout/${workout.id}`);
@@ -376,7 +377,7 @@ function startCard(container) {
       el("button", {
         class: "btn primary block",
         type: "button",
-        text: "Start empty workout",
+        text: t("startEmpty"),
         onclick: async () => {
           const workout = await createWorkout(todayISO(), null);
           navigate(`/workout/${workout.id}`);
@@ -387,14 +388,14 @@ function startCard(container) {
 
   const recent = workoutsSorted().slice(0, 5);
   if (recent.length > 0) {
-    container.append(el("h2", { text: "Recent" }));
+    container.append(el("h2", { text: t("recent") }));
     const list = el("div", { class: "list" });
     for (const workout of recent) {
       const totals = workoutTotals(workout);
       list.append(
         el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
           el("span", {}, [
-            el("div", { text: workout.title || "Workout" }),
+            el("div", { text: workout.title ? splitDayName(workout.title) : t("workout") }),
             el("div", { class: "tiny", text: formatDate(workout.performed_on) })
           ]),
           el("span", { class: "tiny num", text: `${plural(totals.sets, "set")} · ${formatVolume(totals.volume)} kg` })
@@ -444,13 +445,13 @@ export function renderWorkout(container, params) {
           class: "btn small ghost",
           type: "button",
           text: "···",
-          "aria-label": "workout options",
+          "aria-label": t("ariaWorkoutOptions"),
           onclick: () => openWorkoutMenu(workout)
         })
       ]),
       el("input", {
         type: "text",
-        placeholder: "Session name (e.g. Chest)",
+        placeholder: t("sessionNamePlaceholder"),
         value: workout.title || "",
         onchange: (event) => updateWorkout(workout.id, { title: event.target.value.trim() || null })
       }),
@@ -458,9 +459,9 @@ export function renderWorkout(container, params) {
         class: "tiny",
         text: [
           plural(links.length, "exercise"),
-          plural(totals.sets, "working set"),
-          `${formatVolume(totals.volume)} kg volume`,
-          workout.finished_at ? "finished" : null
+          plural(totals.sets, "workingSet"),
+          `${formatVolume(totals.volume)} ${t("volumeSuffix")}`,
+          workout.finished_at ? t("finished") : null
         ]
           .filter(Boolean)
           .join(" · ")
@@ -469,7 +470,7 @@ export function renderWorkout(container, params) {
   );
 
   if (links.length === 0) {
-    container.append(el("div", { class: "empty", text: "No exercises yet. Add the first one below." }));
+    container.append(el("div", { class: "empty", text: t("noExercisesYet") }));
   }
 
   for (const link of links) {
@@ -481,14 +482,14 @@ export function renderWorkout(container, params) {
     el("button", {
       class: "btn primary block",
       type: "button",
-      text: "+ Add exercise",
+      text: t("addExercise"),
       onclick: () => openExercisePicker(workout)
     })
   );
 
   container.append(
     el("textarea", {
-      placeholder: "Session notes",
+      placeholder: t("sessionNotes"),
       value: workout.notes || "",
       onchange: (event) => updateWorkout(workout.id, { notes: event.target.value.trim() || null })
     })
@@ -499,11 +500,11 @@ export function renderWorkout(container, params) {
       el("button", {
         class: "btn block",
         type: "button",
-        text: "Finish workout",
+        text: t("finishWorkout"),
         onclick: () => {
           updateWorkout(workout.id, { finished_at: now() });
           keepAwake(false);
-          toast("Workout finished");
+          toast(t("workoutFinished"));
         }
       })
     );
@@ -512,7 +513,7 @@ export function renderWorkout(container, params) {
 
 function openWorkoutMenu(workout) {
   openSheet((close) => [
-    el("h2", { text: "Workout options" }),
+    el("h2", { text: t("workoutOptions") }),
     el(
       "div",
       { class: "chips" },
@@ -520,7 +521,7 @@ function openWorkoutMenu(workout) {
         el("button", {
           class: "chip",
           type: "button",
-          text: day,
+          text: splitDayName(day),
           onclick: () => {
             updateWorkout(workout.id, { title: day });
             close();
@@ -532,7 +533,7 @@ function openWorkoutMenu(workout) {
       ? el("button", {
           class: "btn block",
           type: "button",
-          text: "Reopen workout",
+          text: t("reopenWorkout"),
           onclick: () => {
             updateWorkout(workout.id, { finished_at: null });
             close();
@@ -542,10 +543,10 @@ function openWorkoutMenu(workout) {
     el("button", {
       class: "btn block danger",
       type: "button",
-      text: "Delete workout",
+      text: t("deleteWorkout"),
       onclick: async () => {
         close();
-        const confirmed = await confirmSheet("Delete workout", "This removes the session and all of its sets.", "Delete");
+        const confirmed = await confirmSheet(t("deleteWorkout"), t("deleteWorkoutBody"), t("delete"));
         if (confirmed) {
           await deleteWorkout(workout.id);
           navigate("/history");

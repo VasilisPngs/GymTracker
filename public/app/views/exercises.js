@@ -1,4 +1,4 @@
-import { el, clear, formatDate, formatNumber, formatVolume, confirmSheet, openSheet, toast } from "../dom.js";
+import { el, clear, formatDate, formatNumber, formatVolume, plural, confirmSheet, openSheet, toast } from "../dom.js";
 import {
   MUSCLE_GROUPS,
   byId,
@@ -12,6 +12,7 @@ import {
 import { openExerciseCreator } from "./workout.js";
 import { sparkline } from "../chart.js";
 import { navigate } from "../router.js";
+import { t, muscleGroupName, equipmentName, exerciseName } from "../i18n.js";
 
 export function renderExercises(container) {
   let query = "";
@@ -26,7 +27,7 @@ export function renderExercises(container) {
       return matchesGroup && matchesQuery;
     });
     if (matches.length === 0) {
-      listNode.append(el("div", { class: "empty", text: "Nothing here yet." }));
+      listNode.append(el("div", { class: "empty", text: t("nothingHere") }));
       return;
     }
     for (const exercise of matches) {
@@ -35,13 +36,15 @@ export function renderExercises(container) {
       listNode.append(
         el("a", { class: "list-item", href: `/exercise/${exercise.id}`, "data-link": "" }, [
           el("span", { class: "grow" }, [
-            el("div", { text: exercise.name }),
+            el("div", { text: exerciseName(exercise.name) }),
             el("div", {
               class: "tiny",
-              text: last ? `Last ${formatDate(last.workout.performed_on)} · ${formatNumber(last.e1rm, 0)} kg e1RM` : "Never trained"
+              text: last
+                ? t("lastWithE1rm", { date: formatDate(last.workout.performed_on), value: formatNumber(last.e1rm, 0) })
+                : t("neverTrained")
             })
           ]),
-          el("span", { class: "badge", text: exercise.muscle_group })
+          el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })
         ])
       );
     }
@@ -49,17 +52,17 @@ export function renderExercises(container) {
 
   container.append(
     el("div", { class: "row between" }, [
-      el("h1", { text: "Exercises" }),
+      el("h1", { text: t("exercisesTitle") }),
       el("button", {
         class: "btn small primary",
         type: "button",
-        text: "+ New",
-        onclick: () => openExerciseCreator("", () => toast("Exercise created"))
+        text: t("newShort"),
+        onclick: () => openExerciseCreator("", () => toast(t("exerciseCreated")))
       })
     ]),
     el("input", {
       type: "search",
-      placeholder: "Search",
+      placeholder: t("search"),
       oninput: (event) => {
         query = event.target.value;
         paint();
@@ -72,7 +75,7 @@ export function renderExercises(container) {
         el("button", {
           class: "chip",
           type: "button",
-          text: name,
+          text: name === "All" ? t("all") : muscleGroupName(name),
           "aria-pressed": (name === "All" && group === "") || name === group ? "true" : "false",
           onclick: (event) => {
             group = name === "All" ? "" : name;
@@ -92,7 +95,7 @@ export function renderExercises(container) {
 export function renderExerciseDetail(container, params) {
   const exercise = byId("exercises", params.id);
   if (!exercise) {
-    container.append(el("div", { class: "empty", text: "Exercise not found." }));
+    container.append(el("div", { class: "empty", text: t("exerciseNotFound") }));
     return;
   }
 
@@ -102,8 +105,11 @@ export function renderExerciseDetail(container, params) {
   container.append(
     el("div", { class: "row between" }, [
       el("div", { class: "grow" }, [
-        el("h1", { text: exercise.name }),
-        el("div", { class: "tiny", text: `${exercise.muscle_group}${exercise.equipment ? ` · ${exercise.equipment}` : ""}` })
+        el("h1", { text: exerciseName(exercise.name) }),
+        el("div", {
+          class: "tiny",
+          text: `${muscleGroupName(exercise.muscle_group)}${exercise.equipment ? ` · ${equipmentName(exercise.equipment)}` : ""}`
+        })
       ]),
       el("button", { class: "btn small ghost", type: "button", text: "···", onclick: () => openMenu(exercise) })
     ])
@@ -111,13 +117,13 @@ export function renderExerciseDetail(container, params) {
 
   container.append(
     el("div", { class: "stat-grid" }, [
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatNumber(records.bestE1rm, 0) }), el("span", { class: "tiny", text: "best e1RM kg" })]),
+      el("div", { class: "stat" }, [el("b", { class: "num", text: formatNumber(records.bestE1rm, 0) }), el("span", { class: "tiny", text: t("bestE1rm") })]),
       el("div", { class: "stat" }, [
         el("b", { class: "num", text: records.heaviest ? formatNumber(records.heaviest.weight_kg) : "-" }),
-        el("span", { class: "tiny", text: "heaviest kg" })
+        el("span", { class: "tiny", text: t("heaviest") })
       ]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(records.bestVolume) }), el("span", { class: "tiny", text: "best session kg" })]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: String(records.sessions) }), el("span", { class: "tiny", text: "sessions" })])
+      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(records.bestVolume) }), el("span", { class: "tiny", text: t("bestSession") })]),
+      el("div", { class: "stat" }, [el("b", { class: "num", text: String(records.sessions) }), el("span", { class: "tiny", text: t("sessionsLabel") })])
     ])
   );
 
@@ -125,18 +131,18 @@ export function renderExerciseDetail(container, params) {
     const chart = sparkline(sessions.map((session) => session.e1rm));
     container.append(
       el("div", { class: "card" }, [
-        el("div", { class: "row between" }, [el("h2", { text: "Estimated 1RM" }), el("span", { class: "tiny", text: `${sessions.length} sessions` })]),
+        el("div", { class: "row between" }, [el("h2", { text: t("estimated1rm") }), el("span", { class: "tiny", text: plural(sessions.length, "session") })]),
         chart
       ])
     );
   }
 
   if (sessions.length === 0) {
-    container.append(el("div", { class: "empty", text: "No logged sets for this exercise." }));
+    container.append(el("div", { class: "empty", text: t("noLoggedSets") }));
     return;
   }
 
-  container.append(el("h2", { text: "Sessions" }));
+  container.append(el("h2", { text: t("sessionsHeading") }));
   const list = el("div", { class: "list" });
   for (const session of [...sessions].reverse()) {
     list.append(
@@ -157,7 +163,7 @@ export function renderExerciseDetail(container, params) {
 
 function openMenu(exercise) {
   openSheet((close) => [
-    el("h2", { text: "Exercise options" }),
+    el("h2", { text: t("exerciseOptions") }),
     el("input", {
       type: "text",
       value: exercise.name,
@@ -166,12 +172,12 @@ function openMenu(exercise) {
     el(
       "select",
       { onchange: (event) => updateExercise(exercise.id, { muscle_group: event.target.value }) },
-      MUSCLE_GROUPS.map((item) => el("option", { value: item, text: item, selected: item === exercise.muscle_group }))
+      MUSCLE_GROUPS.map((item) => el("option", { value: item, text: muscleGroupName(item), selected: item === exercise.muscle_group }))
     ),
     el("button", {
       class: "btn block",
       type: "button",
-      text: exercise.is_archived ? "Unarchive" : "Archive",
+      text: exercise.is_archived ? t("unarchive") : t("archive"),
       onclick: () => {
         updateExercise(exercise.id, { is_archived: exercise.is_archived ? 0 : 1 });
         close();
@@ -180,10 +186,10 @@ function openMenu(exercise) {
     el("button", {
       class: "btn block danger",
       type: "button",
-      text: "Delete exercise",
+      text: t("deleteExercise"),
       onclick: async () => {
         close();
-        const confirmed = await confirmSheet("Delete exercise", "Logged sets stay in past workouts but the exercise disappears from the catalog.", "Delete");
+        const confirmed = await confirmSheet(t("deleteExercise"), t("deleteExerciseBody"), t("delete"));
         if (confirmed) {
           await deleteExercise(exercise.id);
           navigate("/exercises");

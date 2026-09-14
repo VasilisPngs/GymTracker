@@ -1,4 +1,5 @@
 import { el, clear, formatDuration } from "./dom.js";
+import { t } from "./i18n.js";
 
 const REST_KEY = "gymtracker.rest_seconds";
 const DEFAULT_REST = 120;
@@ -66,10 +67,10 @@ function paint() {
   bar.hidden = false;
   clear(bar);
   bar.append(
-    el("span", { class: "timer-value num", text: done ? "Go" : formatDuration(remaining) }),
+    el("span", { class: "timer-value num", text: done ? t("timerGo") : formatDuration(remaining) }),
     el("button", { class: "btn small ghost", type: "button", text: "-30", onclick: () => adjust(-30) }),
     el("button", { class: "btn small ghost", type: "button", text: "+30", onclick: () => adjust(30) }),
-    el("button", { class: "btn small primary", type: "button", text: done ? "Dismiss" : "Skip", onclick: stopRest })
+    el("button", { class: "btn small primary", type: "button", text: done ? t("timerDismiss") : t("timerSkip"), onclick: stopRest })
   );
 }
 

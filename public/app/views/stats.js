@@ -2,6 +2,7 @@ import { el, formatVolume, plural, toast } from "../dom.js";
 import { MUSCLE_GROUPS, weeklyBreakdown, exportData } from "../store.js";
 import { sparkline } from "../chart.js";
 import { restSeconds, setRestSeconds } from "../timer.js";
+import { t, language, languages, setLanguage, muscleGroupName } from "../i18n.js";
 
 const REFERENCE_SETS = 20;
 
@@ -23,21 +24,21 @@ async function download() {
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast("Backup exported");
+  toast(t("backupExported"));
 }
 
 export function renderStats(container) {
   const buckets = weeklyBreakdown(8);
   const current = buckets[buckets.length - 1];
 
-  container.append(el("h1", { text: "Stats" }));
+  container.append(el("h1", { text: t("statsTitle") }));
 
   container.append(
     el("div", { class: "stat-grid" }, [
-      el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.workouts) }), el("span", { class: "tiny", text: "workouts this week" })]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.sets) }), el("span", { class: "tiny", text: "working sets" })]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(current.volume) }), el("span", { class: "tiny", text: "kg volume" })]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: String(streakWeeks(buckets)) }), el("span", { class: "tiny", text: "week streak" })])
+      el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.workouts) }), el("span", { class: "tiny", text: t("workoutsThisWeek") })]),
+      el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.sets) }), el("span", { class: "tiny", text: t("workingSetsLabel") })]),
+      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(current.volume) }), el("span", { class: "tiny", text: t("volumeSuffix") })]),
+      el("div", { class: "stat" }, [el("b", { class: "num", text: String(streakWeeks(buckets)) }), el("span", { class: "tiny", text: t("weekStreak") })])
     ])
   );
 
@@ -45,7 +46,7 @@ export function renderStats(container) {
   if (volumes.some((value) => value > 0)) {
     container.append(
       el("div", { class: "card" }, [
-        el("div", { class: "row between" }, [el("h2", { text: "Weekly volume" }), el("span", { class: "tiny", text: "last 8 weeks" })]),
+        el("div", { class: "row between" }, [el("h2", { text: t("weeklyVolume") }), el("span", { class: "tiny", text: t("lastEightWeeks") })]),
         sparkline(volumes),
         el("div", { class: "row between tiny" }, [
           el("span", { text: `${formatVolume(Math.min(...volumes))} kg` }),
@@ -59,7 +60,7 @@ export function renderStats(container) {
     const value = current.byMuscle[group] || 0;
     const ratio = Math.min(1, value / REFERENCE_SETS);
     return el("div", { class: "bar-row" }, [
-      el("span", { text: group }),
+      el("span", { text: muscleGroupName(group) }),
       el("div", { class: "bar" }, el("span", { style: `width:${(ratio * 100).toFixed(1)}%` })),
       el("span", { class: "num", style: "text-align:right", text: String(value) })
     ]);
@@ -67,15 +68,15 @@ export function renderStats(container) {
 
   container.append(
     el("div", { class: "card" }, [
-      el("div", { class: "row between" }, [el("h2", { text: "Sets per muscle" }), el("span", { class: "tiny", text: "this week" })]),
+      el("div", { class: "row between" }, [el("h2", { text: t("setsPerMuscle") }), el("span", { class: "tiny", text: t("thisWeek") })]),
       ...muscleRows,
-      el("div", { class: "tiny", text: `Bar is full at ${REFERENCE_SETS} hard sets per week.` })
+      el("div", { class: "tiny", text: t("barFullAt", { count: REFERENCE_SETS }) })
     ])
   );
 
   container.append(
     el("div", { class: "card" }, [
-      el("h2", { text: "Previous weeks" }),
+      el("h2", { text: t("previousWeeks") }),
       ...buckets
         .slice(0, -1)
         .reverse()
@@ -90,8 +91,22 @@ export function renderStats(container) {
 
   container.append(
     el("div", { class: "card" }, [
-      el("h2", { text: "Settings" }),
-      el("label", { class: "tiny", text: "Default rest timer (seconds)" }),
+      el("h2", { text: t("settings") }),
+      el("label", { class: "tiny", text: t("language") }),
+      el(
+        "select",
+        {
+          onchange: (event) => {
+            const next = event.target.value;
+            event.target.blur();
+            setLanguage(next);
+          }
+        },
+        languages().map((code) =>
+          el("option", { value: code, text: code === "el" ? "Ελληνικά" : "English", selected: code === language() })
+        )
+      ),
+      el("label", { class: "tiny", text: t("defaultRest") }),
       el("input", {
         type: "number",
         min: "15",
@@ -99,10 +114,10 @@ export function renderStats(container) {
         value: String(restSeconds()),
         onchange: (event) => {
           setRestSeconds(Number(event.target.value));
-          toast("Rest timer updated");
+          toast(t("restUpdated"));
         }
       }),
-      el("button", { class: "btn block", type: "button", text: "Export backup (JSON)", onclick: download })
+      el("button", { class: "btn block", type: "button", text: t("exportBackup"), onclick: download })
     ])
   );
 }

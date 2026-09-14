@@ -6,6 +6,7 @@ import { renderWorkout } from "./views/workout.js";
 import { renderHistory } from "./views/history.js";
 import { renderExercises, renderExerciseDetail } from "./views/exercises.js";
 import { renderStats } from "./views/stats.js";
+import { t, applyLanguage, i18nEvents } from "./i18n.js";
 
 const view = document.getElementById("view");
 const pill = document.getElementById("sync-pill");
@@ -18,6 +19,8 @@ const VIEWS = {
   exercise: renderExerciseDetail,
   stats: renderStats
 };
+
+const TAB_LABELS = { workout: "tabTrain", history: "tabHistory", exercises: "tabExercises", stats: "tabStats" };
 
 const TAB_FOR_ROUTE = {
   workout: "workout",
@@ -44,7 +47,11 @@ function render() {
   deferredRender = false;
   const route = currentRoute();
   const key = `${route.name}:${route.params.id || ""}`;
-  for (const tab of tabs) tab.setAttribute("aria-current", tab.dataset.route === TAB_FOR_ROUTE[route.name] ? "page" : "false");
+  for (const tab of tabs) {
+    tab.setAttribute("aria-current", tab.dataset.route === TAB_FOR_ROUTE[route.name] ? "page" : "false");
+    const label = tab.querySelector("span");
+    if (label) label.textContent = t(TAB_LABELS[tab.dataset.route]);
+  }
   clear(view);
   (VIEWS[route.name] || renderWorkout)(view, route.params);
   if (key !== lastRouteKey) {
@@ -59,22 +66,22 @@ function render() {
 function paintPill() {
   const state = getSyncState();
   let status = "idle";
-  let label = "Synced";
+  let label = t("statusSynced");
   if (state.status === "auth") {
     status = "auth";
-    label = "Sign in";
+    label = t("statusSignIn");
   } else if (state.status === "syncing") {
     status = "syncing";
-    label = "Syncing";
+    label = t("statusSyncing");
   } else if (state.status === "offline") {
     status = "offline";
-    label = state.pending > 0 ? `Offline · ${state.pending}` : "Offline";
+    label = state.pending > 0 ? `${t("statusOffline")} · ${state.pending}` : t("statusOffline");
   } else if (state.status === "error") {
     status = "error";
-    label = "Retry";
+    label = t("statusRetry");
   } else if (state.pending > 0) {
     status = "pending";
-    label = `Queued · ${state.pending}`;
+    label = `${t("statusQueued")} · ${state.pending}`;
   }
   pill.dataset.status = status;
   pill.textContent = label;
@@ -84,8 +91,8 @@ function paintPill() {
 function paintBanner(state) {
   if (state.status === "auth" && !banner) {
     banner = el("div", { class: "banner" }, [
-      el("span", { text: "Access session expired. Your sets are safe and queued." }),
-      el("button", { class: "btn small", type: "button", text: "Sign in", onclick: signIn })
+      el("span", { text: t("sessionExpired") }),
+      el("button", { class: "btn small", type: "button", text: t("statusSignIn"), onclick: signIn })
     ]);
     view.before(banner);
   }
@@ -121,11 +128,11 @@ function watchServiceWorker() {
 function offerUpdate(worker) {
   const host = document.getElementById("toast-host");
   const node = el("div", { class: "toast", style: "pointer-events:auto;display:flex;gap:10px;align-items:center" }, [
-    el("span", { text: "New version ready" }),
+    el("span", { text: t("newVersion") }),
     el("button", {
       class: "btn small primary",
       type: "button",
-      text: "Reload",
+      text: t("reload"),
       onclick: () => worker.postMessage({ type: "skip_waiting" })
     })
   ]);
@@ -145,8 +152,13 @@ pill.addEventListener("click", () => {
 
 async function boot() {
   if (new URL(location.href).searchParams.has("signin")) history.replaceState({}, "", location.pathname);
+  applyLanguage();
   await initStore();
   storeEvents.addEventListener("changed", render);
+  i18nEvents.addEventListener("changed", () => {
+    render();
+    paintPill();
+  });
   syncEvents.addEventListener("state", paintPill);
   startRouter(render);
   paintPill();

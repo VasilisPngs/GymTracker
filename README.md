@@ -1,7 +1,14 @@
 # GymTracker
 
+**English** · [Ελληνικά](#ελληνικά)
+
 Single-user hypertrophy training log. Cloudflare Worker with static assets, D1 database,
 offline-first PWA client, Cloudflare Access for authentication.
+
+The interface ships in English and Greek. It follows the browser language on first run and
+can be switched any time in Stats → Settings → Language; the choice is stored per device.
+Exercise names, muscle groups, split days, equipment and all dates follow the selected
+language, while the database keeps canonical English values.
 
 ## Architecture
 
@@ -109,3 +116,43 @@ Local requests bypass the Access check by hostname.
 
 Stats → Export backup writes a JSON snapshot of every table from the browser database,
 so it costs nothing on the server and works offline.
+
+---
+
+## Ελληνικά
+
+Προσωπικό ημερολόγιο προπόνησης για μυϊκή υπερτροφία, για έναν χρήστη. Τρέχει σε Cloudflare
+Worker με static assets και βάση D1, με PWA που δουλεύει offline και προστασία από Cloudflare
+Access. Δεν υπάρχει κώδικας σύνδεσης στην εφαρμογή.
+
+**Γλώσσα:** η διεπαφή είναι στα αγγλικά και στα ελληνικά. Στην πρώτη εκτέλεση ακολουθεί τη
+γλώσσα του browser και αλλάζει από Στατιστικά → Ρυθμίσεις → Γλώσσα. Μεταφράζονται και τα
+ονόματα ασκήσεων, οι μυϊκές ομάδες, οι μέρες του split, ο εξοπλισμός και οι ημερομηνίες. Στη
+βάση αποθηκεύονται πάντα οι αγγλικές τιμές, οπότε η αλλαγή γλώσσας δεν αγγίζει τα δεδομένα.
+
+**Τι καταγράφει:** ασκήσεις (όνομα, μυϊκή ομάδα, εξοπλισμός), προπονήσεις (ημερομηνία, μέρα
+split, σημειώσεις) και σετ (επαναλήψεις, κιλά, RIR, σήμανση ζεστάματος). Δείχνει την
+προηγούμενη επίδοση σε κάθε άσκηση, εκτιμώμενο 1RM, εβδομαδιαίο όγκο και κύρια σετ ανά μυϊκή
+ομάδα. Όλοι οι υπολογισμοί γίνονται στον browser, ώστε ο Worker να μένει κάτω από το όριο των
+10 ms CPU.
+
+**Offline:** το IndexedDB είναι η πηγή αλήθειας. Κάθε αλλαγή γράφεται τοπικά και μπαίνει σε
+ουρά που αδειάζει μόλις υπάρξει δίκτυο, οπότε η καταγραφή σετ στο γυμναστήριο δουλεύει χωρίς
+σήμα.
+
+**Εγκατάσταση:**
+
+```sh
+npm install
+npx wrangler login
+npx wrangler d1 create gymtracker     # βάλε το database_id στο wrangler.jsonc
+npm run db:migrate:remote
+npm run deploy
+```
+
+**Cloudflare Access (υποχρεωτικό):** Workers & Pages → `gymtracker` → καρτέλα Access →
+Protect this Worker behind Access → All traffic → πολιτική Google μόνο για το email σου →
+διάρκεια συνεδρίας έως έναν μήνα. Χωρίς αυτό το `/api/sync` απαντάει 403 σε όλους.
+
+**Στο κινητό:** άνοιξέ το στο Safari και Προσθήκη στην αρχική οθόνη, ώστε να εγκατασταθεί ως
+PWA.

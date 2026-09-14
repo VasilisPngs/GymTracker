@@ -1,15 +1,23 @@
 import { el, formatDate, formatVolume, plural, openSheet } from "../dom.js";
 import { SPLIT_DAYS, workoutsSorted, createWorkout, todayISO } from "../store.js";
+import { t, locale, splitDayName } from "../i18n.js";
 import { workoutTotals } from "./workout.js";
 import { navigate } from "../router.js";
 
-const monthFormat = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+const monthFormatters = new Map();
+
+function monthFormat() {
+  if (!monthFormatters.has(locale())) {
+    monthFormatters.set(locale(), new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }));
+  }
+  return monthFormatters.get(locale());
+}
 
 function openCreator() {
   let date = todayISO();
   let title = "";
   openSheet((close) => [
-    el("h2", { text: "New workout" }),
+    el("h2", { text: t("newWorkout") }),
     el("input", {
       type: "date",
       value: date,
@@ -24,7 +32,7 @@ function openCreator() {
         el("button", {
           class: "chip",
           type: "button",
-          text: day,
+          text: splitDayName(day),
           onclick: (event) => {
             title = day;
             for (const chip of event.target.parentElement.children) chip.setAttribute("aria-pressed", "false");
@@ -36,7 +44,7 @@ function openCreator() {
     el("button", {
       class: "btn primary block",
       type: "button",
-      text: "Create",
+      text: t("create"),
       onclick: async () => {
         const workout = await createWorkout(date, title || null);
         close();
@@ -51,20 +59,20 @@ export function renderHistory(container) {
 
   container.append(
     el("div", { class: "row between" }, [
-      el("h1", { text: "History" }),
-      el("button", { class: "btn small primary", type: "button", text: "+ New", onclick: openCreator })
+      el("h1", { text: t("historyTitle") }),
+      el("button", { class: "btn small primary", type: "button", text: t("newShort"), onclick: openCreator })
     ])
   );
 
   if (workouts.length === 0) {
-    container.append(el("div", { class: "empty", text: "No sessions logged yet." }));
+    container.append(el("div", { class: "empty", text: t("noSessions") }));
     return;
   }
 
   let currentMonth = "";
   let list = null;
   for (const workout of workouts) {
-    const month = monthFormat.format(new Date(`${workout.performed_on}T00:00:00`));
+    const month = monthFormat().format(new Date(`${workout.performed_on}T00:00:00`));
     if (month !== currentMonth) {
       currentMonth = month;
       container.append(el("h2", { text: month, style: "margin-top:6px" }));
@@ -75,7 +83,7 @@ export function renderHistory(container) {
     list.append(
       el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
         el("span", { class: "grow" }, [
-          el("div", { text: workout.title || "Workout" }),
+          el("div", { text: workout.title ? splitDayName(workout.title) : t("workout") }),
           el("div", { class: "tiny", text: formatDate(workout.performed_on, true) })
         ]),
         el("span", { class: "tiny num", style: "text-align:right" }, [

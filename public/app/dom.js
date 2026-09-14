@@ -1,3 +1,5 @@
+import { locale, t, tn } from "./i18n.js";
+
 export function el(tag, props = {}, children = []) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(props)) {
@@ -36,12 +38,26 @@ export function clear(node) {
   return node;
 }
 
-const dateFormat = new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric", month: "short" });
-const longDateFormat = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const formatters = new Map();
+
+function dateFormatter(long) {
+  const key = `${locale()}:${long}`;
+  if (!formatters.has(key)) {
+    formatters.set(
+      key,
+      new Intl.DateTimeFormat(
+        locale(),
+        long
+          ? { weekday: "long", day: "numeric", month: "long", year: "numeric" }
+          : { weekday: "short", day: "numeric", month: "short" }
+      )
+    );
+  }
+  return formatters.get(key);
+}
 
 export function formatDate(iso, long = false) {
-  const date = new Date(`${iso}T00:00:00`);
-  return (long ? longDateFormat : dateFormat).format(date);
+  return dateFormatter(long).format(new Date(`${iso}T00:00:00`));
 }
 
 export function formatNumber(value, digits = 1) {
@@ -52,11 +68,11 @@ export function formatNumber(value, digits = 1) {
 
 export function formatVolume(value) {
   if (!value) return "0";
-  return Math.round(value).toLocaleString();
+  return Math.round(value).toLocaleString(locale());
 }
 
-export function plural(count, singular, pluralForm) {
-  return `${count} ${count === 1 ? singular : pluralForm || `${singular}s`}`;
+export function plural(count, key) {
+  return tn(count, key);
 }
 
 export function formatDuration(seconds) {
@@ -104,7 +120,7 @@ export function openSheet(build, onClose) {
   return close;
 }
 
-export function confirmSheet(title, message, confirmLabel = "Delete") {
+export function confirmSheet(title, message, confirmLabel) {
   return new Promise((resolve) => {
     let answer = false;
     openSheet(
@@ -112,11 +128,11 @@ export function confirmSheet(title, message, confirmLabel = "Delete") {
         el("h2", { text: title }),
         el("p", { class: "muted", text: message }),
         el("div", { class: "row" }, [
-          el("button", { class: "btn grow", type: "button", text: "Cancel", onclick: close }),
+          el("button", { class: "btn grow", type: "button", text: t("cancel"), onclick: close }),
           el("button", {
             class: "btn primary grow",
             type: "button",
-            text: confirmLabel,
+            text: confirmLabel || t("delete"),
             onclick: () => {
               answer = true;
               close();
