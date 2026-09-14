@@ -138,6 +138,24 @@ export function exercisesSorted() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function exercisesByRecent() {
+  const used = new Map();
+  for (const link of list("workout_exercises")) {
+    const workout = byId("workouts", link.workout_id);
+    if (!workout) continue;
+    const seen = used.get(link.exercise_id);
+    if (!seen || workout.performed_on > seen) used.set(link.exercise_id, workout.performed_on);
+  }
+  return exercisesSorted().sort((a, b) => {
+    const first = used.get(a.id);
+    const second = used.get(b.id);
+    if (first && second) return first < second ? 1 : first > second ? -1 : a.name.localeCompare(b.name);
+    if (first) return -1;
+    if (second) return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export function workoutsSorted() {
   return list("workouts").sort((a, b) => (a.performed_on < b.performed_on ? 1 : a.performed_on > b.performed_on ? -1 : b.created_at - a.created_at));
 }

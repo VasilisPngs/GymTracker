@@ -21,6 +21,7 @@ import {
   updateSet,
   deleteSet,
   exercisesSorted,
+  exercisesByRecent,
   createExercise,
   lastPerformance,
   describeSets,
@@ -249,7 +250,7 @@ function openExercisePicker(workout) {
 
   const paint = () => {
     clear(listNode);
-    const matches = exercisesSorted().filter((exercise) => {
+    const matches = exercisesByRecent().filter((exercise) => {
       const matchesGroup = !group || exercise.muscle_group === group;
       const matchesQuery = !query || exercise.name.toLowerCase().includes(query.toLowerCase());
       return matchesGroup && matchesQuery;
