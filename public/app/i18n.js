@@ -31,7 +31,7 @@ const STRINGS = {
   programs: ["Programs", "Προγράμματα"],
   noPrograms: ["No programs yet.", "Κανένα πρόγραμμα ακόμα."],
   newProgram: ["+ New program", "+ Νέο πρόγραμμα"],
-  programNamePlaceholder: ["Program name (e.g. Push A)", "Όνομα προγράμματος (π.χ. Push A)"],
+  programNamePlaceholder: ["Name (e.g. Chest)", "Όνομα (π.χ. Στήθος)"],
   programEmpty: ["No exercises in this program yet.", "Καμία άσκηση σε αυτό το πρόγραμμα ακόμα."],
   programOptions: ["Program options", "Επιλογές προγράμματος"],
   deleteProgram: ["Delete program", "Διαγραφή προγράμματος"],
