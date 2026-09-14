@@ -6,7 +6,6 @@ let ticker = null;
 let audioContext = null;
 let wakeLock = null;
 let wakeWanted = false;
-let finishedAt = null;
 
 function beep() {
   try {
@@ -43,29 +42,24 @@ function paint() {
     return;
   }
   const remaining = (deadline - Date.now()) / 1000;
-  const done = remaining <= 0;
-  if (done && finishedAt === null) {
-    finishedAt = Date.now();
+  if (remaining <= 0) {
     beep();
-  }
-  if (done && Date.now() - finishedAt > 12000) {
     stopRest();
     return;
   }
   bar.hidden = false;
   clear(bar);
   bar.append(
-    el("span", { class: "timer-value num", text: done ? t("timerGo") : formatDuration(remaining) }),
+    el("span", { class: "timer-value num", text: formatDuration(remaining) }),
     el("button", { class: "btn small ghost", type: "button", text: "-30", onclick: () => adjust(-30) }),
     el("button", { class: "btn small ghost", type: "button", text: "+30", onclick: () => adjust(30) }),
-    el("button", { class: "btn small primary", type: "button", text: done ? t("timerDismiss") : t("timerSkip"), onclick: stopRest })
+    el("button", { class: "btn small primary", type: "button", text: t("timerSkip"), onclick: stopRest })
   );
 }
 
 function adjust(delta) {
   if (deadline === null) return;
   deadline = Math.max(Date.now(), deadline + delta * 1000);
-  finishedAt = null;
   paint();
 }
 
@@ -73,7 +67,6 @@ export function startRest(seconds) {
   if (!seconds || seconds <= 0) return;
   warmAudio();
   deadline = Date.now() + seconds * 1000;
-  finishedAt = null;
   clearInterval(ticker);
   ticker = setInterval(paint, 250);
   paint();
@@ -81,7 +74,6 @@ export function startRest(seconds) {
 
 export function stopRest() {
   deadline = null;
-  finishedAt = null;
   clearInterval(ticker);
   ticker = null;
   paint();

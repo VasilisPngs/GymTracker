@@ -127,9 +127,7 @@ const STRINGS = {
   ariaExerciseOptions: ["exercise options", "επιλογές άσκησης"],
   ariaWorkoutOptions: ["workout options", "επιλογές προπόνησης"],
 
-  timerGo: ["Go", "Πάμε"],
-  timerSkip: ["Skip", "Παράλειψη"],
-  timerDismiss: ["Dismiss", "Κλείσιμο"]
+  timerSkip: ["Skip", "Παράλειψη"]
 };
 
 const PLURALS = {
