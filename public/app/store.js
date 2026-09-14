@@ -215,14 +215,15 @@ export async function moveWorkoutExercise(id, direction) {
 
 export async function addSet(workoutExerciseId, values = {}) {
   const existing = setsOf(workoutExerciseId);
-  const previous = existing[existing.length - 1];
+  const warmup = values.is_warmup ?? 0;
+  const previous = warmup ? null : existing.filter((set) => !set.is_warmup).pop();
   const row = {
     id: uid(),
     workout_exercise_id: workoutExerciseId,
     position: existing.length,
     reps: values.reps ?? previous?.reps ?? null,
     weight_kg: values.weight_kg ?? previous?.weight_kg ?? null,
-    is_warmup: values.is_warmup ?? 0,
+    is_warmup: warmup,
     completed_at: null,
     created_at: now(),
     deleted_at: null
