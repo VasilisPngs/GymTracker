@@ -303,9 +303,9 @@ function targetFromSets(row) {
     .map((set) => (set.id === row.id ? row : set))
     .filter((set) => !set.is_warmup && set.completed_at && set.weight_kg > 0 && set.reps > 0);
   if (done.length === 0) return null;
-  const best = done.reduce((top, set) => (set.weight_kg > top.weight_kg ? set : top));
-  if (planned.target_weight_kg === best.weight_kg && planned.target_reps === best.reps) return null;
-  return { ...planned, target_weight_kg: best.weight_kg, target_reps: best.reps };
+  const last = done.reduce((latest, set) => (set.completed_at >= latest.completed_at ? set : latest));
+  if (planned.target_weight_kg === last.weight_kg && planned.target_reps === last.reps) return null;
+  return { ...planned, target_weight_kg: last.weight_kg, target_reps: last.reps };
 }
 
 export async function updateSet(id, patch) {
