@@ -3,7 +3,6 @@ const LANGUAGES = ["en", "el"];
 
 const STRINGS = {
   tabTrain: ["Train", "Προπόνηση"],
-  tabHistory: ["History", "Ιστορικό"],
   tabSettings: ["Settings", "Ρυθμίσεις"],
   tabStats: ["Stats", "Στατιστικά"],
 
@@ -85,10 +84,6 @@ const STRINGS = {
   newExercise: ["New exercise", "Νέα άσκηση"],
   exerciseNamePlaceholder: ["Exercise name", "Όνομα άσκησης"],
 
-  historyTitle: ["History", "Ιστορικό"],
-  newShort: ["+ New", "+ Νέα"],
-  noSessions: ["No sessions logged yet.", "Δεν έχει καταγραφεί καμία προπόνηση."],
-  newWorkout: ["New workout", "Νέα προπόνηση"],
 
   search: ["Search", "Αναζήτηση"],
   exerciseNotFound: ["Exercise not found.", "Η άσκηση δεν βρέθηκε."],
@@ -155,71 +150,6 @@ const MUSCLE_GROUPS = {
   Core: "Κορμός"
 };
 
-const SESSION_PRESETS = {
-  Chest: "Στήθος",
-  Back: "Πλάτη",
-  Shoulders: "Ώμοι",
-  Arms: "Χέρια",
-  Legs: "Πόδια"
-};
-
-const EQUIPMENT = {
-  Barbell: "Μπάρα",
-  Dumbbell: "Αλτήρες",
-  Machine: "Μηχάνημα",
-  Cable: "Τροχαλία",
-  Bodyweight: "Σωματικό βάρος",
-  Other: "Άλλο"
-};
-
-const EXERCISES = {
-  "Barbell Bench Press": "Πιέσεις στήθους με μπάρα",
-  "Incline Barbell Bench Press": "Πιέσεις στήθους σε κεκλιμένο με μπάρα",
-  "Incline Dumbbell Press": "Πιέσεις σε κεκλιμένο με αλτήρες",
-  "Flat Dumbbell Press": "Πιέσεις στήθους με αλτήρες",
-  "Chest Press Machine": "Πιέσεις στήθους σε μηχάνημα",
-  "Cable Fly": "Ανοίγματα στην τροχαλία",
-  "Pec Deck": "Πεταλούδα",
-  "Weighted Dip": "Βυθίσεις με βάρος",
-  "Pull Up": "Έλξεις σε μονόζυγο",
-  "Lat Pulldown": "Έλξεις τροχαλίας στο στήθος",
-  "Barbell Row": "Κωπηλατική με μπάρα",
-  "Dumbbell Row": "Κωπηλατική με αλτήρα",
-  "Seated Cable Row": "Κωπηλατική σε τροχαλία καθιστός",
-  "Chest Supported Row": "Κωπηλατική με στήριξη στήθους",
-  "Straight Arm Pulldown": "Έλξεις τροχαλίας με τεντωμένα χέρια",
-  Deadlift: "Άρσεις θανάτου",
-  "Overhead Press": "Πιέσεις ώμων με μπάρα",
-  "Seated Dumbbell Press": "Πιέσεις ώμων με αλτήρες καθιστός",
-  "Lateral Raise": "Πλάγιες άρσεις",
-  "Cable Lateral Raise": "Πλάγιες άρσεις στην τροχαλία",
-  "Reverse Pec Deck": "Ανάστροφη πεταλούδα",
-  "Face Pull": "Έλξεις προς το πρόσωπο",
-  "Barbell Curl": "Κάμψεις δικεφάλων με μπάρα",
-  "Incline Dumbbell Curl": "Κάμψεις δικεφάλων σε κεκλιμένο",
-  "Hammer Curl": "Κάμψεις σφυριού",
-  "Cable Curl": "Κάμψεις δικεφάλων στην τροχαλία",
-  "Preacher Curl": "Κάμψεις δικεφάλων στο πουπίτρο",
-  "Close Grip Bench Press": "Πιέσεις πάγκου με κλειστή λαβή",
-  "Triceps Pushdown": "Εκτάσεις τρικεφάλων στην τροχαλία",
-  "Overhead Cable Extension": "Εκτάσεις τρικεφάλων πάνω από το κεφάλι",
-  "Skull Crusher": "Εκτάσεις τρικεφάλων ξαπλωτός",
-  "Barbell Back Squat": "Καθίσματα με μπάρα",
-  "Hack Squat": "Καθίσματα σε hack",
-  "Leg Press": "Πιέσεις ποδιών",
-  "Romanian Deadlift": "Ρουμανικές άρσεις θανάτου",
-  "Bulgarian Split Squat": "Βουλγαρικά μονοποδικά καθίσματα",
-  "Leg Extension": "Εκτάσεις τετρακεφάλων",
-  "Seated Leg Curl": "Κάμψεις μηριαίων καθιστός",
-  "Lying Leg Curl": "Κάμψεις μηριαίων πρηνής",
-  "Hip Thrust": "Ωθήσεις λεκάνης",
-  "Standing Calf Raise": "Άρσεις γάμπας όρθιος",
-  "Seated Calf Raise": "Άρσεις γάμπας καθιστός",
-  "Hanging Leg Raise": "Άρσεις ποδιών σε κρέμαση",
-  "Cable Crunch": "Κοιλιακοί στην τροχαλία",
-  Plank: "Σανίδα"
-};
-
 export const i18nEvents = new EventTarget();
 
 function detect() {
@@ -275,6 +205,3 @@ export function weekdayNames() {
 }
 
 export const muscleGroupName = (value) => translateFrom(MUSCLE_GROUPS, value);
-export const presetName = (value) => translateFrom(SESSION_PRESETS, value);
-export const equipmentName = (value) => translateFrom(EQUIPMENT, value);
-export const exerciseName = (value) => translateFrom(EXERCISES, value);

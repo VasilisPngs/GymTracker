@@ -1,5 +1,5 @@
 import { el, append, clear, formatDate, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
-import { t, presetName, exerciseName, muscleGroupName } from "../i18n.js";
+import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
   todayISO,
@@ -108,7 +108,7 @@ function exerciseBlock(workout, link) {
   const block = el("section", { class: "exercise-block" }, [
     el("div", { class: "exercise-head" }, [
       el("div", { class: "grow" }, [
-        el("div", { class: "exercise-title", text: exerciseName(exercise.name) }),
+        el("div", { class: "exercise-title", text: exercise.name }),
         el("div", { class: "tiny" }, [
           el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) }),
           summary.count > 0 ? ` ${plural(summary.count, "set")}` : ` ${t("noWorkingSets")}`
@@ -180,7 +180,7 @@ function exerciseBlock(workout, link) {
 
 function openExerciseMenu(workout, link, exercise) {
   openSheet((close) => [
-    el("h2", { text: exerciseName(exercise.name) }),
+    el("h2", { text: exercise.name }),
     el("label", { class: "field" }, [
       el("span", { class: "tiny", text: t("colRest") }),
       stepper(link.rest_seconds, 15, 0, (value) => updateWorkoutExercise(link.id, { rest_seconds: value }))
@@ -220,7 +220,7 @@ function openExerciseMenu(workout, link, exercise) {
       text: t("removeFromWorkout"),
       onclick: async () => {
         close();
-        const confirmed = await confirmSheet(t("removeExercise"), t("removeExerciseBody", { name: exerciseName(exercise.name) }), t("remove"));
+        const confirmed = await confirmSheet(t("removeExercise"), t("removeExerciseBody", { name: exercise.name }), t("remove"));
         if (confirmed) removeWorkoutExercise(link.id);
       }
     })
@@ -237,7 +237,7 @@ function recentList(container) {
     list.append(
       el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
         el("span", {}, [
-          el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
+          el("div", { text: workout.title ? workout.title : t("workout") }),
           el("div", { class: "tiny", text: formatDate(workout.performed_on) })
         ]),
         el("span", { class: "tiny num", text: plural(totals.sets, "set") })
@@ -375,7 +375,7 @@ function openWorkoutMenu(workout) {
         const confirmed = await confirmSheet(t("deleteWorkout"), t("deleteWorkoutBody"), t("delete"));
         if (confirmed) {
           await deleteWorkout(workout.id);
-          navigate("/history");
+          navigate("/");
         }
       }
     })

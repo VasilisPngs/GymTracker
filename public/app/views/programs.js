@@ -1,5 +1,5 @@
 import { el, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
-import { t, muscleGroupName, exerciseName, weekdayNames } from "../i18n.js";
+import { t, muscleGroupName, weekdayNames } from "../i18n.js";
 import {
   byId,
   storeEvents,
@@ -71,7 +71,7 @@ function programRow(item) {
   return el("section", { class: "exercise-block" }, [
     el("div", { class: "exercise-head" }, [
       el("div", { class: "grow" }, [
-        el("div", { class: "exercise-title", text: exerciseName(exercise.name) }),
+        el("div", { class: "exercise-title", text: exercise.name }),
         el("div", { class: "tiny" }, [el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })])
       ]),
       el("button", {
@@ -99,7 +99,7 @@ function programRow(item) {
 
 function openProgramExerciseMenu(item, exercise) {
   openSheet((close) => [
-    el("h2", { text: exerciseName(exercise.name) }),
+    el("h2", { text: exercise.name }),
     el("div", { class: "row" }, [
       el("button", {
         class: "btn grow",

@@ -1,7 +1,6 @@
 const ROUTES = [
   { pattern: /^\/$/, name: "workout", params: () => ({}) },
   { pattern: /^\/workout\/([\w-]+)$/, name: "workout", params: (match) => ({ id: match[1] }) },
-  { pattern: /^\/history$/, name: "history", params: () => ({}) },
   { pattern: /^\/exercise\/([\w-]+)$/, name: "exercise", params: (match) => ({ id: match[1] }) },
   { pattern: /^\/stats$/, name: "stats", params: () => ({}) },
   { pattern: /^\/settings$/, name: "settings", params: () => ({}) }

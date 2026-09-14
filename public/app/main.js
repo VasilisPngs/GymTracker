@@ -3,7 +3,6 @@ import { initStore, storeEvents } from "./store.js";
 import { startSync, syncEvents, getSyncState, requestSync } from "./sync.js";
 import { currentRoute, startRouter } from "./router.js";
 import { renderWorkout } from "./views/workout.js";
-import { renderHistory } from "./views/history.js";
 import { renderExerciseDetail } from "./views/exercises.js";
 import { renderStats } from "./views/stats.js";
 import { renderSettings } from "./views/settings.js";
@@ -16,17 +15,15 @@ const tabs = [...document.querySelectorAll(".tab")];
 
 const VIEWS = {
   workout: renderWorkout,
-  history: renderHistory,
   exercise: renderExerciseDetail,
   stats: renderStats,
   settings: renderSettings
 };
 
-const TAB_LABELS = { workout: "tabTrain", history: "tabHistory", stats: "tabStats", settings: "tabSettings" };
+const TAB_LABELS = { workout: "tabTrain", stats: "tabStats", settings: "tabSettings" };
 
 const TAB_FOR_ROUTE = {
   workout: "workout",
-  history: "history",
   exercises: "exercises",
   exercise: "workout",
   stats: "stats",

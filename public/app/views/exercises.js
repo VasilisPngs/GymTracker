@@ -10,7 +10,7 @@ import {
 } from "../store.js";
 import { sparkline } from "../chart.js";
 import { navigate } from "../router.js";
-import { t, muscleGroupName, equipmentName, exerciseName } from "../i18n.js";
+import { t, muscleGroupName } from "../i18n.js";
 
 export function renderExerciseDetail(container, params) {
   const exercise = byId("exercises", params.id);
@@ -25,10 +25,10 @@ export function renderExerciseDetail(container, params) {
   container.append(
     el("div", { class: "row between" }, [
       el("div", { class: "grow" }, [
-        el("h1", { text: exerciseName(exercise.name) }),
+        el("h1", { text: exercise.name }),
         el("div", {
           class: "tiny",
-          text: `${muscleGroupName(exercise.muscle_group)}${exercise.equipment ? ` · ${equipmentName(exercise.equipment)}` : ""}`
+          text: muscleGroupName(exercise.muscle_group)
         })
       ]),
       el("button", { class: "btn small ghost", type: "button", text: "···", onclick: () => openMenu(exercise) })

@@ -1,5 +1,5 @@
 import { el, clear, openSheet, toast } from "../dom.js";
-import { t, muscleGroupName, exerciseName } from "../i18n.js";
+import { t, muscleGroupName } from "../i18n.js";
 import { MUSCLE_GROUPS, exercisesByRecent, createExercise } from "../store.js";
 
 export function openExercisePicker(onPick) {
@@ -29,7 +29,7 @@ export function openExercisePicker(onPick) {
     for (const exercise of matches.slice(0, 40)) {
       listNode.append(
         el("button", { class: "list-item", type: "button", onclick: () => pick(exercise.id) }, [
-          el("span", { text: exerciseName(exercise.name) }),
+          el("span", { text: exercise.name }),
           el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })
         ])
       );

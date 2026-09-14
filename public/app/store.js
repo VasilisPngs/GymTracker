@@ -3,8 +3,6 @@ import { scheduleSync, syncEvents } from "./sync.js";
 
 export const MUSCLE_GROUPS = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Calves", "Core"];
 
-export const SESSION_PRESETS = ["Chest", "Back", "Shoulders", "Arms", "Legs"];
-
 export const storeEvents = new EventTarget();
 
 const cache = {
