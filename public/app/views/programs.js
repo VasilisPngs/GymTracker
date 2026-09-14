@@ -189,12 +189,14 @@ export function renderPrograms(container, repaint) {
 
   if (!active) {
     container.append(
-      el("button", {
-        class: "btn primary block",
-        type: "button",
-        text: t("newProgram"),
-        onclick: () => openProgramCreator()
-      })
+      el("div", { class: "card" }, [
+        el("button", {
+          class: "btn primary block",
+          type: "button",
+          text: t("newProgram"),
+          onclick: () => openProgramCreator()
+        })
+      ])
     );
     return;
   }
