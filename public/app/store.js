@@ -88,29 +88,38 @@ async function hydrate() {
   }
 }
 
+const seedId = (name) => `seed_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
+
+async function seedCatalog() {
+  if (cache.exercises.size > 0) return false;
+  if (await getMeta("seeded", false)) return false;
+  const created = now();
+  const entries = SEED.map(([name, muscle_group, equipment]) => ({
+    table: "exercises",
+    row: {
+      id: seedId(name),
+      name,
+      muscle_group,
+      equipment,
+      notes: null,
+      is_archived: 0,
+      created_at: created,
+      deleted_at: null
+    }
+  }));
+  await setMeta("seeded", true);
+  await commit(entries);
+  return true;
+}
+
 export async function initStore() {
   await hydrate();
-  if (cache.exercises.size === 0 && !(await getMeta("seeded", false))) {
-    const created = now();
-    const entries = SEED.map(([name, muscle_group, equipment]) => ({
-      table: "exercises",
-      row: {
-        id: uid(),
-        name,
-        muscle_group,
-        equipment,
-        notes: null,
-        is_archived: 0,
-        created_at: created,
-        deleted_at: null
-      }
-    }));
-    await setMeta("seeded", true);
-    await commit(entries);
-  }
   syncEvents.addEventListener("changed", async () => {
     await hydrate();
     announce();
+  });
+  syncEvents.addEventListener("synced", async () => {
+    await seedCatalog();
   });
 }
 

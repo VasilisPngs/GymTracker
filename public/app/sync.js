@@ -107,6 +107,7 @@ export async function requestSync() {
   try {
     await cycle();
     failures = 0;
+    syncEvents.dispatchEvent(new CustomEvent("synced"));
     state.lastSyncedAt = Date.now();
     await setMeta("last_synced_at", state.lastSyncedAt);
     await refreshPending();

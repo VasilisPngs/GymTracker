@@ -3,6 +3,7 @@ import { MUSCLE_GROUPS, weeklyBreakdown, exportData } from "../store.js";
 import { sparkline } from "../chart.js";
 import { restSeconds, setRestSeconds } from "../timer.js";
 import { t, language, languages, setLanguage, muscleGroupName } from "../i18n.js";
+import { themeMode, themeModes, setTheme } from "../theme.js";
 
 const REFERENCE_SETS = 20;
 
@@ -104,6 +105,24 @@ export function renderStats(container) {
         },
         languages().map((code) =>
           el("option", { value: code, text: code === "el" ? "Ελληνικά" : "English", selected: code === language() })
+        )
+      ),
+      el("label", { class: "tiny", text: t("theme") }),
+      el(
+        "select",
+        {
+          onchange: (event) => {
+            const next = event.target.value;
+            event.target.blur();
+            setTheme(next);
+          }
+        },
+        themeModes().map((mode) =>
+          el("option", {
+            value: mode,
+            text: t(`theme${mode[0].toUpperCase()}${mode.slice(1)}`),
+            selected: mode === themeMode()
+          })
         )
       ),
       el("label", { class: "tiny", text: t("defaultRest") }),
