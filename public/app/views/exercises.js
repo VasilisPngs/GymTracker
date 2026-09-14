@@ -1,96 +1,16 @@
-import { el, clear, formatDate, formatNumber, formatVolume, plural, confirmSheet, openSheet, toast } from "../dom.js";
+import { el, formatDate, formatNumber, formatVolume, plural, confirmSheet, openSheet, toast } from "../dom.js";
 import {
   MUSCLE_GROUPS,
   byId,
-  exercisesSorted,
   exerciseSessions,
   personalRecords,
   updateExercise,
   deleteExercise,
   describeSets
 } from "../store.js";
-import { openExerciseCreator } from "./picker.js";
 import { sparkline } from "../chart.js";
 import { navigate } from "../router.js";
 import { t, muscleGroupName, equipmentName, exerciseName } from "../i18n.js";
-
-export function renderExercises(container) {
-  let query = "";
-  let group = "";
-  const listNode = el("div", { class: "list" });
-
-  const paint = () => {
-    clear(listNode);
-    const matches = exercisesSorted().filter((exercise) => {
-      const matchesGroup = !group || exercise.muscle_group === group;
-      const matchesQuery = !query || exercise.name.toLowerCase().includes(query.toLowerCase());
-      return matchesGroup && matchesQuery;
-    });
-    if (matches.length === 0) {
-      listNode.append(el("div", { class: "empty", text: t("nothingHere") }));
-      return;
-    }
-    for (const exercise of matches) {
-      const sessions = exerciseSessions(exercise.id);
-      const last = sessions[sessions.length - 1];
-      listNode.append(
-        el("a", { class: "list-item", href: `/exercise/${exercise.id}`, "data-link": "" }, [
-          el("span", { class: "grow" }, [
-            el("div", { text: exerciseName(exercise.name) }),
-            el("div", {
-              class: "tiny",
-              text: last
-                ? t("lastWithE1rm", { date: formatDate(last.workout.performed_on), value: formatNumber(last.e1rm, 0) })
-                : t("neverTrained")
-            })
-          ]),
-          el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })
-        ])
-      );
-    }
-  };
-
-  container.append(
-    el("div", { class: "row between" }, [
-      el("h1", { text: t("exercisesTitle") }),
-      el("button", {
-        class: "btn small primary",
-        type: "button",
-        text: t("newShort"),
-        onclick: () => openExerciseCreator("", () => toast(t("exerciseCreated")))
-      })
-    ]),
-    el("input", {
-      type: "search",
-      placeholder: t("search"),
-      oninput: (event) => {
-        query = event.target.value;
-        paint();
-      }
-    }),
-    el(
-      "div",
-      { class: "chips" },
-      ["All", ...MUSCLE_GROUPS].map((name) =>
-        el("button", {
-          class: "chip",
-          type: "button",
-          text: name === "All" ? t("all") : muscleGroupName(name),
-          "aria-pressed": (name === "All" && group === "") || name === group ? "true" : "false",
-          onclick: (event) => {
-            group = name === "All" ? "" : name;
-            for (const chip of event.target.parentElement.children) chip.setAttribute("aria-pressed", "false");
-            event.target.setAttribute("aria-pressed", "true");
-            paint();
-          }
-        })
-      )
-    ),
-    listNode
-  );
-
-  paint();
-}
 
 export function renderExerciseDetail(container, params) {
   const exercise = byId("exercises", params.id);

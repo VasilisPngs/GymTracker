@@ -4,7 +4,7 @@ const LANGUAGES = ["en", "el"];
 const STRINGS = {
   tabTrain: ["Train", "Προπόνηση"],
   tabHistory: ["History", "Ιστορικό"],
-  tabExercises: ["Exercises", "Ασκήσεις"],
+  tabSettings: ["Settings", "Ρυθμίσεις"],
   tabStats: ["Stats", "Στατιστικά"],
 
   statusSynced: ["Synced", "Συγχρονισμένο"],
@@ -92,18 +92,13 @@ const STRINGS = {
   createNewExercise: ["Create new exercise", "Δημιουργία νέας άσκησης"],
   newExercise: ["New exercise", "Νέα άσκηση"],
   exerciseNamePlaceholder: ["Exercise name", "Όνομα άσκησης"],
-  exerciseCreated: ["Exercise created", "Η άσκηση δημιουργήθηκε"],
 
   historyTitle: ["History", "Ιστορικό"],
   newShort: ["+ New", "+ Νέα"],
   noSessions: ["No sessions logged yet.", "Δεν έχει καταγραφεί καμία προπόνηση."],
   newWorkout: ["New workout", "Νέα προπόνηση"],
 
-  exercisesTitle: ["Exercises", "Ασκήσεις"],
   search: ["Search", "Αναζήτηση"],
-  nothingHere: ["Nothing here yet.", "Τίποτα εδώ ακόμα."],
-  neverTrained: ["Never trained", "Δεν έχει γυμναστεί"],
-  lastWithE1rm: ["Last {date} · {value} kg e1RM", "Τελευταία {date} · {value} kg e1RM"],
   exerciseNotFound: ["Exercise not found.", "Η άσκηση δεν βρέθηκε."],
   bestE1rm: ["best e1RM kg", "καλύτερο e1RM kg"],
   heaviest: ["heaviest kg", "μέγιστα kg"],
@@ -131,12 +126,14 @@ const STRINGS = {
   thisWeek: ["this week", "αυτή την εβδομάδα"],
   barFullAt: ["Bar is full at {count} hard sets per week.", "Η μπάρα γεμίζει στα {count} κύρια σετ την εβδομάδα."],
   previousWeeks: ["Previous weeks", "Προηγούμενες εβδομάδες"],
-  settings: ["Settings", "Ρυθμίσεις"],
+  settingsTitle: ["Settings", "Ρυθμίσεις"],
+  backup: ["Backup", "Αντίγραφο"],
   language: ["Language", "Γλώσσα"],
   theme: ["Theme", "Θέμα"],
   themeSystem: ["System", "Σύστημα"],
   themeLight: ["Light", "Φωτεινό"],
   themeDark: ["Dark", "Σκοτεινό"],
+  themeAmoled: ["AMOLED", "AMOLED"],
   exportBackup: ["Export backup (JSON)", "Εξαγωγή αντιγράφου (JSON)"],
   backupExported: ["Backup exported", "Το αντίγραφο εξήχθη"],
 
