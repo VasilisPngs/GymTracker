@@ -83,7 +83,6 @@ function programRow(item) {
       type: "text",
       class: "setup-note",
       value: item.notes || "",
-      placeholder: t("setupPlaceholder"),
       onchange: (event) => updateProgramExercise(item.id, { notes: event.target.value.trim() || null })
     }),
     el("div", { class: "program-fields" }, [

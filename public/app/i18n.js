@@ -47,7 +47,6 @@ const STRINGS = {
   colTargetReps: ["Reps", "Επαναλήψεις"],
   colTargetWeight: ["Kg", "Κιλά"],
   colRest: ["Rest (s)", "Διάλειμμα (δλ)"],
-  setupPlaceholder: ["Machine setup, seat, pin…", "Ρύθμιση μηχανήματος, θέση, καρφί…"],
   createNamed: ["Create \u00ab{name}\u00bb", "Δημιουργία \u00ab{name}\u00bb"],
   recent: ["Recent", "Πρόσφατα"],
   workout: ["Workout", "Προπόνηση"],

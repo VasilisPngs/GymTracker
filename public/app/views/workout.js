@@ -129,7 +129,6 @@ function exerciseBlock(workout, link) {
       type: "text",
       class: "setup-note",
       value: link.notes || "",
-      placeholder: t("setupPlaceholder"),
       onchange: (event) => updateWorkoutExercise(link.id, { notes: event.target.value.trim() || null })
     })
   );
