@@ -6,6 +6,7 @@ import { renderWorkout } from "./views/workout.js";
 import { renderHistory } from "./views/history.js";
 import { renderExercises, renderExerciseDetail } from "./views/exercises.js";
 import { renderStats } from "./views/stats.js";
+import { renderProgram } from "./views/programs.js";
 import { t, applyLanguage, i18nEvents } from "./i18n.js";
 import { applyTheme, themeEvents } from "./theme.js";
 
@@ -18,7 +19,8 @@ const VIEWS = {
   history: renderHistory,
   exercises: renderExercises,
   exercise: renderExerciseDetail,
-  stats: renderStats
+  stats: renderStats,
+  program: renderProgram
 };
 
 const TAB_LABELS = { workout: "tabTrain", history: "tabHistory", exercises: "tabExercises", stats: "tabStats" };
@@ -28,7 +30,8 @@ const TAB_FOR_ROUTE = {
   history: "history",
   exercises: "exercises",
   exercise: "exercises",
-  stats: "stats"
+  stats: "stats",
+  program: "workout"
 };
 
 let lastRouteKey = "";

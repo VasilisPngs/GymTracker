@@ -56,11 +56,12 @@ const SEED = [
 export const storeEvents = new EventTarget();
 
 const cache = {
-  plan: new Map(),
   exercises: new Map(),
   workouts: new Map(),
   workout_exercises: new Map(),
-  sets: new Map()
+  sets: new Map(),
+  programs: new Map(),
+  program_exercises: new Map()
 };
 
 export const uid = () => crypto.randomUUID();
@@ -141,29 +142,19 @@ export function exercisesSorted() {
 
 export const weekdayIndex = (date = new Date()) => (date.getDay() + 6) % 7;
 
-export function planTitle(weekday) {
-  const row = cache.plan.get(String(weekday));
-  return row && !row.deleted_at && row.title ? row.title : "";
+export function programsSorted() {
+  return list("programs").sort((a, b) => {
+    const first = a.weekday === null || a.weekday === undefined ? 7 : a.weekday;
+    const second = b.weekday === null || b.weekday === undefined ? 7 : b.weekday;
+    return first - second || a.position - b.position || a.created_at - b.created_at;
+  });
 }
 
-export const todayPlan = () => planTitle(weekdayIndex());
-
-export async function setPlanTitle(weekday, title) {
-  const id = String(weekday);
-  const current = cache.plan.get(id);
-  const clean = title.trim();
-  await commit([
-    {
-      table: "plan",
-      row: {
-        id,
-        title: clean || null,
-        created_at: current ? current.created_at : now(),
-        deleted_at: null
-      }
-    }
-  ]);
+export function programForWeekday(weekday) {
+  return programsSorted().find((program) => program.weekday === weekday) || null;
 }
+
+export const todayProgram = () => programForWeekday(weekdayIndex());
 
 export function exercisesByRecent() {
   const used = new Map();
@@ -239,12 +230,19 @@ export async function addExerciseToWorkout(workoutId, exerciseId) {
     workout_id: workoutId,
     exercise_id: exerciseId,
     position,
+    rest_seconds: null,
     notes: null,
     created_at: now(),
     deleted_at: null
   };
   await commit([{ table: "workout_exercises", row }]);
   return row;
+}
+
+export async function updateWorkoutExercise(id, patch) {
+  const current = byId("workout_exercises", id);
+  if (!current) return;
+  await commit([{ table: "workout_exercises", row: { ...current, ...patch } }]);
 }
 
 export async function removeWorkoutExercise(id) {
@@ -299,6 +297,149 @@ export async function deleteSet(id) {
   const current = byId("sets", id);
   if (!current) return;
   await commit([{ table: "sets", row: { ...current, deleted_at: now() } }]);
+}
+
+export function programExercises(programId) {
+  return list("program_exercises")
+    .filter((row) => row.program_id === programId)
+    .sort((a, b) => a.position - b.position);
+}
+
+export async function createProgram(title, weekday = null) {
+  const row = {
+    id: uid(),
+    title,
+    weekday,
+    notes: null,
+    position: programsSorted().length,
+    created_at: now(),
+    deleted_at: null
+  };
+  await commit([{ table: "programs", row }]);
+  return row;
+}
+
+export async function setProgramWeekday(id, weekday) {
+  const taken = weekday === null ? null : programForWeekday(weekday);
+  const entries = [];
+  if (taken && taken.id !== id) entries.push({ table: "programs", row: { ...taken, weekday: null } });
+  const current = byId("programs", id);
+  if (!current) return;
+  entries.push({ table: "programs", row: { ...current, weekday } });
+  await commit(entries);
+}
+
+export async function updateProgram(id, patch) {
+  const current = byId("programs", id);
+  if (!current) return;
+  await commit([{ table: "programs", row: { ...current, ...patch } }]);
+}
+
+export async function deleteProgram(id) {
+  const current = byId("programs", id);
+  if (!current) return;
+  const stamp = now();
+  const entries = [{ table: "programs", row: { ...current, deleted_at: stamp } }];
+  for (const item of programExercises(id)) entries.push({ table: "program_exercises", row: { ...item, deleted_at: stamp } });
+  await commit(entries);
+}
+
+export async function addProgramExercise(programId, exerciseId) {
+  const siblings = programExercises(programId);
+  const row = {
+    id: uid(),
+    program_id: programId,
+    exercise_id: exerciseId,
+    position: siblings.length,
+    target_sets: null,
+    target_reps: null,
+    target_weight_kg: null,
+    rest_seconds: null,
+    notes: null,
+    created_at: now(),
+    deleted_at: null
+  };
+  await commit([{ table: "program_exercises", row }]);
+  return row;
+}
+
+export async function updateProgramExercise(id, patch) {
+  const current = byId("program_exercises", id);
+  if (!current) return;
+  await commit([{ table: "program_exercises", row: { ...current, ...patch } }]);
+}
+
+export async function removeProgramExercise(id) {
+  const current = byId("program_exercises", id);
+  if (!current) return;
+  await commit([{ table: "program_exercises", row: { ...current, deleted_at: now() } }]);
+}
+
+export async function moveProgramExercise(id, direction) {
+  const current = byId("program_exercises", id);
+  if (!current) return;
+  const siblings = programExercises(current.program_id);
+  const index = siblings.findIndex((row) => row.id === id);
+  const target = index + direction;
+  if (target < 0 || target >= siblings.length) return;
+  const other = siblings[target];
+  await commit([
+    { table: "program_exercises", row: { ...current, position: other.position } },
+    { table: "program_exercises", row: { ...other, position: current.position } }
+  ]);
+}
+
+export async function startWorkoutFromProgram(programId, performed_on = todayISO()) {
+  const program = byId("programs", programId);
+  if (!program) return null;
+  const stamp = now();
+  const workout = {
+    id: uid(),
+    performed_on,
+    title: program.title,
+    notes: null,
+    started_at: stamp,
+    finished_at: null,
+    created_at: stamp,
+    deleted_at: null
+  };
+  const entries = [{ table: "workouts", row: workout }];
+  let position = 0;
+  for (const planned of programExercises(programId)) {
+    if (!byId("exercises", planned.exercise_id)) continue;
+    const link = {
+      id: uid(),
+      workout_id: workout.id,
+      exercise_id: planned.exercise_id,
+      position,
+      rest_seconds: planned.rest_seconds,
+      notes: planned.notes,
+      created_at: stamp,
+      deleted_at: null
+    };
+    entries.push({ table: "workout_exercises", row: link });
+    const count = Math.min(Math.max(planned.target_sets || 0, 0), 12);
+    for (let index = 0; index < count; index += 1) {
+      entries.push({
+        table: "sets",
+        row: {
+          id: uid(),
+          workout_exercise_id: link.id,
+          position: index,
+          reps: planned.target_reps,
+          weight_kg: planned.target_weight_kg,
+          rir: null,
+          is_warmup: 0,
+          completed_at: null,
+          created_at: stamp,
+          deleted_at: null
+        }
+      });
+    }
+    position += 1;
+  }
+  await commit(entries);
+  return workout;
 }
 
 export async function createExercise(name, muscle_group, equipment) {

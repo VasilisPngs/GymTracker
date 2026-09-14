@@ -1,24 +1,12 @@
 import { el, clear, formatDuration } from "./dom.js";
 import { t } from "./i18n.js";
 
-const REST_KEY = "gymtracker.rest_seconds";
-const DEFAULT_REST = 120;
-
 let deadline = null;
 let ticker = null;
 let audioContext = null;
 let wakeLock = null;
 let wakeWanted = false;
 let finishedAt = null;
-
-export function restSeconds() {
-  const stored = Number(localStorage.getItem(REST_KEY));
-  return Number.isFinite(stored) && stored > 0 ? stored : DEFAULT_REST;
-}
-
-export function setRestSeconds(value) {
-  localStorage.setItem(REST_KEY, String(Math.max(15, Math.round(value))));
-}
 
 function beep() {
   try {
@@ -81,7 +69,8 @@ function adjust(delta) {
   paint();
 }
 
-export function startRest(seconds = restSeconds()) {
+export function startRest(seconds) {
+  if (!seconds || seconds <= 0) return;
   warmAudio();
   deadline = Date.now() + seconds * 1000;
   finishedAt = null;

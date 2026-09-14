@@ -1,4 +1,4 @@
-const VERSION = "v8";
+const VERSION = "v9";
 const CACHE = `gymtracker-${VERSION}`;
 
 const SHELL = [
@@ -19,6 +19,8 @@ const SHELL = [
   "/app/views/history.js",
   "/app/views/exercises.js",
   "/app/views/stats.js",
+  "/app/views/programs.js",
+  "/app/views/picker.js",
   "/icons/icon.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",

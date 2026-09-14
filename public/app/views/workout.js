@@ -1,17 +1,17 @@
-import { el, append, clear, formatDate, formatNumber, formatVolume, plural, openSheet, confirmSheet, toast } from "../dom.js";
-import { t, muscleGroupName, presetName, equipmentName, exerciseName } from "../i18n.js";
+import { el, append, clear, formatDate, formatNumber, formatVolume, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { t, presetName, exerciseName, muscleGroupName } from "../i18n.js";
 import {
-  MUSCLE_GROUPS,
   SESSION_PRESETS,
   byId,
   todayISO,
-  todayPlan,
+  todayProgram,
   now,
   createWorkout,
   updateWorkout,
   deleteWorkout,
   workoutsSorted,
   workoutExercises,
+  updateWorkoutExercise,
   setsOf,
   workingSets,
   summarizeSets,
@@ -21,14 +21,13 @@ import {
   addSet,
   updateSet,
   deleteSet,
-  exercisesSorted,
-  exercisesByRecent,
-  createExercise,
   lastPerformance,
   describeSets,
   epley
 } from "../store.js";
 import { startRest, keepAwake } from "../timer.js";
+import { openExercisePicker } from "./picker.js";
+import { programList, openProgramCreator, startProgram } from "./programs.js";
 import { navigate } from "../router.js";
 
 function todaysWorkout() {
@@ -36,33 +35,7 @@ function todaysWorkout() {
   return workoutsSorted().find((workout) => workout.performed_on === today) || null;
 }
 
-function stepper(value, step, min, onCommit, options = {}) {
-  const input = el("input", {
-    type: "text",
-    inputMode: options.decimal ? "decimal" : "numeric",
-    value: value === null || value === undefined ? "" : String(value),
-    onchange: (event) => {
-      const raw = event.target.value.replace(",", ".").trim();
-      if (raw === "") return onCommit(null);
-      const parsed = Number(raw);
-      onCommit(Number.isFinite(parsed) ? Math.max(min, parsed) : null);
-    },
-    onfocus: (event) => event.target.select()
-  });
-  const bump = (delta) => {
-    const current = Number(input.value.replace(",", ".")) || 0;
-    const next = Math.max(min, Math.round((current + delta) * 100) / 100);
-    input.value = String(next);
-    onCommit(next);
-  };
-  return el("div", { class: "stepper" }, [
-    el("button", { type: "button", text: "−", "aria-label": t("ariaDecrease"), onclick: () => bump(-step) }),
-    input,
-    el("button", { type: "button", text: "+", "aria-label": t("ariaIncrease"), onclick: () => bump(step) })
-  ]);
-}
-
-function setRow(set, index) {
+function setRow(set, index, rest) {
   const classes = ["set-grid"];
   if (set.completed_at) classes.push("done");
   if (set.is_warmup) classes.push("warmup");
@@ -97,7 +70,7 @@ function setRow(set, index) {
       onclick: () => {
         const completing = !set.completed_at;
         updateSet(set.id, { completed_at: completing ? now() : null });
-        if (completing && !set.is_warmup) startRest();
+        if (completing && !set.is_warmup) startRest(rest);
       }
     })
   ]);
@@ -176,7 +149,7 @@ function exerciseBlock(workout, link) {
 
   let index = 0;
   for (const set of sets) {
-    block.append(setRow(set, set.is_warmup ? index : index++));
+    block.append(setRow(set, set.is_warmup ? index : index++, link.rest_seconds));
   }
 
   block.append(
@@ -202,6 +175,10 @@ function exerciseBlock(workout, link) {
 function openExerciseMenu(workout, link, exercise) {
   openSheet((close) => [
     el("h2", { text: exerciseName(exercise.name) }),
+    el("label", { class: "field" }, [
+      el("span", { class: "tiny", text: t("colRest") }),
+      stepper(link.rest_seconds, 15, 0, (value) => updateWorkoutExercise(link.id, { rest_seconds: value }))
+    ]),
     el("button", {
       class: "btn block",
       type: "button",
@@ -244,141 +221,16 @@ function openExerciseMenu(workout, link, exercise) {
   ]);
 }
 
-function openExercisePicker(workout) {
-  let query = "";
-  let group = "";
-  const listNode = el("div", { class: "list" });
-
-  const paint = () => {
-    clear(listNode);
-    const needle = query.trim().toLowerCase();
-    const matches = exercisesByRecent().filter((exercise) => {
-      const matchesGroup = !group || exercise.muscle_group === group;
-      const matchesQuery = !needle || exercise.name.toLowerCase().includes(needle);
-      return matchesGroup && matchesQuery;
-    });
-    if (needle && !matches.some((exercise) => exercise.name.toLowerCase() === needle)) {
-      listNode.append(
-        el("button", { class: "list-item", type: "button", onclick: () => createFromQuery() }, [
-          el("span", { class: "grow", text: t("createNamed", { name: query.trim() }) }),
-          el("span", { class: "badge", text: "+" })
-        ])
-      );
-    }
-    if (matches.length === 0 && !needle) {
-      listNode.append(el("div", { class: "empty", text: t("noExerciseMatch") }));
-    }
-    for (const exercise of matches.slice(0, 40)) {
-      listNode.append(
-        el("button", { class: "list-item", type: "button", onclick: () => pick(exercise.id) }, [
-          el("span", { text: exerciseName(exercise.name) }),
-          el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })
-        ])
-      );
-    }
-  };
-
-  let closeSheet = null;
-  const createFromQuery = () => {
-    if (closeSheet) closeSheet();
-    openExerciseCreator(query.trim(), (exercise) => addExerciseToWorkout(workout.id, exercise.id));
-  };
-  const pick = async (exerciseId) => {
-    await addExerciseToWorkout(workout.id, exerciseId);
-    if (closeSheet) closeSheet();
-  };
-
-  paint();
-
-  closeSheet = openSheet(() => [
-    el("h2", { text: t("addExercise").replace("+ ", "") }),
-    el("input", {
-      type: "search",
-      placeholder: t("searchExercises"),
-      oninput: (event) => {
-        query = event.target.value;
-        paint();
-      }
-    }),
-    el(
-      "div",
-      { class: "chips" },
-      ["All", ...MUSCLE_GROUPS].map((name) =>
-        el("button", {
-          class: "chip",
-          type: "button",
-          text: name === "All" ? t("all") : muscleGroupName(name),
-          "aria-pressed": (name === "All" && group === "") || name === group ? "true" : "false",
-          onclick: (event) => {
-            group = name === "All" ? "" : name;
-            for (const chip of event.target.parentElement.children) chip.setAttribute("aria-pressed", "false");
-            event.target.setAttribute("aria-pressed", "true");
-            paint();
-          }
-        })
-      )
-    ),
-    listNode,
-    el("button", {
-      class: "btn block",
-      type: "button",
-      text: t("createNewExercise"),
-      onclick: () => {
-        if (closeSheet) closeSheet();
-        openExerciseCreator(query, (exercise) => addExerciseToWorkout(workout.id, exercise.id));
-      }
-    })
-  ]);
-}
-
-export function openExerciseCreator(initialName, onCreated) {
-  let name = initialName || "";
-  let group = MUSCLE_GROUPS[0];
-  let equipment = "Barbell";
-  openSheet((close) => [
-    el("h2", { text: t("newExercise") }),
-    el("input", {
-      type: "text",
-      placeholder: t("exerciseNamePlaceholder"),
-      value: name,
-      oninput: (event) => {
-        name = event.target.value;
-      }
-    }),
-    el(
-      "select",
-      { onchange: (event) => (group = event.target.value) },
-      MUSCLE_GROUPS.map((item) => el("option", { value: item, text: muscleGroupName(item) }))
-    ),
-    el(
-      "select",
-      { onchange: (event) => (equipment = event.target.value) },
-      ["Barbell", "Dumbbell", "Machine", "Cable", "Bodyweight", "Other"].map((item) => el("option", { value: item, text: equipmentName(item) }))
-    ),
-    el("button", {
-      class: "btn primary block",
-      type: "button",
-      text: t("create"),
-      onclick: async () => {
-        if (!name.trim()) return toast(t("nameRequired"));
-        const exercise = await createExercise(name.trim(), group, equipment);
-        close();
-        if (onCreated) onCreated(exercise);
-      }
-    })
-  ]);
-}
-
 function startCard(container) {
-  const planned = todayPlan();
-  let draft = planned;
+  const program = todayProgram();
+  let draft = "";
   const start = async (name) => {
     const workout = await createWorkout(todayISO(), name && name.trim() ? name.trim() : null);
     navigate(`/workout/${workout.id}`);
   };
   const input = el("input", {
     type: "text",
-    value: planned,
+    value: "",
     placeholder: t("sessionNamePlaceholder"),
     oninput: (event) => {
       draft = event.target.value;
@@ -391,7 +243,15 @@ function startCard(container) {
   container.append(
     el("div", { class: "card" }, [
       el("h1", { text: t("readyToTrain") }),
-      planned ? el("div", { class: "tiny", text: t("todayIs", { name: planned }) }) : null,
+      program
+        ? el("button", {
+            class: "btn primary block",
+            type: "button",
+            text: t("startProgram", { name: program.title }),
+            onclick: () => startProgram(program.id)
+          })
+        : null,
+      program ? el("div", { class: "tiny", text: t("orStartFree") }) : null,
       input,
       el("div", { class: "tiny", text: t("quickNames") }),
       el(
@@ -407,12 +267,25 @@ function startCard(container) {
         )
       ),
       el("button", {
-        class: "btn primary block",
+        class: program ? "btn block" : "btn primary block",
         type: "button",
         text: t("startSession"),
         onclick: () => start(draft)
       })
     ])
+  );
+
+  container.append(el("h2", { text: t("programs") }));
+  const programs = programList();
+  if (programs) container.append(programs);
+  else container.append(el("div", { class: "empty", text: t("noPrograms") }));
+  container.append(
+    el("button", {
+      class: "btn block",
+      type: "button",
+      text: t("newProgram"),
+      onclick: () => openProgramCreator()
+    })
   );
 
   const recent = workoutsSorted().slice(0, 5);
@@ -512,7 +385,7 @@ export function renderWorkout(container, params) {
       class: "btn primary block",
       type: "button",
       text: t("addExercise"),
-      onclick: () => openExercisePicker(workout)
+      onclick: () => openExercisePicker((exerciseId) => addExerciseToWorkout(workout.id, exerciseId))
     })
   );
 

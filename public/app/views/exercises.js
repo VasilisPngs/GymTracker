@@ -9,7 +9,7 @@ import {
   deleteExercise,
   describeSets
 } from "../store.js";
-import { openExerciseCreator } from "./workout.js";
+import { openExerciseCreator } from "./picker.js";
 import { sparkline } from "../chart.js";
 import { navigate } from "../router.js";
 import { t, muscleGroupName, equipmentName, exerciseName } from "../i18n.js";

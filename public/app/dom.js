@@ -144,3 +144,29 @@ export function confirmSheet(title, message, confirmLabel) {
     );
   });
 }
+
+export function stepper(value, step, min, onCommit, options = {}) {
+  const input = el("input", {
+    type: "text",
+    inputMode: options.decimal ? "decimal" : "numeric",
+    value: value === null || value === undefined ? "" : String(value),
+    onchange: (event) => {
+      const raw = event.target.value.replace(",", ".").trim();
+      if (raw === "") return onCommit(null);
+      const parsed = Number(raw);
+      onCommit(Number.isFinite(parsed) ? Math.max(min, parsed) : null);
+    },
+    onfocus: (event) => event.target.select()
+  });
+  const bump = (delta) => {
+    const current = Number(input.value.replace(",", ".")) || 0;
+    const next = Math.max(min, Math.round((current + delta) * 100) / 100);
+    input.value = String(next);
+    onCommit(next);
+  };
+  return el("div", { class: "stepper" }, [
+    el("button", { type: "button", text: "−", "aria-label": t("ariaDecrease"), onclick: () => bump(-step) }),
+    input,
+    el("button", { type: "button", text: "+", "aria-label": t("ariaIncrease"), onclick: () => bump(step) })
+  ]);
+}

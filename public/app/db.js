@@ -1,7 +1,7 @@
 const DB_NAME = "gymtracker";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
-export const TABLES = ["exercises", "workouts", "workout_exercises", "sets", "plan"];
+export const TABLES = ["exercises", "workouts", "workout_exercises", "sets", "programs", "program_exercises"];
 
 let dbPromise = null;
 
@@ -27,7 +27,9 @@ function openDatabase() {
       ensure("workouts", [["performed_on", "performed_on"]]);
       ensure("workout_exercises", [["workout_id", "workout_id"]]);
       ensure("sets", [["workout_exercise_id", "workout_exercise_id"]]);
-      ensure("plan");
+      if (db.objectStoreNames.contains("plan")) db.deleteObjectStore("plan");
+      ensure("programs");
+      ensure("program_exercises", [["program_id", "program_id"]]);
       ensure("outbox", [], ["table", "id"]);
       ensure("meta", [], "key");
     };

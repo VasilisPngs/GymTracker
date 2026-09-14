@@ -42,13 +42,30 @@ const SCHEMA = {
     workout_id: { cast: text, required: true },
     exercise_id: { cast: text, required: true },
     position: { cast: int, required: true },
+    rest_seconds: { cast: int },
     notes: { cast: text },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
   },
-  plan: {
+  programs: {
     id: { cast: text, required: true },
-    title: { cast: text },
+    title: { cast: text, required: true },
+    weekday: { cast: int },
+    notes: { cast: text },
+    position: { cast: int, required: true },
+    created_at: { cast: int, required: true },
+    deleted_at: { cast: int }
+  },
+  program_exercises: {
+    id: { cast: text, required: true },
+    program_id: { cast: text, required: true },
+    exercise_id: { cast: text, required: true },
+    position: { cast: int, required: true },
+    target_sets: { cast: int },
+    target_reps: { cast: int },
+    target_weight_kg: { cast: real },
+    rest_seconds: { cast: int },
+    notes: { cast: text },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
   },
