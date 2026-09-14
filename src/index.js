@@ -30,6 +30,7 @@ const SCHEMA = {
   workouts: {
     id: { cast: text, required: true },
     performed_on: { cast: text, required: true },
+    program_id: { cast: text },
     title: { cast: text },
     notes: { cast: text },
     started_at: { cast: int },

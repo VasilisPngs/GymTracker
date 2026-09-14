@@ -194,6 +194,7 @@ export async function createWorkout(performed_on, title) {
   const row = {
     id: uid(),
     performed_on,
+    program_id: null,
     title: title || null,
     notes: null,
     started_at: now(),
@@ -287,10 +288,34 @@ export async function addSet(workoutExerciseId, values = {}) {
   return row;
 }
 
+function plannedFor(link, programId) {
+  return programExercises(programId).find((item) => item.exercise_id === link.exercise_id) || null;
+}
+
+function targetFromSets(row) {
+  const link = byId("workout_exercises", row.workout_exercise_id);
+  if (!link) return null;
+  const workout = byId("workouts", link.workout_id);
+  if (!workout || !workout.program_id) return null;
+  const planned = plannedFor(link, workout.program_id);
+  if (!planned) return null;
+  const done = setsOf(link.id)
+    .map((set) => (set.id === row.id ? row : set))
+    .filter((set) => !set.is_warmup && set.completed_at && set.weight_kg > 0 && set.reps > 0);
+  if (done.length === 0) return null;
+  const best = done.reduce((top, set) => (set.weight_kg > top.weight_kg ? set : top));
+  if (planned.target_weight_kg === best.weight_kg && planned.target_reps === best.reps) return null;
+  return { ...planned, target_weight_kg: best.weight_kg, target_reps: best.reps };
+}
+
 export async function updateSet(id, patch) {
   const current = byId("sets", id);
   if (!current) return;
-  await commit([{ table: "sets", row: { ...current, ...patch } }]);
+  const row = { ...current, ...patch };
+  const entries = [{ table: "sets", row }];
+  const target = targetFromSets(row);
+  if (target) entries.push({ table: "program_exercises", row: target });
+  await commit(entries);
 }
 
 export async function deleteSet(id) {
@@ -396,6 +421,7 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
   const workout = {
     id: uid(),
     performed_on,
+    program_id: program.id,
     title: program.title,
     notes: null,
     started_at: stamp,
