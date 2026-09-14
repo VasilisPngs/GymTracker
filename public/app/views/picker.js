@@ -92,7 +92,6 @@ export function openExercisePicker(onPick) {
 export function openExerciseCreator(initialName, onCreated) {
   let name = initialName || "";
   let group = MUSCLE_GROUPS[0];
-  let equipment = "Barbell";
   openSheet((close) => [
     el("h2", { text: t("newExercise") }),
     el("input", {
@@ -108,18 +107,13 @@ export function openExerciseCreator(initialName, onCreated) {
       { onchange: (event) => (group = event.target.value) },
       MUSCLE_GROUPS.map((item) => el("option", { value: item, text: muscleGroupName(item) }))
     ),
-    el(
-      "select",
-      { onchange: (event) => (equipment = event.target.value) },
-      ["Barbell", "Dumbbell", "Machine", "Cable", "Bodyweight", "Other"].map((item) => el("option", { value: item, text: equipmentName(item) }))
-    ),
     el("button", {
       class: "btn primary block",
       type: "button",
       text: t("create"),
       onclick: async () => {
         if (!name.trim()) return toast(t("nameRequired"));
-        const exercise = await createExercise(name.trim(), group, equipment);
+        const exercise = await createExercise(name.trim(), group, null);
         close();
         if (onCreated) onCreated(exercise);
       }

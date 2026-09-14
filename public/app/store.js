@@ -1,57 +1,9 @@
-import { TABLES, readAll, writeRows, getMeta, setMeta, snapshot } from "./db.js";
+import { TABLES, readAll, writeRows, snapshot } from "./db.js";
 import { scheduleSync, syncEvents } from "./sync.js";
 
 export const MUSCLE_GROUPS = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Calves", "Core"];
 
 export const SESSION_PRESETS = ["Chest", "Back", "Shoulders", "Arms", "Legs"];
-
-const SEED = [
-  ["Barbell Bench Press", "Chest", "Barbell"],
-  ["Incline Barbell Bench Press", "Chest", "Barbell"],
-  ["Incline Dumbbell Press", "Chest", "Dumbbell"],
-  ["Flat Dumbbell Press", "Chest", "Dumbbell"],
-  ["Chest Press Machine", "Chest", "Machine"],
-  ["Cable Fly", "Chest", "Cable"],
-  ["Pec Deck", "Chest", "Machine"],
-  ["Weighted Dip", "Chest", "Bodyweight"],
-  ["Pull Up", "Back", "Bodyweight"],
-  ["Lat Pulldown", "Back", "Cable"],
-  ["Barbell Row", "Back", "Barbell"],
-  ["Dumbbell Row", "Back", "Dumbbell"],
-  ["Seated Cable Row", "Back", "Cable"],
-  ["Chest Supported Row", "Back", "Machine"],
-  ["Straight Arm Pulldown", "Back", "Cable"],
-  ["Deadlift", "Back", "Barbell"],
-  ["Overhead Press", "Shoulders", "Barbell"],
-  ["Seated Dumbbell Press", "Shoulders", "Dumbbell"],
-  ["Lateral Raise", "Shoulders", "Dumbbell"],
-  ["Cable Lateral Raise", "Shoulders", "Cable"],
-  ["Reverse Pec Deck", "Shoulders", "Machine"],
-  ["Face Pull", "Shoulders", "Cable"],
-  ["Barbell Curl", "Biceps", "Barbell"],
-  ["Incline Dumbbell Curl", "Biceps", "Dumbbell"],
-  ["Hammer Curl", "Biceps", "Dumbbell"],
-  ["Cable Curl", "Biceps", "Cable"],
-  ["Preacher Curl", "Biceps", "Machine"],
-  ["Close Grip Bench Press", "Triceps", "Barbell"],
-  ["Triceps Pushdown", "Triceps", "Cable"],
-  ["Overhead Cable Extension", "Triceps", "Cable"],
-  ["Skull Crusher", "Triceps", "Barbell"],
-  ["Barbell Back Squat", "Legs", "Barbell"],
-  ["Hack Squat", "Legs", "Machine"],
-  ["Leg Press", "Legs", "Machine"],
-  ["Romanian Deadlift", "Legs", "Barbell"],
-  ["Bulgarian Split Squat", "Legs", "Dumbbell"],
-  ["Leg Extension", "Legs", "Machine"],
-  ["Seated Leg Curl", "Legs", "Machine"],
-  ["Lying Leg Curl", "Legs", "Machine"],
-  ["Hip Thrust", "Legs", "Barbell"],
-  ["Standing Calf Raise", "Calves", "Machine"],
-  ["Seated Calf Raise", "Calves", "Machine"],
-  ["Hanging Leg Raise", "Core", "Bodyweight"],
-  ["Cable Crunch", "Core", "Cable"],
-  ["Plank", "Core", "Bodyweight"]
-];
 
 export const storeEvents = new EventTarget();
 
@@ -90,38 +42,11 @@ async function hydrate() {
   }
 }
 
-const seedId = (name) => `seed_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
-
-async function seedCatalog() {
-  if (cache.exercises.size > 0) return false;
-  if (await getMeta("seeded", false)) return false;
-  const created = now();
-  const entries = SEED.map(([name, muscle_group, equipment]) => ({
-    table: "exercises",
-    row: {
-      id: seedId(name),
-      name,
-      muscle_group,
-      equipment,
-      notes: null,
-      is_archived: 0,
-      created_at: created,
-      deleted_at: null
-    }
-  }));
-  await setMeta("seeded", true);
-  await commit(entries);
-  return true;
-}
-
 export async function initStore() {
   await hydrate();
   syncEvents.addEventListener("changed", async () => {
     await hydrate();
     announce();
-  });
-  syncEvents.addEventListener("synced", async () => {
-    await seedCatalog();
   });
 }
 
