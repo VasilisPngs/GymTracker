@@ -82,6 +82,7 @@ function programRow(item) {
     el("input", {
       type: "text",
       class: "setup-note",
+      placeholder: t("setupPlaceholder"),
       value: item.notes || "",
       onchange: (event) => updateProgramExercise(item.id, { notes: event.target.value.trim() || null })
     }),

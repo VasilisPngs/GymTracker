@@ -75,7 +75,6 @@ const SCHEMA = {
     position: { cast: int, required: true },
     reps: { cast: int },
     weight_kg: { cast: real },
-    rir: { cast: int },
     is_warmup: { cast: bool, required: true },
     completed_at: { cast: int },
     created_at: { cast: int, required: true },

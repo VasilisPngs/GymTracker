@@ -463,7 +463,7 @@ textarea {
 
 .set-grid {
   display: grid;
-  grid-template-columns: 30px 1fr 1fr 58px 40px;
+  grid-template-columns: 30px 1fr 1fr 40px;
   gap: 8px;
   align-items: center;
   padding: 7px 14px;

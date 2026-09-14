@@ -19,8 +19,7 @@ import {
   updateSet,
   deleteSet,
   lastPerformance,
-  describeSets,
-  epley
+  describeSets
 } from "../store.js";
 import { startRest, keepAwake } from "../timer.js";
 import { openExercisePicker } from "./picker.js";
@@ -47,17 +46,6 @@ function setRow(set, index, rest) {
     }),
     stepper(set.weight_kg, 2.5, 0, (value) => updateSet(set.id, { weight_kg: value }), { decimal: true }),
     stepper(set.reps, 1, 0, (value) => updateSet(set.id, { reps: value })),
-    el(
-      "select",
-      {
-        "aria-label": t("ariaRir"),
-        style: "padding:9px 6px;text-align:center",
-        onchange: (event) => updateSet(set.id, { rir: event.target.value === "" ? null : Number(event.target.value) })
-      },
-      ["", "0", "1", "2", "3", "4", "5"].map((option) =>
-        el("option", { value: option, text: option === "" ? "RIR" : option, selected: String(set.rir ?? "") === option })
-      )
-    ),
     el("button", {
       class: "check",
       type: "button",
@@ -128,6 +116,7 @@ function exerciseBlock(workout, link) {
     el("input", {
       type: "text",
       class: "setup-note",
+      placeholder: t("setupPlaceholder"),
       value: link.notes || "",
       onchange: (event) => updateWorkoutExercise(link.id, { notes: event.target.value.trim() || null })
     })
@@ -148,7 +137,6 @@ function exerciseBlock(workout, link) {
       el("span", { text: t("colSet") }),
       el("span", { text: t("colKg") }),
       el("span", { text: t("colReps") }),
-      el("span", { text: t("colRir") }),
       el("span", { text: "" })
     ])
   );
@@ -170,7 +158,7 @@ function exerciseBlock(workout, link) {
         class: "btn small",
         type: "button",
         text: t("addWarmup"),
-        onclick: () => addSet(link.id, { is_warmup: 1, rir: null })
+        onclick: () => addSet(link.id, { is_warmup: 1 })
       })
     ])
   );
@@ -250,15 +238,13 @@ function recentList(container) {
 export function workoutTotals(workout) {
   let sets = 0;
   let volume = 0;
-  let best = 0;
   for (const link of workoutExercises(workout.id)) {
     const working = workingSets(link.id);
     const summary = summarizeSets(working);
     sets += working.length;
     volume += summary.volume;
-    if (summary.best) best = Math.max(best, epley(summary.best.weight_kg, summary.best.reps));
   }
-  return { sets, volume, best };
+  return { sets, volume };
 }
 
 export function renderWorkout(container, params) {

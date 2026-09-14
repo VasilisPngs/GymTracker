@@ -37,7 +37,6 @@ export function renderExerciseDetail(container, params) {
 
   container.append(
     el("div", { class: "stat-grid" }, [
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatNumber(records.bestE1rm, 0) }), el("span", { class: "tiny", text: t("bestE1rm") })]),
       el("div", { class: "stat" }, [
         el("b", { class: "num", text: records.heaviest ? formatNumber(records.heaviest.weight_kg) : "-" }),
         el("span", { class: "tiny", text: t("heaviest") })
@@ -47,10 +46,10 @@ export function renderExerciseDetail(container, params) {
   );
 
   if (sessions.length >= 2) {
-    const chart = sparkline(sessions.map((session) => session.e1rm));
+    const chart = sparkline(sessions.map((session) => (session.best ? session.best.weight_kg : 0)));
     container.append(
       el("div", { class: "card" }, [
-        el("div", { class: "row between" }, [el("h2", { text: t("estimated1rm") }), el("span", { class: "tiny", text: plural(sessions.length, "session") })]),
+        el("div", { class: "row between" }, [el("h2", { text: t("topSet") }), el("span", { class: "tiny", text: plural(sessions.length, "session") })]),
         chart
       ])
     );
@@ -70,7 +69,7 @@ export function renderExerciseDetail(container, params) {
           el("div", { text: formatDate(session.workout.performed_on, true) }),
           el("div", { class: "tiny", text: describeSets(session.sets) })
         ]),
-        el("span", { class: "tiny num", style: "text-align:right", text: `${formatNumber(session.e1rm, 0)} e1RM` })
+        el("span", { class: "tiny num", style: "text-align:right", text: session.best ? `${formatNumber(session.best.weight_kg)} kg` : "" })
       ])
     );
   }

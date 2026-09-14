@@ -222,7 +222,6 @@ export async function addSet(workoutExerciseId, values = {}) {
     position: existing.length,
     reps: values.reps ?? previous?.reps ?? null,
     weight_kg: values.weight_kg ?? previous?.weight_kg ?? null,
-    rir: values.rir ?? previous?.rir ?? null,
     is_warmup: values.is_warmup ?? 0,
     completed_at: null,
     created_at: now(),
@@ -407,7 +406,6 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
           position: index,
           reps: planned.target_reps,
           weight_kg: planned.target_weight_kg,
-          rir: null,
           is_warmup: 0,
           completed_at: null,
           created_at: stamp,
@@ -448,8 +446,6 @@ export async function deleteExercise(id) {
   await commit([{ table: "exercises", row: { ...current, deleted_at: now() } }]);
 }
 
-export const epley = (weight, reps) => (weight && reps ? weight * (1 + reps / 30) : 0);
-
 export function workingSets(workoutExerciseId) {
   return setsOf(workoutExerciseId).filter((set) => !set.is_warmup && set.completed_at && set.reps > 0);
 }
@@ -472,8 +468,7 @@ export function summarizeSets(sets) {
     const weight = set.weight_kg || 0;
     const reps = set.reps || 0;
     volume += weight * reps;
-    const score = epley(weight, reps);
-    if (!best || score > best.score) best = { score, set };
+    if (!best || weight > best.weight || (weight === best.weight && reps > best.reps)) best = { weight, reps, set };
   }
   return { volume, best: best ? best.set : null, count: sets.length };
 }
@@ -492,8 +487,7 @@ export function exerciseSessions(exerciseId) {
       link,
       sets,
       volume: summary.volume,
-      best: summary.best,
-      e1rm: summary.best ? epley(summary.best.weight_kg, summary.best.reps) : 0
+      best: summary.best
     });
   }
   return sessions.sort((a, b) => (a.workout.performed_on < b.workout.performed_on ? -1 : 1));
@@ -507,16 +501,12 @@ export function lastPerformance(exerciseId, excludeWorkoutId) {
 export function personalRecords(exerciseId) {
   const sessions = exerciseSessions(exerciseId);
   let heaviest = null;
-  let bestE1rm = 0;
-  let bestVolume = 0;
   for (const session of sessions) {
     for (const set of session.sets) {
       if (!heaviest || (set.weight_kg || 0) > (heaviest.weight_kg || 0)) heaviest = set;
-      bestE1rm = Math.max(bestE1rm, epley(set.weight_kg, set.reps));
     }
-    bestVolume = Math.max(bestVolume, session.volume);
   }
-  return { heaviest, bestE1rm, bestVolume, sessions: sessions.length };
+  return { heaviest, sessions: sessions.length };
 }
 
 export function startOfWeek(date) {
