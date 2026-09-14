@@ -1,6 +1,6 @@
 import { el, formatDate, formatVolume, plural, openSheet } from "../dom.js";
-import { SPLIT_DAYS, workoutsSorted, createWorkout, todayISO } from "../store.js";
-import { t, locale, splitDayName } from "../i18n.js";
+import { SESSION_PRESETS, workoutsSorted, createWorkout, todayISO } from "../store.js";
+import { t, locale, presetName } from "../i18n.js";
 import { workoutTotals } from "./workout.js";
 import { navigate } from "../router.js";
 
@@ -28,11 +28,11 @@ function openCreator() {
     el(
       "div",
       { class: "chips" },
-      SPLIT_DAYS.map((day) =>
+      SESSION_PRESETS.map((day) =>
         el("button", {
           class: "chip",
           type: "button",
-          text: splitDayName(day),
+          text: presetName(day),
           onclick: (event) => {
             title = day;
             for (const chip of event.target.parentElement.children) chip.setAttribute("aria-pressed", "false");
@@ -83,7 +83,7 @@ export function renderHistory(container) {
     list.append(
       el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
         el("span", { class: "grow" }, [
-          el("div", { text: workout.title ? splitDayName(workout.title) : t("workout") }),
+          el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
           el("div", { class: "tiny", text: formatDate(workout.performed_on, true) })
         ]),
         el("span", { class: "tiny num", style: "text-align:right" }, [

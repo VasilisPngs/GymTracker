@@ -3,7 +3,7 @@ import { scheduleSync, syncEvents } from "./sync.js";
 
 export const MUSCLE_GROUPS = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Calves", "Core"];
 
-export const SPLIT_DAYS = ["Chest", "Back", "Shoulders", "Arms", "Legs"];
+export const SESSION_PRESETS = ["Chest", "Back", "Shoulders", "Arms", "Legs"];
 
 const SEED = [
   ["Barbell Bench Press", "Chest", "Barbell"],

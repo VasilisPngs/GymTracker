@@ -24,12 +24,14 @@ const STRINGS = {
   all: ["All", "Όλες"],
   nameRequired: ["Name is required", "Το όνομα είναι υποχρεωτικό"],
 
-  readyToTrain: ["Ready to train", "Έτοιμος για προπόνηση"],
+  readyToTrain: ["Start a session", "Ξεκίνα προπόνηση"],
   readyBody: [
-    "Pick today's split day and start logging. Everything works offline.",
-    "Διάλεξε τη σημερινή μέρα του split και ξεκίνα καταγραφή. Όλα δουλεύουν χωρίς σύνδεση."
+    "Name it however you train, or start without a name. Nothing here locks you into a programme, and it all works with no signal.",
+    "Ονόμασέ την όπως γυμνάζεσαι εσύ, ή ξεκίνα χωρίς όνομα. Κανένα πρόγραμμα δεν σε δεσμεύει, και όλα δουλεύουν χωρίς σήμα."
   ],
-  startEmpty: ["Start empty workout", "Ξεκίνα κενή προπόνηση"],
+  startSession: ["Start", "Έναρξη"],
+  quickNames: ["Quick names", "Γρήγορα ονόματα"],
+  createNamed: ["Create \u00ab{name}\u00bb", "Δημιουργία \u00ab{name}\u00bb"],
   recent: ["Recent", "Πρόσφατα"],
   workout: ["Workout", "Προπόνηση"],
   sessionNamePlaceholder: ["Session name (e.g. Chest)", "Όνομα προπόνησης (π.χ. Στήθος)"],
@@ -147,7 +149,7 @@ const MUSCLE_GROUPS = {
   Core: "Κορμός"
 };
 
-const SPLIT_DAYS = {
+const SESSION_PRESETS = {
   Chest: "Στήθος",
   Back: "Πλάτη",
   Shoulders: "Ώμοι",
@@ -262,6 +264,6 @@ export function tn(count, key) {
 const translateFrom = (map, value) => (current === "el" && map[value] ? map[value] : value);
 
 export const muscleGroupName = (value) => translateFrom(MUSCLE_GROUPS, value);
-export const splitDayName = (value) => translateFrom(SPLIT_DAYS, value);
+export const presetName = (value) => translateFrom(SESSION_PRESETS, value);
 export const equipmentName = (value) => translateFrom(EQUIPMENT, value);
 export const exerciseName = (value) => translateFrom(EXERCISES, value);

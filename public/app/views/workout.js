@@ -1,8 +1,8 @@
 import { el, append, clear, formatDate, formatNumber, formatVolume, plural, openSheet, confirmSheet, toast } from "../dom.js";
-import { t, muscleGroupName, splitDayName, equipmentName, exerciseName } from "../i18n.js";
+import { t, muscleGroupName, presetName, equipmentName, exerciseName } from "../i18n.js";
 import {
   MUSCLE_GROUPS,
-  SPLIT_DAYS,
+  SESSION_PRESETS,
   byId,
   todayISO,
   now,
@@ -250,12 +250,21 @@ function openExercisePicker(workout) {
 
   const paint = () => {
     clear(listNode);
+    const needle = query.trim().toLowerCase();
     const matches = exercisesByRecent().filter((exercise) => {
       const matchesGroup = !group || exercise.muscle_group === group;
-      const matchesQuery = !query || exercise.name.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery = !needle || exercise.name.toLowerCase().includes(needle);
       return matchesGroup && matchesQuery;
     });
-    if (matches.length === 0) {
+    if (needle && !matches.some((exercise) => exercise.name.toLowerCase() === needle)) {
+      listNode.append(
+        el("button", { class: "list-item", type: "button", onclick: () => createFromQuery() }, [
+          el("span", { class: "grow", text: t("createNamed", { name: query.trim() }) }),
+          el("span", { class: "badge", text: "+" })
+        ])
+      );
+    }
+    if (matches.length === 0 && !needle) {
       listNode.append(el("div", { class: "empty", text: t("noExerciseMatch") }));
     }
     for (const exercise of matches.slice(0, 40)) {
@@ -269,6 +278,10 @@ function openExercisePicker(workout) {
   };
 
   let closeSheet = null;
+  const createFromQuery = () => {
+    if (closeSheet) closeSheet();
+    openExerciseCreator(query.trim(), (exercise) => addExerciseToWorkout(workout.id, exercise.id));
+  };
   const pick = async (exerciseId) => {
     await addExerciseToWorkout(workout.id, exerciseId);
     if (closeSheet) closeSheet();
@@ -356,33 +369,45 @@ export function openExerciseCreator(initialName, onCreated) {
 }
 
 function startCard(container) {
+  let draft = "";
+  const start = async (name) => {
+    const workout = await createWorkout(todayISO(), name && name.trim() ? name.trim() : null);
+    navigate(`/workout/${workout.id}`);
+  };
+  const input = el("input", {
+    type: "text",
+    placeholder: t("sessionNamePlaceholder"),
+    oninput: (event) => {
+      draft = event.target.value;
+    },
+    onkeydown: (event) => {
+      if (event.key === "Enter") start(draft);
+    }
+  });
+
   container.append(
     el("div", { class: "card" }, [
       el("h1", { text: t("readyToTrain") }),
       el("p", { class: "muted", text: t("readyBody") }),
+      input,
+      el("div", { class: "tiny", text: t("quickNames") }),
       el(
         "div",
         { class: "chips" },
-        SPLIT_DAYS.map((day) =>
+        SESSION_PRESETS.map((preset) =>
           el("button", {
             class: "chip",
             type: "button",
-            text: splitDayName(day),
-            onclick: async () => {
-              const workout = await createWorkout(todayISO(), day);
-              navigate(`/workout/${workout.id}`);
-            }
+            text: presetName(preset),
+            onclick: () => start(preset)
           })
         )
       ),
       el("button", {
         class: "btn primary block",
         type: "button",
-        text: t("startEmpty"),
-        onclick: async () => {
-          const workout = await createWorkout(todayISO(), null);
-          navigate(`/workout/${workout.id}`);
-        }
+        text: t("startSession"),
+        onclick: () => start(draft)
       })
     ])
   );
@@ -396,7 +421,7 @@ function startCard(container) {
       list.append(
         el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
           el("span", {}, [
-            el("div", { text: workout.title ? splitDayName(workout.title) : t("workout") }),
+            el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
             el("div", { class: "tiny", text: formatDate(workout.performed_on) })
           ]),
           el("span", { class: "tiny num", text: `${plural(totals.sets, "set")} · ${formatVolume(totals.volume)} kg` })
@@ -518,11 +543,11 @@ function openWorkoutMenu(workout) {
     el(
       "div",
       { class: "chips" },
-      SPLIT_DAYS.map((day) =>
+      SESSION_PRESETS.map((day) =>
         el("button", {
           class: "chip",
           type: "button",
-          text: splitDayName(day),
+          text: presetName(day),
           onclick: () => {
             updateWorkout(workout.id, { title: day });
             close();
