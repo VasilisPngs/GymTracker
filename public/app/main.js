@@ -7,7 +7,6 @@ import { renderHistory } from "./views/history.js";
 import { renderExerciseDetail } from "./views/exercises.js";
 import { renderStats } from "./views/stats.js";
 import { renderSettings } from "./views/settings.js";
-import { renderProgram } from "./views/programs.js";
 import { t, applyLanguage, i18nEvents } from "./i18n.js";
 import { applyTheme, themeEvents } from "./theme.js";
 
@@ -20,8 +19,7 @@ const VIEWS = {
   history: renderHistory,
   exercise: renderExerciseDetail,
   stats: renderStats,
-  settings: renderSettings,
-  program: renderProgram
+  settings: renderSettings
 };
 
 const TAB_LABELS = { workout: "tabTrain", history: "tabHistory", stats: "tabStats", settings: "tabSettings" };
@@ -32,8 +30,7 @@ const TAB_FOR_ROUTE = {
   exercises: "exercises",
   exercise: "workout",
   stats: "stats",
-  settings: "settings",
-  program: "workout"
+  settings: "settings"
 };
 
 let lastRouteKey = "";

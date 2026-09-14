@@ -1,12 +1,9 @@
 import { el, append, clear, formatDate, formatNumber, formatVolume, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, presetName, exerciseName, muscleGroupName } from "../i18n.js";
 import {
-  SESSION_PRESETS,
   byId,
   todayISO,
-  todayProgram,
   now,
-  createWorkout,
   updateWorkout,
   deleteWorkout,
   workoutsSorted,
@@ -27,7 +24,7 @@ import {
 } from "../store.js";
 import { startRest, keepAwake } from "../timer.js";
 import { openExercisePicker } from "./picker.js";
-import { programList, openProgramCreator, startProgram } from "./programs.js";
+import { renderPrograms } from "./programs.js";
 import { navigate } from "../router.js";
 
 function todaysWorkout() {
@@ -221,91 +218,24 @@ function openExerciseMenu(workout, link, exercise) {
   ]);
 }
 
-function startCard(container) {
-  const program = todayProgram();
-  let draft = "";
-  const start = async (name) => {
-    const workout = await createWorkout(todayISO(), name && name.trim() ? name.trim() : null);
-    navigate(`/workout/${workout.id}`);
-  };
-  const input = el("input", {
-    type: "text",
-    value: "",
-    placeholder: t("sessionNamePlaceholder"),
-    oninput: (event) => {
-      draft = event.target.value;
-    },
-    onkeydown: (event) => {
-      if (event.key === "Enter") start(draft);
-    }
-  });
-
-  container.append(
-    el("div", { class: "card" }, [
-      el("h1", { text: t("readyToTrain") }),
-      program
-        ? el("button", {
-            class: "btn primary block",
-            type: "button",
-            text: t("startProgram", { name: program.title }),
-            onclick: () => startProgram(program.id)
-          })
-        : null,
-      program ? el("div", { class: "tiny", text: t("orStartFree") }) : null,
-      input,
-      el("div", { class: "tiny", text: t("quickNames") }),
-      el(
-        "div",
-        { class: "chips" },
-        SESSION_PRESETS.map((preset) =>
-          el("button", {
-            class: "chip",
-            type: "button",
-            text: presetName(preset),
-            onclick: () => start(preset)
-          })
-        )
-      ),
-      el("button", {
-        class: program ? "btn block" : "btn primary block",
-        type: "button",
-        text: t("startSession"),
-        onclick: () => start(draft)
-      })
-    ])
-  );
-
-  container.append(el("h2", { text: t("programs") }));
-  const programs = programList();
-  if (programs) container.append(programs);
-  else container.append(el("div", { class: "empty", text: t("noPrograms") }));
-  container.append(
-    el("button", {
-      class: "btn block",
-      type: "button",
-      text: t("newProgram"),
-      onclick: () => openProgramCreator()
-    })
-  );
-
+function recentList(container) {
   const recent = workoutsSorted().slice(0, 5);
-  if (recent.length > 0) {
-    container.append(el("h2", { text: t("recent") }));
-    const list = el("div", { class: "list" });
-    for (const workout of recent) {
-      const totals = workoutTotals(workout);
-      list.append(
-        el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
-          el("span", {}, [
-            el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
-            el("div", { class: "tiny", text: formatDate(workout.performed_on) })
-          ]),
-          el("span", { class: "tiny num", text: `${plural(totals.sets, "set")} · ${formatVolume(totals.volume)} kg` })
-        ])
-      );
-    }
-    container.append(list);
+  if (recent.length === 0) return;
+  container.append(el("h2", { text: t("recent") }));
+  const list = el("div", { class: "list" });
+  for (const workout of recent) {
+    const totals = workoutTotals(workout);
+    list.append(
+      el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
+        el("span", {}, [
+          el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
+          el("div", { class: "tiny", text: formatDate(workout.performed_on) })
+        ]),
+        el("span", { class: "tiny num", text: `${plural(totals.sets, "set")} · ${formatVolume(totals.volume)} kg` })
+      ])
+    );
   }
+  container.append(list);
 }
 
 export function workoutTotals(workout) {
@@ -326,7 +256,8 @@ export function renderWorkout(container, params) {
   const workout = params.id ? byId("workouts", params.id) : todaysWorkout();
   if (!workout) {
     keepAwake(false);
-    startCard(container);
+    renderPrograms(container, () => renderWorkout(clear(container) || container, params));
+    recentList(container);
     return;
   }
 
@@ -416,21 +347,6 @@ export function renderWorkout(container, params) {
 function openWorkoutMenu(workout) {
   openSheet((close) => [
     el("h2", { text: t("workoutOptions") }),
-    el(
-      "div",
-      { class: "chips" },
-      SESSION_PRESETS.map((day) =>
-        el("button", {
-          class: "chip",
-          type: "button",
-          text: presetName(day),
-          onclick: () => {
-            updateWorkout(workout.id, { title: day });
-            close();
-          }
-        })
-      )
-    ),
     workout.finished_at
       ? el("button", {
           class: "btn block",

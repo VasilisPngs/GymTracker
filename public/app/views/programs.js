@@ -2,6 +2,7 @@ import { el, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, muscleGroupName, exerciseName, weekdayNames } from "../i18n.js";
 import {
   byId,
+  storeEvents,
   programsSorted,
   programExercises,
   createProgram,
@@ -21,11 +22,6 @@ export function programSummary(program) {
   const items = programExercises(program.id);
   const sets = items.reduce((total, item) => total + (item.target_sets || 0), 0);
   return { exercises: items.length, sets };
-}
-
-export function programLabel(program) {
-  const day = program.weekday === null || program.weekday === undefined ? null : weekdayNames()[program.weekday];
-  return day ? `${program.title} · ${day}` : program.title;
 }
 
 export async function startProgram(programId) {
@@ -54,8 +50,9 @@ export function openProgramCreator() {
       onclick: async () => {
         if (!name.trim()) return toast(t("nameRequired"));
         const program = await createProgram(name.trim());
+        rememberActive(program.id);
+        storeEvents.dispatchEvent(new CustomEvent("changed"));
         close();
-        navigate(`/program/${program.id}`);
       }
     })
   ]);
@@ -126,49 +123,124 @@ function openProgramExerciseMenu(item, exercise) {
   ]);
 }
 
-export function renderProgram(container, params) {
-  const program = byId("programs", params.id);
-  if (!program) {
-    container.append(el("div", { class: "empty", text: t("programMissing") }));
+const ACTIVE_KEY = "gymtracker.program";
+
+function storedActive() {
+  try {
+    return localStorage.getItem(ACTIVE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function rememberActive(id) {
+  try {
+    localStorage.setItem(ACTIVE_KEY, id);
+  } catch {}
+}
+
+export function activeProgram() {
+  const all = programsSorted();
+  if (all.length === 0) return null;
+  const stored = storedActive();
+  return all.find((program) => program.id === stored) || all[0];
+}
+
+function programTabs(active, onSelect) {
+  const strip = el("div", { class: "prog-tabs", role: "tablist" });
+  for (const program of programsSorted()) {
+    strip.append(
+      el("button", {
+        class: program.id === active.id ? "prog-tab current" : "prog-tab",
+        type: "button",
+        role: "tab",
+        "aria-selected": program.id === active.id ? "true" : "false",
+        text: program.title,
+        onclick: () => onSelect(program.id)
+      })
+    );
+  }
+  strip.append(
+    el("button", {
+      class: "prog-tab add",
+      type: "button",
+      text: "+",
+      "aria-label": t("newProgram"),
+      onclick: () => openProgramCreator()
+    })
+  );
+  return strip;
+}
+
+export function renderPrograms(container, repaint) {
+  const active = activeProgram();
+
+  if (!active) {
+    container.append(
+      el("div", { class: "card" }, [
+        el("h1", { text: t("programs") }),
+        el("div", { class: "tiny", text: t("noPrograms") }),
+        el("button", {
+          class: "btn primary block",
+          type: "button",
+          text: t("newProgram"),
+          onclick: () => openProgramCreator()
+        })
+      ])
+    );
     return;
   }
 
-  const items = programExercises(program.id);
-  const totals = programSummary(program);
+  container.append(
+    programTabs(active, (id) => {
+      rememberActive(id);
+      repaint();
+    })
+  );
+
+  const items = programExercises(active.id);
+  const totals = programSummary(active);
   const days = weekdayNames();
 
   container.append(
     el("div", { class: "card tight" }, [
       el("div", { class: "row between" }, [
-        el("button", { class: "btn small ghost", type: "button", text: t("back"), onclick: () => navigate("/") }),
+        el("input", {
+          type: "text",
+          class: "grow",
+          value: active.title,
+          placeholder: t("programNamePlaceholder"),
+          onchange: (event) => updateProgram(active.id, { title: event.target.value.trim() || active.title })
+        }),
         el("button", {
           class: "btn small ghost",
           type: "button",
           text: "···",
           "aria-label": t("programOptions"),
-          onclick: () => openProgramMenu(program)
+          onclick: () => openProgramMenu(active)
         })
       ]),
-      el("input", {
-        type: "text",
-        value: program.title,
-        placeholder: t("programNamePlaceholder"),
-        onchange: (event) => updateProgram(program.id, { title: event.target.value.trim() || program.title })
-      }),
       el(
         "select",
         {
           "aria-label": t("programDay"),
-          onchange: (event) => setProgramWeekday(program.id, event.target.value === "" ? null : Number(event.target.value))
+          onchange: (event) => setProgramWeekday(active.id, event.target.value === "" ? null : Number(event.target.value))
         },
         [
-          el("option", { value: "", text: t("anyDay"), selected: program.weekday === null || program.weekday === undefined }),
-          ...days.map((name, index) => el("option", { value: String(index), text: name, selected: program.weekday === index }))
+          el("option", { value: "", text: t("anyDay"), selected: active.weekday === null || active.weekday === undefined }),
+          ...days.map((name, index) => el("option", { value: String(index), text: name, selected: active.weekday === index }))
         ]
       ),
       el("div", {
         class: "tiny",
         text: [plural(totals.exercises, "exercise"), plural(totals.sets, "set")].join(" · ")
+      }),
+      el("button", {
+        class: "btn primary block",
+        type: "button",
+        text: t("startNow"),
+        disabled: items.length === 0,
+        onclick: () => startProgram(active.id)
       })
     ])
   );
@@ -185,17 +257,7 @@ export function renderProgram(container, params) {
       class: "btn block",
       type: "button",
       text: t("addExercise"),
-      onclick: () => openExercisePicker((exerciseId) => addProgramExercise(program.id, exerciseId))
-    })
-  );
-
-  container.append(
-    el("button", {
-      class: "btn primary block",
-      type: "button",
-      text: t("startNow"),
-      disabled: items.length === 0,
-      onclick: () => startProgram(program.id)
+      onclick: () => openExercisePicker((exerciseId) => addProgramExercise(active.id, exerciseId))
     })
   );
 }
@@ -210,36 +272,8 @@ function openProgramMenu(program) {
       onclick: async () => {
         close();
         const confirmed = await confirmSheet(t("deleteProgram"), t("deleteProgramBody", { name: program.title }), t("delete"));
-        if (confirmed) {
-          await deleteProgram(program.id);
-          navigate("/");
-        }
+        if (confirmed) await deleteProgram(program.id);
       }
     })
   ]);
-}
-
-export function programList() {
-  const programs = programsSorted();
-  if (programs.length === 0) return null;
-  const list = el("div", { class: "list" });
-  for (const program of programs) {
-    const totals = programSummary(program);
-    list.append(
-      el("div", { class: "list-item" }, [
-        el("a", { class: "grow", href: `/program/${program.id}`, "data-link": "", style: "text-decoration:none;color:inherit" }, [
-          el("div", { text: programLabel(program) }),
-          el("div", { class: "tiny", text: [plural(totals.exercises, "exercise"), plural(totals.sets, "set")].join(" · ") })
-        ]),
-        el("button", {
-          class: "btn small primary",
-          type: "button",
-          text: t("startSession"),
-          disabled: totals.exercises === 0,
-          onclick: () => startProgram(program.id)
-        })
-      ])
-    );
-  }
-  return list;
 }

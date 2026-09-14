@@ -842,3 +842,50 @@ textarea {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.prog-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 2px 0;
+  margin-bottom: -1px;
+}
+
+.prog-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.prog-tab {
+  flex: 0 0 auto;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-bottom-color: transparent;
+  border-radius: var(--radius-m) var(--radius-m) 0 0;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 560;
+  cursor: pointer;
+  transition: background var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+
+.prog-tab.current {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.prog-tab.add {
+  padding: 10px 14px;
+  font-size: 16px;
+  background: transparent;
+  border-color: transparent;
+}
+
+.prog-tabs + .card {
+  border-top-left-radius: 0;
+}

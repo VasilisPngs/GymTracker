@@ -4,8 +4,7 @@ const ROUTES = [
   { pattern: /^\/history$/, name: "history", params: () => ({}) },
   { pattern: /^\/exercise\/([\w-]+)$/, name: "exercise", params: (match) => ({ id: match[1] }) },
   { pattern: /^\/stats$/, name: "stats", params: () => ({}) },
-  { pattern: /^\/settings$/, name: "settings", params: () => ({}) },
-  { pattern: /^\/program\/([\w-]+)$/, name: "program", params: (match) => ({ id: match[1] }) }
+  { pattern: /^\/settings$/, name: "settings", params: () => ({}) }
 ];
 
 let renderer = null;
