@@ -133,7 +133,7 @@ const STRINGS = {
   themeSystem: ["System", "Σύστημα"],
   themeLight: ["Light", "Φωτεινό"],
   themeDark: ["Dark", "Σκοτεινό"],
-  themeAmoled: ["AMOLED", "AMOLED"],
+  themeBlack: ["Black", "Μαύρο"],
   exportBackup: ["Export backup (JSON)", "Εξαγωγή αντιγράφου (JSON)"],
   backupExported: ["Backup exported", "Το αντίγραφο εξήχθη"],
 

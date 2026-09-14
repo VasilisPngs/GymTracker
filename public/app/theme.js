@@ -1,6 +1,6 @@
 const STORAGE_KEY = "gymtracker.theme";
-const MODES = ["system", "light", "dark", "amoled"];
-const COLORS = { light: "#f4f5f8", dark: "#0b0c0f", amoled: "#000000" };
+const MODES = ["system", "light", "dark", "black"];
+const COLORS = { light: "#f4f5f8", dark: "#0b0c0f", black: "#000000" };
 
 export const themeEvents = new EventTarget();
 
