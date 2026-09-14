@@ -889,3 +889,11 @@ textarea {
 .prog-tabs + .card {
   border-top-left-radius: 0;
 }
+
+input.setup-note {
+  display: block;
+  width: calc(100% - 28px);
+  margin: 0 14px 10px;
+  background: var(--surface-2);
+  font-size: 13px;
+}

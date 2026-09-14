@@ -79,6 +79,13 @@ function programRow(item) {
         onclick: () => openProgramExerciseMenu(item, exercise)
       })
     ]),
+    el("input", {
+      type: "text",
+      class: "setup-note",
+      value: item.notes || "",
+      placeholder: t("setupPlaceholder"),
+      onchange: (event) => updateProgramExercise(item.id, { notes: event.target.value.trim() || null })
+    }),
     el("div", { class: "program-fields" }, [
       field(t("colSets"), stepper(item.target_sets, 1, 0, (value) => updateProgramExercise(item.id, { target_sets: value }))),
       field(t("colTargetReps"), stepper(item.target_reps, 1, 0, (value) => updateProgramExercise(item.id, { target_reps: value }))),

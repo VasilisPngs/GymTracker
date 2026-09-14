@@ -243,7 +243,16 @@ export async function addExerciseToWorkout(workoutId, exerciseId) {
 export async function updateWorkoutExercise(id, patch) {
   const current = byId("workout_exercises", id);
   if (!current) return;
-  await commit([{ table: "workout_exercises", row: { ...current, ...patch } }]);
+  const row = { ...current, ...patch };
+  const entries = [{ table: "workout_exercises", row }];
+  const workout = byId("workouts", row.workout_id);
+  if (workout && workout.program_id) {
+    const planned = plannedFor(row, workout.program_id);
+    if (planned && (planned.notes !== row.notes || planned.rest_seconds !== row.rest_seconds)) {
+      entries.push({ table: "program_exercises", row: { ...planned, notes: row.notes, rest_seconds: row.rest_seconds } });
+    }
+  }
+  await commit(entries);
 }
 
 export async function removeWorkoutExercise(id) {

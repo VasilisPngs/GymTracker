@@ -124,6 +124,16 @@ function exerciseBlock(workout, link) {
     ])
   ]);
 
+  block.append(
+    el("input", {
+      type: "text",
+      class: "setup-note",
+      value: link.notes || "",
+      placeholder: t("setupPlaceholder"),
+      onchange: (event) => updateWorkoutExercise(link.id, { notes: event.target.value.trim() || null })
+    })
+  );
+
   if (previous) {
     const delta = previous.volume > 0 ? ((summary.volume - previous.volume) / previous.volume) * 100 : 0;
     const trend = summary.volume > 0 && previous.volume > 0 ? ` · ${delta >= 0 ? "▲" : "▼"} ${formatNumber(Math.abs(delta), 0)}%` : "";
