@@ -32,7 +32,7 @@ export async function startProgram(programId) {
 export function openProgramCreator() {
   let name = "";
   openSheet((close) => [
-    el("h2", { text: t("newProgram") }),
+    el("h2", { text: t("newProgram").replace("+ ", "") }),
     el("input", {
       type: "text",
       placeholder: t("programNamePlaceholder"),
