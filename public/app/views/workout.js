@@ -29,7 +29,7 @@ import { navigate } from "../router.js";
 
 function todaysWorkout() {
   const today = todayISO();
-  return workoutsSorted().find((workout) => workout.performed_on === today) || null;
+  return workoutsSorted().find((workout) => workout.performed_on === today && !workout.finished_at) || null;
 }
 
 function setRow(set, index, rest) {
@@ -342,10 +342,11 @@ export function renderWorkout(container, params) {
         class: "btn block",
         type: "button",
         text: t("finishWorkout"),
-        onclick: () => {
-          updateWorkout(workout.id, { finished_at: now() });
+        onclick: async () => {
+          await updateWorkout(workout.id, { finished_at: now() });
           keepAwake(false);
           toast(t("workoutFinished"));
+          navigate("/");
         }
       })
     );
