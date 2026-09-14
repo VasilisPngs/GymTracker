@@ -1,7 +1,23 @@
 import { TABLES, readAll, writeRows, snapshot } from "./db.js";
 import { scheduleSync, syncEvents } from "./sync.js";
 
-export const MUSCLE_GROUPS = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Legs", "Calves", "Core"];
+export const MUSCLE_GROUPS = [
+  "Chest",
+  "Back",
+  "LowerBack",
+  "Shoulders",
+  "Traps",
+  "Biceps",
+  "Triceps",
+  "Forearms",
+  "Quads",
+  "Hamstrings",
+  "Glutes",
+  "Adductors",
+  "Abductors",
+  "Calves",
+  "Abs"
+];
 
 export const storeEvents = new EventTarget();
 
@@ -63,21 +79,17 @@ export function exercisesSorted() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export const weekdayIndex = (date = new Date()) => (date.getDay() + 6) % 7;
-
 export function programsSorted() {
-  return list("programs").sort((a, b) => {
-    const first = a.weekday === null || a.weekday === undefined ? 7 : a.weekday;
-    const second = b.weekday === null || b.weekday === undefined ? 7 : b.weekday;
-    return first - second || a.position - b.position || a.created_at - b.created_at;
-  });
+  return list("programs").sort((a, b) => a.position - b.position || a.created_at - b.created_at);
 }
 
-export function programForWeekday(weekday) {
-  return programsSorted().find((program) => program.weekday === weekday) || null;
+export function lastTrained(programId) {
+  const dates = list("workouts")
+    .filter((workout) => workout.program_id === programId)
+    .map((workout) => workout.performed_on)
+    .sort();
+  return dates.length > 0 ? dates[dates.length - 1] : null;
 }
-
-export const todayProgram = () => programForWeekday(weekdayIndex());
 
 export function exercisesByRecent() {
   const used = new Map();
@@ -282,11 +294,10 @@ export function programExercises(programId) {
     .sort((a, b) => a.position - b.position);
 }
 
-export async function createProgram(title, weekday = null) {
+export async function createProgram(title) {
   const row = {
     id: uid(),
     title,
-    weekday,
     notes: null,
     position: programsSorted().length,
     created_at: now(),
@@ -294,16 +305,6 @@ export async function createProgram(title, weekday = null) {
   };
   await commit([{ table: "programs", row }]);
   return row;
-}
-
-export async function setProgramWeekday(id, weekday) {
-  const taken = weekday === null ? null : programForWeekday(weekday);
-  const entries = [];
-  if (taken && taken.id !== id) entries.push({ table: "programs", row: { ...taken, weekday: null } });
-  const current = byId("programs", id);
-  if (!current) return;
-  entries.push({ table: "programs", row: { ...current, weekday } });
-  await commit(entries);
 }
 
 export async function updateProgram(id, patch) {

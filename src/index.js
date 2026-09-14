@@ -51,7 +51,6 @@ const SCHEMA = {
   programs: {
     id: { cast: text, required: true },
     title: { cast: text, required: true },
-    weekday: { cast: int },
     notes: { cast: text },
     position: { cast: int, required: true },
     created_at: { cast: int, required: true },

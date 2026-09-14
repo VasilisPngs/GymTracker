@@ -32,8 +32,6 @@ const STRINGS = {
   noPrograms: ["No programs yet.", "Κανένα πρόγραμμα ακόμα."],
   newProgram: ["+ New program", "+ Νέο πρόγραμμα"],
   programNamePlaceholder: ["Program name (e.g. Push A)", "Όνομα προγράμματος (π.χ. Push A)"],
-  programDay: ["Day", "Μέρα"],
-  anyDay: ["Any day", "Οποιαδήποτε μέρα"],
   programEmpty: ["No exercises in this program yet.", "Καμία άσκηση σε αυτό το πρόγραμμα ακόμα."],
   programOptions: ["Program options", "Επιλογές προγράμματος"],
   deleteProgram: ["Delete program", "Διαγραφή προγράμματος"],
@@ -46,6 +44,10 @@ const STRINGS = {
   colTargetReps: ["Reps", "Επαναλήψεις"],
   colTargetWeight: ["Kg", "Κιλά"],
   colRest: ["Rest (s)", "Διάλειμμα (δλ)"],
+  neverTrained: ["not trained yet", "καμία ακόμα"],
+  trainedToday: ["today", "σήμερα"],
+  trainedYesterday: ["yesterday", "χθες"],
+  trainedDaysAgo: ["{days} days ago", "πριν {days} μέρες"],
   createNamed: ["Create \u00ab{name}\u00bb", "Δημιουργία \u00ab{name}\u00bb"],
   recent: ["Recent", "Πρόσφατα"],
   workout: ["Workout", "Προπόνηση"],
@@ -142,12 +144,19 @@ const PLURALS = {
 const MUSCLE_GROUPS = {
   Chest: "Στήθος",
   Back: "Πλάτη",
+  LowerBack: "Ραχιαίοι",
   Shoulders: "Ώμοι",
+  Traps: "Τραπεζοειδείς",
   Biceps: "Δικέφαλοι",
   Triceps: "Τρικέφαλοι",
-  Legs: "Πόδια",
+  Forearms: "Πήχεις",
+  Quads: "Τετρακέφαλα",
+  Hamstrings: "Δικέφαλα μηριαία",
+  Glutes: "Γλουτοί",
+  Adductors: "Προσαγωγοί",
+  Abductors: "Απαγωγοί",
   Calves: "Γάμπες",
-  Core: "Κορμός"
+  Abs: "Κοιλιακοί"
 };
 
 export const i18nEvents = new EventTarget();
@@ -199,9 +208,16 @@ export function tn(count, key) {
 
 const translateFrom = (map, value) => (current === "el" && map[value] ? map[value] : value);
 
-export function weekdayNames() {
-  const format = new Intl.DateTimeFormat(locale(), { weekday: "long" });
-  return Array.from({ length: 7 }, (item, index) => format.format(new Date(2024, 0, 1 + index)));
+export function relativeDay(iso) {
+  if (!iso) return t("neverTrained");
+  const day = 86400000;
+  const from = new Date(`${iso}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.round((today - from) / day);
+  if (days <= 0) return t("trainedToday");
+  if (days === 1) return t("trainedYesterday");
+  return t("trainedDaysAgo", { days });
 }
 
 export const muscleGroupName = (value) => translateFrom(MUSCLE_GROUPS, value);

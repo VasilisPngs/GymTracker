@@ -1,16 +1,13 @@
 import { el, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
-import { t, muscleGroupName, weekdayNames } from "../i18n.js";
+import { t, muscleGroupName, relativeDay } from "../i18n.js";
 import {
   byId,
   storeEvents,
-  todayISO,
-  weekdayIndex,
-  programForWeekday,
   programsSorted,
+  lastTrained,
   programExercises,
   createProgram,
   updateProgram,
-  setProgramWeekday,
   deleteProgram,
   addProgramExercise,
   updateProgramExercise,
@@ -136,7 +133,7 @@ const ACTIVE_KEY = "gymtracker.program";
 
 function storedActive() {
   try {
-    return JSON.parse(localStorage.getItem(ACTIVE_KEY) || "null");
+    return localStorage.getItem(ACTIVE_KEY);
   } catch {
     return null;
   }
@@ -144,7 +141,7 @@ function storedActive() {
 
 function rememberActive(id) {
   try {
-    localStorage.setItem(ACTIVE_KEY, JSON.stringify({ id, day: todayISO() }));
+    localStorage.setItem(ACTIVE_KEY, id);
   } catch {}
 }
 
@@ -152,25 +149,27 @@ export function activeProgram() {
   const all = programsSorted();
   if (all.length === 0) return null;
   const stored = storedActive();
-  if (stored && stored.day === todayISO()) {
-    const picked = all.find((program) => program.id === stored.id);
-    if (picked) return picked;
-  }
-  return programForWeekday(weekdayIndex()) || all[0];
+  return all.find((program) => program.id === stored) || all[0];
 }
 
 function programTabs(active, onSelect) {
   const strip = el("div", { class: "prog-tabs", role: "tablist" });
   for (const program of programsSorted()) {
     strip.append(
-      el("button", {
-        class: program.id === active.id ? "prog-tab current" : "prog-tab",
-        type: "button",
-        role: "tab",
-        "aria-selected": program.id === active.id ? "true" : "false",
-        text: program.title,
-        onclick: () => onSelect(program.id)
-      })
+      el(
+        "button",
+        {
+          class: program.id === active.id ? "prog-tab current" : "prog-tab",
+          type: "button",
+          role: "tab",
+          "aria-selected": program.id === active.id ? "true" : "false",
+          onclick: () => onSelect(program.id)
+        },
+        [
+          el("span", { class: "prog-tab-name", text: program.title }),
+          el("span", { class: "prog-tab-when", text: relativeDay(lastTrained(program.id)) })
+        ]
+      )
     );
   }
   strip.append(
@@ -213,7 +212,6 @@ export function renderPrograms(container, repaint) {
 
   const items = programExercises(active.id);
   const totals = programSummary(active);
-  const days = weekdayNames();
 
   container.append(
     el("div", { class: "card tight" }, [
@@ -233,17 +231,6 @@ export function renderPrograms(container, repaint) {
           onclick: () => openProgramMenu(active)
         })
       ]),
-      el(
-        "select",
-        {
-          "aria-label": t("programDay"),
-          onchange: (event) => setProgramWeekday(active.id, event.target.value === "" ? null : Number(event.target.value))
-        },
-        [
-          el("option", { value: "", text: t("anyDay"), selected: active.weekday === null || active.weekday === undefined }),
-          ...days.map((name, index) => el("option", { value: String(index), text: name, selected: active.weekday === index }))
-        ]
-      ),
       el("div", {
         class: "tiny",
         text: [plural(totals.exercises, "exercise"), plural(totals.sets, "set")].join(" · ")
