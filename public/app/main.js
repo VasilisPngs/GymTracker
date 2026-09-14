@@ -24,7 +24,6 @@ const TAB_LABELS = { workout: "tabTrain", stats: "tabStats", settings: "tabSetti
 
 const TAB_FOR_ROUTE = {
   workout: "workout",
-  exercises: "exercises",
   exercise: "workout",
   stats: "stats",
   settings: "settings"

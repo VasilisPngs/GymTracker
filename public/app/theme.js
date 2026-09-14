@@ -18,7 +18,7 @@ let current = detect();
 
 export const themeMode = () => current;
 export const themeModes = () => [...MODES];
-export const resolvedTheme = () => (current === "system" ? (query.matches ? "light" : "dark") : current);
+const resolvedTheme = () => (current === "system" ? (query.matches ? "light" : "dark") : current);
 
 export function applyTheme() {
   const root = document.documentElement;

@@ -89,7 +89,7 @@ export function openExercisePicker(onPick) {
   ]);
 }
 
-export function openExerciseCreator(initialName, onCreated) {
+function openExerciseCreator(initialName, onCreated) {
   let name = initialName || "";
   let group = MUSCLE_GROUPS[0];
   openSheet((close) => [

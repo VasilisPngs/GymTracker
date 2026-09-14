@@ -50,7 +50,6 @@ const STRINGS = {
   trainedYesterday: ["Yesterday", "Χθες"],
   trainedDaysAgo: ["{days} days ago", "Πριν {days} μέρες"],
   createNamed: ["Create \u00ab{name}\u00bb", "Δημιουργία \u00ab{name}\u00bb"],
-  recent: ["Recent", "Πρόσφατα"],
   workout: ["Workout", "Προπόνηση"],
   sessionNamePlaceholder: ["Session name (e.g. Chest)", "Όνομα προπόνησης (π.χ. Στήθος)"],
   sessionNotes: ["Session notes", "Σημειώσεις προπόνησης"],
@@ -99,8 +98,8 @@ const STRINGS = {
   unarchive: ["Unarchive", "Επαναφορά από αρχείο"],
   deleteExercise: ["Delete exercise", "Διαγραφή άσκησης"],
   deleteExerciseBody: [
-    "Logged sets stay in past workouts but the exercise disappears from the catalog.",
-    "Τα καταγεγραμμένα σετ μένουν στις παλιές προπονήσεις, αλλά η άσκηση φεύγει από τον κατάλογο."
+    "Every set logged for it is deleted too. Archive keeps the history.",
+    "Διαγράφονται και όλα τα σετ που έχεις καταγράψει. Η αρχειοθέτηση κρατά το ιστορικό."
   ],
 
   statsTitle: ["Stats", "Στατιστικά"],

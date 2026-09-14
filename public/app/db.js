@@ -65,14 +65,6 @@ export async function readAll(table) {
   return transact([table], "readonly", (tx) => promisify(tx.objectStore(table).getAll()));
 }
 
-export async function readBy(table, index, value) {
-  return transact([table], "readonly", (tx) => promisify(tx.objectStore(table).index(index).getAll(value)));
-}
-
-export async function readOne(table, id) {
-  return transact([table], "readonly", (tx) => promisify(tx.objectStore(table).get(id)));
-}
-
 export async function writeRows(entries) {
   if (entries.length === 0) return;
   const stamp = Date.now();

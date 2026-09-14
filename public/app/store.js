@@ -30,7 +30,9 @@ const cache = {
   program_exercises: new Map()
 };
 
-export const uid = () => crypto.randomUUID();
+export const MAX_SETS = 12;
+
+const uid = () => crypto.randomUUID();
 export const now = () => Date.now();
 
 export function todayISO(date = new Date()) {
@@ -73,7 +75,7 @@ export function byId(table, id) {
   return row && !row.deleted_at ? row : null;
 }
 
-export function exercisesSorted() {
+function exercisesSorted() {
   return list("exercises")
     .filter((row) => !row.is_archived)
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -123,22 +125,6 @@ export function setsOf(workoutExerciseId) {
   return list("sets")
     .filter((row) => row.workout_exercise_id === workoutExerciseId)
     .sort((a, b) => a.position - b.position);
-}
-
-export async function createWorkout(performed_on, title) {
-  const row = {
-    id: uid(),
-    performed_on,
-    program_id: null,
-    title: title || null,
-    notes: null,
-    started_at: now(),
-    finished_at: null,
-    created_at: now(),
-    deleted_at: null
-  };
-  await commit([{ table: "workouts", row }]);
-  return row;
 }
 
 export async function updateWorkout(id, patch) {
@@ -290,7 +276,7 @@ export async function deleteSet(id) {
 
 export function programExercises(programId) {
   return list("program_exercises")
-    .filter((row) => row.program_id === programId)
+    .filter((row) => row.program_id === programId && byId("exercises", row.exercise_id))
     .sort((a, b) => a.position - b.position);
 }
 
@@ -397,7 +383,7 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
       deleted_at: null
     };
     entries.push({ table: "workout_exercises", row: link });
-    const count = Math.min(Math.max(planned.target_sets || 0, 0), 12);
+    const count = Math.min(Math.max(planned.target_sets || 0, 0), MAX_SETS);
     for (let index = 0; index < count; index += 1) {
       entries.push({
         table: "sets",
@@ -444,7 +430,17 @@ export async function updateExercise(id, patch) {
 export async function deleteExercise(id) {
   const current = byId("exercises", id);
   if (!current) return;
-  await commit([{ table: "exercises", row: { ...current, deleted_at: now() } }]);
+  const stamp = now();
+  const entries = [{ table: "exercises", row: { ...current, deleted_at: stamp } }];
+  for (const row of list("program_exercises")) {
+    if (row.exercise_id === id) entries.push({ table: "program_exercises", row: { ...row, deleted_at: stamp } });
+  }
+  for (const link of list("workout_exercises")) {
+    if (link.exercise_id !== id) continue;
+    entries.push({ table: "workout_exercises", row: { ...link, deleted_at: stamp } });
+    for (const set of setsOf(link.id)) entries.push({ table: "sets", row: { ...set, deleted_at: stamp } });
+  }
+  await commit(entries);
 }
 
 export function workingSets(workoutExerciseId) {
@@ -510,7 +506,7 @@ export function personalRecords(exerciseId) {
   return { heaviest, sessions: sessions.length };
 }
 
-export function startOfWeek(date) {
+function startOfWeek(date) {
   const copy = new Date(date);
   const day = (copy.getDay() + 6) % 7;
   copy.setHours(0, 0, 0, 0);

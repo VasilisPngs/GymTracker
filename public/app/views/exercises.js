@@ -1,4 +1,4 @@
-import { el, formatDate, formatNumber, plural, confirmSheet, openSheet, toast } from "../dom.js";
+import { el, formatDate, formatNumber, plural, confirmSheet, openSheet } from "../dom.js";
 import {
   MUSCLE_GROUPS,
   byId,
@@ -107,7 +107,7 @@ function openMenu(exercise) {
         const confirmed = await confirmSheet(t("deleteExercise"), t("deleteExerciseBody"), t("delete"));
         if (confirmed) {
           await deleteExercise(exercise.id);
-          navigate("/exercises");
+          navigate("/");
         }
       }
     })

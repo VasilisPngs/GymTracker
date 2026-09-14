@@ -6,6 +6,7 @@ import {
   programsSorted,
   lastTrained,
   programExercises,
+  MAX_SETS,
   createProgram,
   updateProgram,
   deleteProgram,
@@ -18,18 +19,18 @@ import {
 import { openExercisePicker } from "./picker.js";
 import { navigate } from "../router.js";
 
-export function programSummary(program) {
+function programSummary(program) {
   const items = programExercises(program.id);
   const sets = items.reduce((total, item) => total + (item.target_sets || 0), 0);
   return { exercises: items.length, sets };
 }
 
-export async function startProgram(programId) {
+async function startProgram(programId) {
   const workout = await startWorkoutFromProgram(programId);
   if (workout) navigate(`/workout/${workout.id}`);
 }
 
-export function openProgramCreator() {
+function openProgramCreator() {
   let name = "";
   openSheet((close) => [
     el("h2", { text: t("newProgram").replace("+ ", "") }),
@@ -87,7 +88,7 @@ function programRow(item) {
       onchange: (event) => updateProgramExercise(item.id, { notes: event.target.value.trim() || null })
     }),
     el("div", { class: "program-fields" }, [
-      field(t("colSets"), stepper(item.target_sets, 1, 0, (value) => updateProgramExercise(item.id, { target_sets: value }))),
+      field(t("colSets"), stepper(item.target_sets, 1, 0, (value) => updateProgramExercise(item.id, { target_sets: value === null ? null : Math.min(value, MAX_SETS) }))),
       field(t("colTargetReps"), stepper(item.target_reps, 1, 0, (value) => updateProgramExercise(item.id, { target_reps: value }))),
       field(t("colTargetWeight"), stepper(item.target_weight_kg, 2.5, 0, (value) => updateProgramExercise(item.id, { target_weight_kg: value }), { decimal: true })),
       field(t("colRest"), stepper(item.rest_seconds, 15, 0, (value) => updateProgramExercise(item.id, { rest_seconds: value })))
@@ -146,7 +147,7 @@ function rememberActive(id) {
   } catch {}
 }
 
-export function activeProgram() {
+function activeProgram() {
   const all = programsSorted();
   if (all.length === 0) return null;
   const stored = storedActive();

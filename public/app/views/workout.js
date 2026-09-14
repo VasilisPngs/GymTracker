@@ -2,7 +2,6 @@ import { el, append, clear, formatDate, formatNumber, plural, stepper, openSheet
 import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
-  todayISO,
   now,
   updateWorkout,
   deleteWorkout,
@@ -26,9 +25,11 @@ import { openExercisePicker } from "./picker.js";
 import { renderPrograms } from "./programs.js";
 import { navigate } from "../router.js";
 
-function todaysWorkout() {
-  const today = todayISO();
-  return workoutsSorted().find((workout) => workout.performed_on === today && !workout.finished_at) || null;
+const RESUME_WINDOW_MS = 12 * 60 * 60 * 1000;
+
+function openWorkout() {
+  const cutoff = now() - RESUME_WINDOW_MS;
+  return workoutsSorted().find((workout) => !workout.finished_at && (workout.started_at || 0) >= cutoff) || null;
 }
 
 function setRow(set, index, rest) {
@@ -215,44 +216,17 @@ function openExerciseMenu(workout, link, exercise) {
   ]);
 }
 
-function recentList(container) {
-  const recent = workoutsSorted().slice(0, 5);
-  if (recent.length === 0) return;
-  container.append(el("h2", { text: t("recent") }));
-  const list = el("div", { class: "list" });
-  for (const workout of recent) {
-    const totals = workoutTotals(workout);
-    list.append(
-      el("a", { class: "list-item", href: `/workout/${workout.id}`, "data-link": "" }, [
-        el("span", {}, [
-          el("div", { text: workout.title ? workout.title : t("workout") }),
-          el("div", { class: "tiny", text: formatDate(workout.performed_on) })
-        ]),
-        el("span", { class: "tiny num", text: plural(totals.sets, "set") })
-      ])
-    );
-  }
-  container.append(list);
-}
-
-export function workoutTotals(workout) {
+function workoutTotals(workout) {
   let sets = 0;
-  let volume = 0;
-  for (const link of workoutExercises(workout.id)) {
-    const working = workingSets(link.id);
-    const summary = summarizeSets(working);
-    sets += working.length;
-    volume += summary.volume;
-  }
-  return { sets, volume };
+  for (const link of workoutExercises(workout.id)) sets += workingSets(link.id).length;
+  return { sets };
 }
 
 export function renderWorkout(container, params) {
-  const workout = params.id ? byId("workouts", params.id) : todaysWorkout();
+  const workout = params.id ? byId("workouts", params.id) : openWorkout();
   if (!workout) {
     keepAwake(false);
     renderPrograms(container, () => renderWorkout(clear(container) || container, params));
-    recentList(container);
     return;
   }
 

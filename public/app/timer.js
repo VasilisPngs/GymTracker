@@ -72,7 +72,7 @@ export function startRest(seconds) {
   paint();
 }
 
-export function stopRest() {
+function stopRest() {
   deadline = null;
   clearInterval(ticker);
   ticker = null;
