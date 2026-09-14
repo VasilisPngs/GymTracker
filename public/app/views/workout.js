@@ -5,6 +5,7 @@ import {
   SESSION_PRESETS,
   byId,
   todayISO,
+  todayPlan,
   now,
   createWorkout,
   updateWorkout,
@@ -369,13 +370,15 @@ export function openExerciseCreator(initialName, onCreated) {
 }
 
 function startCard(container) {
-  let draft = "";
+  const planned = todayPlan();
+  let draft = planned;
   const start = async (name) => {
     const workout = await createWorkout(todayISO(), name && name.trim() ? name.trim() : null);
     navigate(`/workout/${workout.id}`);
   };
   const input = el("input", {
     type: "text",
+    value: planned,
     placeholder: t("sessionNamePlaceholder"),
     oninput: (event) => {
       draft = event.target.value;
@@ -389,6 +392,7 @@ function startCard(container) {
     el("div", { class: "card" }, [
       el("h1", { text: t("readyToTrain") }),
       el("p", { class: "muted", text: t("readyBody") }),
+      planned ? el("div", { class: "tiny", text: t("todayIs", { name: planned }) }) : null,
       input,
       el("div", { class: "tiny", text: t("quickNames") }),
       el(

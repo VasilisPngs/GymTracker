@@ -56,6 +56,7 @@ const SEED = [
 export const storeEvents = new EventTarget();
 
 const cache = {
+  plan: new Map(),
   exercises: new Map(),
   workouts: new Map(),
   workout_exercises: new Map(),
@@ -136,6 +137,32 @@ export function exercisesSorted() {
   return list("exercises")
     .filter((row) => !row.is_archived)
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export const weekdayIndex = (date = new Date()) => (date.getDay() + 6) % 7;
+
+export function planTitle(weekday) {
+  const row = cache.plan.get(String(weekday));
+  return row && !row.deleted_at && row.title ? row.title : "";
+}
+
+export const todayPlan = () => planTitle(weekdayIndex());
+
+export async function setPlanTitle(weekday, title) {
+  const id = String(weekday);
+  const current = cache.plan.get(id);
+  const clean = title.trim();
+  await commit([
+    {
+      table: "plan",
+      row: {
+        id,
+        title: clean || null,
+        created_at: current ? current.created_at : now(),
+        deleted_at: null
+      }
+    }
+  ]);
 }
 
 export function exercisesByRecent() {

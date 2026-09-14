@@ -109,6 +109,12 @@ const STRINGS = {
   barFullAt: ["Bar is full at {count} hard sets per week.", "Η μπάρα γεμίζει στα {count} κύρια σετ την εβδομάδα."],
   previousWeeks: ["Previous weeks", "Προηγούμενες εβδομάδες"],
   settings: ["Settings", "Ρυθμίσεις"],
+  weeklyPlan: ["Weekly plan", "Εβδομαδιαίο πρόγραμμα"],
+  weeklyPlanHint: [
+    "Write what you train on each day, in your own words. Leave a day blank for rest.",
+    "Γράψε τι γυμνάζεις κάθε μέρα, με δικά σου λόγια. Άσε κενή μια μέρα για ξεκούραση."
+  ],
+  todayIs: ["Today: {name}", "Σήμερα: {name}"],
   language: ["Language", "Γλώσσα"],
   theme: ["Theme", "Θέμα"],
   themeSystem: ["System", "Σύστημα"],
@@ -262,6 +268,11 @@ export function tn(count, key) {
 }
 
 const translateFrom = (map, value) => (current === "el" && map[value] ? map[value] : value);
+
+export function weekdayNames() {
+  const format = new Intl.DateTimeFormat(locale(), { weekday: "long" });
+  return Array.from({ length: 7 }, (item, index) => format.format(new Date(2024, 0, 1 + index)));
+}
 
 export const muscleGroupName = (value) => translateFrom(MUSCLE_GROUPS, value);
 export const presetName = (value) => translateFrom(SESSION_PRESETS, value);

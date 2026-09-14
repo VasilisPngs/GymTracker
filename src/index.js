@@ -46,6 +46,12 @@ const SCHEMA = {
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
   },
+  plan: {
+    id: { cast: text, required: true },
+    title: { cast: text },
+    created_at: { cast: int, required: true },
+    deleted_at: { cast: int }
+  },
   sets: {
     id: { cast: text, required: true },
     workout_exercise_id: { cast: text, required: true },

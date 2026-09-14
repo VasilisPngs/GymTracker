@@ -1,8 +1,8 @@
 import { el, formatVolume, plural, toast } from "../dom.js";
-import { MUSCLE_GROUPS, weeklyBreakdown, exportData } from "../store.js";
+import { MUSCLE_GROUPS, weeklyBreakdown, exportData, planTitle, setPlanTitle, weekdayIndex } from "../store.js";
 import { sparkline } from "../chart.js";
 import { restSeconds, setRestSeconds } from "../timer.js";
-import { t, language, languages, setLanguage, muscleGroupName } from "../i18n.js";
+import { t, language, languages, setLanguage, muscleGroupName, weekdayNames } from "../i18n.js";
 import { themeMode, themeModes, setTheme } from "../theme.js";
 
 const REFERENCE_SETS = 20;
@@ -87,6 +87,25 @@ export function renderStats(container) {
             el("span", { class: "num", text: `${plural(bucket.workouts, "session")} · ${plural(bucket.sets, "set")} · ${formatVolume(bucket.volume)} kg` })
           ])
         )
+    ])
+  );
+
+  const today = weekdayIndex();
+  container.append(
+    el("div", { class: "card" }, [
+      el("h2", { text: t("weeklyPlan") }),
+      el("div", { class: "tiny", text: t("weeklyPlanHint") }),
+      ...weekdayNames().map((name, index) =>
+        el("div", { class: "plan-row" }, [
+          el("span", { class: index === today ? "plan-day current" : "plan-day", text: name }),
+          el("input", {
+            type: "text",
+            value: planTitle(index),
+            placeholder: "—",
+            onchange: (event) => setPlanTitle(index, event.target.value)
+          })
+        ])
+      )
     ])
   );
 

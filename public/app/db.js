@@ -1,7 +1,7 @@
 const DB_NAME = "gymtracker";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
-export const TABLES = ["exercises", "workouts", "workout_exercises", "sets"];
+export const TABLES = ["exercises", "workouts", "workout_exercises", "sets", "plan"];
 
 let dbPromise = null;
 
@@ -18,16 +18,18 @@ function openDatabase() {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
-      const exercises = db.createObjectStore("exercises", { keyPath: "id" });
-      exercises.createIndex("muscle_group", "muscle_group");
-      const workouts = db.createObjectStore("workouts", { keyPath: "id" });
-      workouts.createIndex("performed_on", "performed_on");
-      const workoutExercises = db.createObjectStore("workout_exercises", { keyPath: "id" });
-      workoutExercises.createIndex("workout_id", "workout_id");
-      const sets = db.createObjectStore("sets", { keyPath: "id" });
-      sets.createIndex("workout_exercise_id", "workout_exercise_id");
-      db.createObjectStore("outbox", { keyPath: ["table", "id"] });
-      db.createObjectStore("meta", { keyPath: "key" });
+      const ensure = (name, indexes = [], keyPath = "id") => {
+        if (db.objectStoreNames.contains(name)) return;
+        const store = db.createObjectStore(name, { keyPath });
+        for (const [indexName, path] of indexes) store.createIndex(indexName, path);
+      };
+      ensure("exercises", [["muscle_group", "muscle_group"]]);
+      ensure("workouts", [["performed_on", "performed_on"]]);
+      ensure("workout_exercises", [["workout_id", "workout_id"]]);
+      ensure("sets", [["workout_exercise_id", "workout_exercise_id"]]);
+      ensure("plan");
+      ensure("outbox", [], ["table", "id"]);
+      ensure("meta", [], "key");
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
