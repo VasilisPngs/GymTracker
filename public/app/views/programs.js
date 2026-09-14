@@ -3,6 +3,9 @@ import { t, muscleGroupName, exerciseName, weekdayNames } from "../i18n.js";
 import {
   byId,
   storeEvents,
+  todayISO,
+  weekdayIndex,
+  programForWeekday,
   programsSorted,
   programExercises,
   createProgram,
@@ -133,7 +136,7 @@ const ACTIVE_KEY = "gymtracker.program";
 
 function storedActive() {
   try {
-    return localStorage.getItem(ACTIVE_KEY);
+    return JSON.parse(localStorage.getItem(ACTIVE_KEY) || "null");
   } catch {
     return null;
   }
@@ -141,7 +144,7 @@ function storedActive() {
 
 function rememberActive(id) {
   try {
-    localStorage.setItem(ACTIVE_KEY, id);
+    localStorage.setItem(ACTIVE_KEY, JSON.stringify({ id, day: todayISO() }));
   } catch {}
 }
 
@@ -149,7 +152,11 @@ export function activeProgram() {
   const all = programsSorted();
   if (all.length === 0) return null;
   const stored = storedActive();
-  return all.find((program) => program.id === stored) || all[0];
+  if (stored && stored.day === todayISO()) {
+    const picked = all.find((program) => program.id === stored.id);
+    if (picked) return picked;
+  }
+  return programForWeekday(weekdayIndex()) || all[0];
 }
 
 function programTabs(active, onSelect) {

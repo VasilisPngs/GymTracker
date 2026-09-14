@@ -1,4 +1,4 @@
-import { el, append, clear, formatDate, formatNumber, formatVolume, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, append, clear, formatDate, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, presetName, exerciseName, muscleGroupName } from "../i18n.js";
 import {
   byId,
@@ -111,7 +111,7 @@ function exerciseBlock(workout, link) {
         el("div", { class: "exercise-title", text: exerciseName(exercise.name) }),
         el("div", { class: "tiny" }, [
           el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) }),
-          summary.count > 0 ? ` ${plural(summary.count, "set")} · ${formatVolume(summary.volume)} kg` : ` ${t("noWorkingSets")}`
+          summary.count > 0 ? ` ${plural(summary.count, "set")}` : ` ${t("noWorkingSets")}`
         ])
       ]),
       el("button", {
@@ -240,7 +240,7 @@ function recentList(container) {
           el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
           el("div", { class: "tiny", text: formatDate(workout.performed_on) })
         ]),
-        el("span", { class: "tiny num", text: `${plural(totals.sets, "set")} · ${formatVolume(totals.volume)} kg` })
+        el("span", { class: "tiny num", text: plural(totals.sets, "set") })
       ])
     );
   }
@@ -302,7 +302,6 @@ export function renderWorkout(container, params) {
         text: [
           plural(links.length, "exercise"),
           plural(totals.sets, "workingSet"),
-          `${formatVolume(totals.volume)} ${t("volumeSuffix")}`,
           workout.finished_at ? t("finished") : null
         ]
           .filter(Boolean)

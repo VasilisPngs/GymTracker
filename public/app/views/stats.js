@@ -1,9 +1,6 @@
-import { el, formatVolume, plural } from "../dom.js";
+import { el, plural } from "../dom.js";
 import { MUSCLE_GROUPS, weeklyBreakdown } from "../store.js";
-import { sparkline } from "../chart.js";
 import { t, muscleGroupName } from "../i18n.js";
-
-const REFERENCE_SETS = 20;
 
 function streakWeeks(buckets) {
   let streak = 0;
@@ -24,40 +21,21 @@ export function renderStats(container) {
     el("div", { class: "stat-grid" }, [
       el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.workouts) }), el("span", { class: "tiny", text: t("workoutsThisWeek") })]),
       el("div", { class: "stat" }, [el("b", { class: "num", text: String(current.sets) }), el("span", { class: "tiny", text: t("workingSetsLabel") })]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(current.volume) }), el("span", { class: "tiny", text: t("volumeSuffix") })]),
       el("div", { class: "stat" }, [el("b", { class: "num", text: String(streakWeeks(buckets)) }), el("span", { class: "tiny", text: t("weekStreak") })])
     ])
   );
 
-  const volumes = buckets.map((bucket) => bucket.volume);
-  if (volumes.some((value) => value > 0)) {
-    container.append(
-      el("div", { class: "card" }, [
-        el("div", { class: "row between" }, [el("h2", { text: t("weeklyVolume") }), el("span", { class: "tiny", text: t("lastEightWeeks") })]),
-        sparkline(volumes),
-        el("div", { class: "row between tiny" }, [
-          el("span", { text: `${formatVolume(Math.min(...volumes))} kg` }),
-          el("span", { text: `${formatVolume(Math.max(...volumes))} kg` })
-        ])
-      ])
-    );
-  }
-
-  const muscleRows = MUSCLE_GROUPS.map((group) => {
-    const value = current.byMuscle[group] || 0;
-    const ratio = Math.min(1, value / REFERENCE_SETS);
-    return el("div", { class: "bar-row" }, [
+  const muscleRows = MUSCLE_GROUPS.map((group) =>
+    el("div", { class: "row between" }, [
       el("span", { text: muscleGroupName(group) }),
-      el("div", { class: "bar" }, el("span", { style: `width:${(ratio * 100).toFixed(1)}%` })),
-      el("span", { class: "num", style: "text-align:right", text: String(value) })
-    ]);
-  });
+      el("span", { class: "num", text: String(current.byMuscle[group] || 0) })
+    ])
+  );
 
   container.append(
     el("div", { class: "card" }, [
       el("div", { class: "row between" }, [el("h2", { text: t("setsPerMuscle") }), el("span", { class: "tiny", text: t("thisWeek") })]),
-      ...muscleRows,
-      el("div", { class: "tiny", text: t("barFullAt", { count: REFERENCE_SETS }) })
+      ...muscleRows
     ])
   );
 
@@ -70,7 +48,7 @@ export function renderStats(container) {
         .map((bucket) =>
           el("div", { class: "row between tiny" }, [
             el("span", { text: bucket.key }),
-            el("span", { class: "num", text: `${plural(bucket.workouts, "session")} · ${plural(bucket.sets, "set")} · ${formatVolume(bucket.volume)} kg` })
+            el("span", { class: "num", text: `${plural(bucket.workouts, "session")} · ${plural(bucket.sets, "set")}` })
           ])
         )
     ])

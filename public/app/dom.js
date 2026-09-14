@@ -66,11 +66,6 @@ export function formatNumber(value, digits = 1) {
   return String(rounded);
 }
 
-export function formatVolume(value) {
-  if (!value) return "0";
-  return Math.round(value).toLocaleString(locale());
-}
-
 export function plural(count, key) {
   return tn(count, key);
 }

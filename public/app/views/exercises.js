@@ -1,4 +1,4 @@
-import { el, formatDate, formatNumber, formatVolume, plural, confirmSheet, openSheet, toast } from "../dom.js";
+import { el, formatDate, formatNumber, plural, confirmSheet, openSheet, toast } from "../dom.js";
 import {
   MUSCLE_GROUPS,
   byId,
@@ -42,7 +42,6 @@ export function renderExerciseDetail(container, params) {
         el("b", { class: "num", text: records.heaviest ? formatNumber(records.heaviest.weight_kg) : "-" }),
         el("span", { class: "tiny", text: t("heaviest") })
       ]),
-      el("div", { class: "stat" }, [el("b", { class: "num", text: formatVolume(records.bestVolume) }), el("span", { class: "tiny", text: t("bestSession") })]),
       el("div", { class: "stat" }, [el("b", { class: "num", text: String(records.sessions) }), el("span", { class: "tiny", text: t("sessionsLabel") })])
     ])
   );
@@ -71,10 +70,7 @@ export function renderExerciseDetail(container, params) {
           el("div", { text: formatDate(session.workout.performed_on, true) }),
           el("div", { class: "tiny", text: describeSets(session.sets) })
         ]),
-        el("span", { class: "tiny num", style: "text-align:right" }, [
-          el("div", { text: `${formatNumber(session.e1rm, 0)} e1RM` }),
-          el("div", { text: `${formatVolume(session.volume)} kg` })
-        ])
+        el("span", { class: "tiny num", style: "text-align:right", text: `${formatNumber(session.e1rm, 0)} e1RM` })
       ])
     );
   }

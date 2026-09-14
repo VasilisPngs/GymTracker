@@ -1,4 +1,4 @@
-import { el, formatDate, formatVolume, plural, openSheet } from "../dom.js";
+import { el, formatDate, plural, openSheet } from "../dom.js";
 import { SESSION_PRESETS, workoutsSorted, createWorkout, todayISO } from "../store.js";
 import { t, locale, presetName } from "../i18n.js";
 import { workoutTotals } from "./workout.js";
@@ -86,10 +86,7 @@ export function renderHistory(container) {
           el("div", { text: workout.title ? presetName(workout.title) : t("workout") }),
           el("div", { class: "tiny", text: formatDate(workout.performed_on, true) })
         ]),
-        el("span", { class: "tiny num", style: "text-align:right" }, [
-          el("div", { text: plural(totals.sets, "set") }),
-          el("div", { text: `${formatVolume(totals.volume)} kg` })
-        ])
+        el("span", { class: "tiny num", style: "text-align:right", text: plural(totals.sets, "set") })
       ])
     );
   }
