@@ -103,6 +103,16 @@ Verified against Cloudflare documentation (September 2026):
 | D1 bound parameters per query | 100 | Batches chunked to ≤90 |
 | Static asset files | 20,000 | 20 |
 
+## Toolchain
+
+Zero runtime dependencies: the browser and the Worker both run the source as
+written, with no bundler, transpiler or framework in between.
+
+Build tooling stays on the latest stable release: wrangler pinned to an exact
+version in `package.json`, Node on the Active LTS line in `.nvmrc`. Stable
+means the release line the upstream project supports for production, so Node
+follows LTS rather than Current.
+
 ## Local development
 
 ```sh
