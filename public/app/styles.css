@@ -267,10 +267,6 @@ svg {
   justify-content: space-between;
 }
 
-.row.wrap {
-  flex-wrap: wrap;
-}
-
 .grow {
   flex: 1;
   min-width: 0;
@@ -608,14 +604,6 @@ textarea {
   font-weight: 650;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-}
-
-.bar-row {
-  display: grid;
-  grid-template-columns: 78px 1fr 42px;
-  gap: 10px;
-  align-items: center;
-  font-size: 13px;
 }
 
 .bar {
