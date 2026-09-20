@@ -111,13 +111,6 @@ const UPDATE_CHECK_MS = 900000;
 function watchServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   navigator.serviceWorker.register("/sw.js").then((registration) => {
-    registration.addEventListener("updatefound", () => {
-      const worker = registration.installing;
-      if (!worker) return;
-      worker.addEventListener("statechange", () => {
-        if (worker.state === "installed" && navigator.serviceWorker.controller) offerUpdate(worker);
-      });
-    });
     let checkedAt = Date.now();
     addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible" || Date.now() - checkedAt < UPDATE_CHECK_MS) return;
@@ -125,26 +118,6 @@ function watchServiceWorker() {
       registration.update().catch(() => {});
     });
   });
-  let reloading = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (reloading) return;
-    reloading = true;
-    location.reload();
-  });
-}
-
-function offerUpdate(worker) {
-  const host = document.getElementById("toast-host");
-  const node = el("div", { class: "toast", style: "pointer-events:auto;display:flex;gap:10px;align-items:center" }, [
-    el("span", { text: t("newVersion") }),
-    el("button", {
-      class: "btn small primary",
-      type: "button",
-      text: t("reload"),
-      onclick: () => worker.postMessage({ type: "skip_waiting" })
-    })
-  ]);
-  host.append(node);
 }
 
 view.addEventListener("focusout", () => {

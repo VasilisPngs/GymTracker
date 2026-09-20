@@ -1,4 +1,4 @@
-const VERSION = "v57";
+const VERSION = "v58";
 const CACHE = `gymtracker-${VERSION}`;
 
 const SHELL = [
@@ -30,6 +30,7 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE).then((cache) => cache.addAll(SHELL))
   );
@@ -45,9 +46,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "skip_waiting") self.skipWaiting();
-});
 
 async function staleWhileRevalidate(event, cacheKey) {
   const cache = await caches.open(CACHE);
