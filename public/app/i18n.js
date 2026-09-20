@@ -12,7 +12,7 @@ const STRINGS = {
   statusRetry: ["Retrying", "Επανάληψη"],
   statusQueued: ["Queued", "Σε ουρά"],
   statusSignIn: ["Sign in", "Σύνδεση"],
-  sessionExpired: ["Access session expired. Your sets are safe and queued.", "Η συνεδρία Access έληξε. Τα σετ σου είναι ασφαλή και σε ουρά."],
+  sessionExpired: ["Your Cloudflare Access session expired. Your sets are safe and queued.", "Η σύνδεση στο Cloudflare Access έληξε. Τα σετ σου είναι ασφαλή και σε ουρά."],
   newVersion: ["New version ready", "Νέα έκδοση έτοιμη"],
   reload: ["Reload", "Επαναφόρτωση"],
   storageBlocked: [
