@@ -1,5 +1,5 @@
 import { el, clear } from "./dom.js";
-import { startShell } from "./shell.js";
+import { startShell, scrollViewTop } from "./shell.js";
 import { initStore, storeEvents } from "./store.js";
 import { startSync, syncEvents, getSyncState, requestSync } from "./sync.js";
 import { currentRoute, startRouter } from "./router.js";
@@ -59,7 +59,7 @@ function render() {
     view.classList.remove("enter");
     void view.offsetWidth;
     view.classList.add("enter");
-    scrollTo({ top: 0, behavior: "instant" });
+    scrollViewTop();
   }
 }
 
