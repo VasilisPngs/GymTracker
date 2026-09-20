@@ -1,4 +1,4 @@
-const VERSION = "v45";
+const VERSION = "v46";
 const CACHE = `gymtracker-${VERSION}`;
 
 const SHELL = [
@@ -22,12 +22,6 @@ const SHELL = [
   "/app/views/settings.js",
   "/app/views/programs.js",
   "/app/views/picker.js",
-  "/fonts/rounded-400-greek.woff2",
-  "/fonts/rounded-400-latin.woff2",
-  "/fonts/rounded-500-greek.woff2",
-  "/fonts/rounded-500-latin.woff2",
-  "/fonts/rounded-700-greek.woff2",
-  "/fonts/rounded-700-latin.woff2",
   "/icons/icon.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
