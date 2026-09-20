@@ -240,7 +240,7 @@ export function renderWorkout(container, params) {
         el("input", {
           type: "date",
           value: workout.performed_on,
-          style: "width:auto;background:transparent;border:0;padding:0;font-weight:600",
+          style: "width:auto;min-height:0;background:transparent;border:0;padding:0;font-weight:600",
           onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
         }),
         el("button", {
