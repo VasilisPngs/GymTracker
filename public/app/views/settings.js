@@ -20,20 +20,7 @@ export function renderSettings(container) {
 
   container.append(
     el("div", { class: "card" }, [
-      el("label", { class: "tiny", text: t("language") }),
-      el(
-        "select",
-        {
-          onchange: (event) => {
-            const next = event.target.value;
-            event.target.blur();
-            setLanguage(next);
-          }
-        },
-        languages().map((code) =>
-          el("option", { value: code, text: code === "el" ? "Ελληνικά" : "English", selected: code === language() })
-        )
-      ),
+      el("h2", { text: t("appearance") }),
       el("label", { class: "tiny", text: t("theme") }),
       el(
         "select",
@@ -50,6 +37,20 @@ export function renderSettings(container) {
             text: t(`theme${mode[0].toUpperCase()}${mode.slice(1)}`),
             selected: mode === themeMode()
           })
+        )
+      ),
+      el("label", { class: "tiny", text: t("language") }),
+      el(
+        "select",
+        {
+          onchange: (event) => {
+            const next = event.target.value;
+            event.target.blur();
+            setLanguage(next);
+          }
+        },
+        languages().map((code) =>
+          el("option", { value: code, text: code === "el" ? "Ελληνικά" : "English", selected: code === language() })
         )
       )
     ])

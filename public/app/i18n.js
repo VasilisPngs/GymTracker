@@ -111,6 +111,7 @@ const STRINGS = {
   thisWeek: ["This week (previous)", "Αυτή (προηγούμενη)"],
   previousWeeks: ["Previous weeks", "Προηγούμενες εβδομάδες"],
   settingsTitle: ["Settings", "Ρυθμίσεις"],
+  appearance: ["Appearance", "Εμφάνιση"],
   backup: ["Backup", "Αντίγραφο"],
   language: ["Language", "Γλώσσα"],
   theme: ["Theme", "Θέμα"],
