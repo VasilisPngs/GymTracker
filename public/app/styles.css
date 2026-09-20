@@ -15,6 +15,7 @@
   --radius-s: 10px;
   --radius-m: 14px;
   --radius-l: 20px;
+  --view-gap: 14px;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --speed: 0.24s;
@@ -195,7 +196,7 @@ svg {
   padding: 16px 16px calc(var(--tabbar) + env(safe-area-inset-bottom) + 28px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--view-gap);
 }
 
 .view.enter {
@@ -843,8 +844,7 @@ textarea {
   gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 2px 2px 0;
-  margin-bottom: -1px;
+  padding: 0;
 }
 
 .prog-tabs::-webkit-scrollbar {
@@ -862,7 +862,6 @@ textarea {
   white-space: nowrap;
   padding: 8px 16px;
   border: 1px solid var(--border);
-  border-bottom-color: transparent;
   border-radius: var(--radius-m) var(--radius-m) 0 0;
   background: var(--surface-2);
   color: var(--muted);
@@ -874,6 +873,7 @@ textarea {
 
 .prog-tab.current {
   background: var(--surface);
+  border-bottom-color: var(--surface);
   color: var(--text);
 }
 
@@ -885,7 +885,9 @@ textarea {
 }
 
 .prog-tabs + .card {
+  margin-top: calc(-1 * var(--view-gap) - 1px);
   border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 input.setup-note {
