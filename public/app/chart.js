@@ -14,7 +14,20 @@ export function sparkline(values) {
     return [x, y];
   };
   const coordinates = values.map(point);
-  const line = coordinates.map(([x, y], index) => `${index === 0 ? "M" : "L"}${x.toFixed(2)} ${y.toFixed(2)}`).join(" ");
+  const at = (index) => coordinates[Math.min(coordinates.length - 1, Math.max(0, index))];
+  const clamp = (y) => Math.min(height - 3, Math.max(3, y));
+  let line = `M${coordinates[0][0].toFixed(2)} ${coordinates[0][1].toFixed(2)}`;
+  for (let index = 0; index < coordinates.length - 1; index += 1) {
+    const [x0, y0] = at(index - 1);
+    const [x1, y1] = at(index);
+    const [x2, y2] = at(index + 1);
+    const [x3, y3] = at(index + 2);
+    const c1x = x1 + (x2 - x0) / 6;
+    const c1y = clamp(y1 + (y2 - y0) / 6);
+    const c2x = x2 - (x3 - x1) / 6;
+    const c2y = clamp(y2 - (y3 - y1) / 6);
+    line += ` C${c1x.toFixed(2)} ${c1y.toFixed(2)} ${c2x.toFixed(2)} ${c2y.toFixed(2)} ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+  }
   const area = `${line} L${width} ${height} L0 ${height} Z`;
   return svg(
     "svg",
