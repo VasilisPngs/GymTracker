@@ -1,4 +1,4 @@
-const VERSION = "v41";
+const VERSION = "v42";
 const CACHE = `gymtracker-${VERSION}`;
 
 const SHELL = [
@@ -77,4 +77,27 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   event.respondWith(staleWhileRevalidate(event, request));
+});
+
+const REPORT_LIMIT = 3;
+let reported = 0;
+
+function report(kind, message, detail) {
+  const text = String(message == null ? "" : message).slice(0, 300).trim();
+  if (!text || reported >= REPORT_LIMIT) return;
+  reported += 1;
+  fetch("/api/report", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind, message: text, stack: String(detail || "").slice(0, 1000), route: "/sw" })
+  }).catch(() => {});
+}
+
+self.addEventListener("error", (event) => {
+  report("sw-error", event.message, `${event.filename}:${event.lineno}`);
+});
+
+self.addEventListener("unhandledrejection", (event) => {
+  const reason = event.reason;
+  report("sw-rejection", reason && reason.message ? reason.message : String(reason), reason && reason.stack);
 });
