@@ -9,7 +9,7 @@ const STRINGS = {
   statusSynced: ["Synced", "Συγχρονισμένο"],
   statusSyncing: ["Syncing", "Συγχρονισμός"],
   statusOffline: ["Offline", "Εκτός σύνδεσης"],
-  statusRetry: ["Retry", "Επανάληψη"],
+  statusRetry: ["Retrying", "Επανάληψη"],
   statusQueued: ["Queued", "Σε ουρά"],
   statusSignIn: ["Sign in", "Σύνδεση"],
   sessionExpired: ["Access session expired. Your sets are safe and queued.", "Η συνεδρία Access έληξε. Τα σετ σου είναι ασφαλή και σε ουρά."],
@@ -19,7 +19,7 @@ const STRINGS = {
     "Another GymTracker window is open with an older version. Close every other tab and reload.",
     "Ένα άλλο παράθυρο GymTracker είναι ανοιχτό με παλιότερη έκδοση. Κλείσε τις άλλες καρτέλες και φόρτωσε ξανά."
   ],
-  storageFailed: ["Local storage could not be opened.", "Η τοπική αποθήκευση δεν άνοιξε."],
+  storageFailed: ["Local storage could not be opened.", "Δεν άνοιξε η τοπική αποθήκευση."],
 
   cancel: ["Cancel", "Άκυρο"],
   delete: ["Delete", "Διαγραφή"],
@@ -45,7 +45,7 @@ const STRINGS = {
   colRest: ["Rest (seconds)", "Διάλειμμα (δευτερόλεπτα)"],
   topSet: ["Top set", "Βαρύτερο σετ"],
   setupPlaceholder: ["Note for this exercise", "Σχόλιο για τη συγκεκριμένη άσκηση"],
-  neverTrained: ["Not trained yet", "Καμία ακόμα"],
+  neverTrained: ["Never", "Ποτέ"],
   trainedToday: ["Today", "Σήμερα"],
   trainedYesterday: ["Yesterday", "Χθες"],
   trainedDaysAgo: ["{days} days ago", "Πριν {days} μέρες"],
@@ -89,7 +89,7 @@ const STRINGS = {
 
   search: ["Search", "Αναζήτηση"],
   exerciseNotFound: ["Exercise not found.", "Η άσκηση δεν βρέθηκε."],
-  heaviest: ["Heaviest kg", "Μέγιστα kg"],
+  heaviest: ["Heaviest (kg)", "Μέγιστα κιλά"],
   sessionsLabel: ["Sessions", "Προπονήσεις"],
   sessionsHeading: ["Sessions", "Προπονήσεις"],
   noLoggedSets: ["No logged sets for this exercise.", "Δεν υπάρχουν καταγεγραμμένα σετ για αυτή την άσκηση."],
@@ -116,10 +116,10 @@ const STRINGS = {
   theme: ["Theme", "Θέμα"],
   themeSystem: ["System", "Σύστημα"],
   themeLight: ["Light", "Φωτεινό"],
-  themeDark: ["Dark", "Σκοτεινό"],
+  themeDark: ["Dark", "Σκούρο"],
   themeBlack: ["Black", "Μαύρο"],
   exportBackup: ["Export backup (JSON)", "Εξαγωγή αντιγράφου (JSON)"],
-  backupExported: ["Backup exported", "Το αντίγραφο εξήχθη"],
+  backupExported: ["Backup exported", "Το αντίγραφο κατέβηκε"],
 
   ariaDecrease: ["decrease", "μείωση"],
   ariaIncrease: ["increase", "αύξηση"],
@@ -140,7 +140,7 @@ const PLURALS = {
 const MUSCLE_GROUPS = {
   Chest: "Στήθος",
   Back: "Πλάτη",
-  LowerBack: "Ραχιαίοι",
+  LowerBack: "Οσφυϊκοί",
   Shoulders: "Ώμοι",
   Traps: "Τραπεζοειδείς",
   Biceps: "Δικέφαλοι",
