@@ -348,11 +348,6 @@ h3 {
   border-radius: var(--radius-s);
 }
 
-.btn.icon {
-  padding: 8px;
-  border-radius: 50%;
-}
-
 .btn:disabled {
   opacity: 0.45;
   cursor: default;

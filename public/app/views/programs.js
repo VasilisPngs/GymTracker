@@ -72,7 +72,7 @@ function programRow(item) {
         el("div", { class: "tiny" }, [el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })])
       ]),
       el("button", {
-        class: "btn icon ghost",
+        class: "btn small ghost",
         type: "button",
         text: "···",
         "aria-label": t("ariaExerciseOptions"),

@@ -104,7 +104,7 @@ function exerciseBlock(workout, link) {
         ])
       ]),
       el("button", {
-        class: "btn icon ghost",
+        class: "btn small ghost",
         type: "button",
         "aria-label": t("ariaExerciseOptions"),
         text: "···",
