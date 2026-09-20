@@ -1,4 +1,4 @@
-import { el, clear, formatNumber, plural } from "../dom.js";
+import { el, clear, formatDate, formatNumber, plural } from "../dom.js";
 import { MUSCLE_GROUPS, list, weeklyBreakdown, exerciseSessions } from "../store.js";
 import { t, muscleGroupName } from "../i18n.js";
 
@@ -129,7 +129,7 @@ export function renderStats(container) {
         .reverse()
         .map((bucket) =>
           el("div", { class: "row between tiny" }, [
-            el("span", { text: bucket.key }),
+            el("span", { text: formatDate(bucket.key) }),
             el("span", { class: "num", text: `${plural(bucket.workouts, "session")} · ${plural(bucket.sets, "set")}` })
           ])
         )
