@@ -202,7 +202,10 @@ export function renderPrograms(container, repaint) {
     return;
   }
 
-  container.append(
+  const bar = el("div", { class: "list-bar" });
+  container.append(bar);
+
+  bar.append(
     programTabs(active, (id) => {
       rememberActive(id);
       repaint();
@@ -212,7 +215,7 @@ export function renderPrograms(container, repaint) {
   const items = programExercises(active.id);
   const totals = programSummary(active);
 
-  container.append(
+  bar.append(
     el("div", { class: "card tight" }, [
       el("div", { class: "row between" }, [
         el("input", {

@@ -234,7 +234,10 @@ export function renderWorkout(container, params) {
   const totals = workoutTotals(workout);
   const links = workoutExercises(workout.id);
 
-  container.append(
+  const bar = el("div", { class: "list-bar" });
+  container.append(bar);
+
+  bar.append(
     el("div", { class: "card tight" }, [
       el("div", { class: "row between" }, [
         el("input", {

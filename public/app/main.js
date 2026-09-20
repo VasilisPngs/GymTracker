@@ -106,6 +106,8 @@ function signIn() {
   location.href = `/?signin=${Date.now()}`;
 }
 
+const UPDATE_CHECK_MS = 900000;
+
 function watchServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   navigator.serviceWorker.register("/sw.js").then((registration) => {
@@ -115,6 +117,12 @@ function watchServiceWorker() {
       worker.addEventListener("statechange", () => {
         if (worker.state === "installed" && navigator.serviceWorker.controller) offerUpdate(worker);
       });
+    });
+    let checkedAt = Date.now();
+    addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible" || Date.now() - checkedAt < UPDATE_CHECK_MS) return;
+      checkedAt = Date.now();
+      registration.update().catch(() => {});
     });
   });
   let reloading = false;
