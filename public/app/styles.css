@@ -210,6 +210,10 @@ svg {
   gap: var(--view-gap);
 }
 
+.view > * {
+  flex: none;
+}
+
 .view.enter {
   animation: enter var(--speed) var(--ease);
 }
@@ -723,6 +727,10 @@ textarea {
   flex-direction: column;
   gap: 12px;
   animation: slide-up 0.3s var(--ease);
+}
+
+.sheet > * {
+  flex: none;
 }
 
 @keyframes slide-up {
