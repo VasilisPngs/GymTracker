@@ -1,4 +1,5 @@
 import { el, clear } from "./dom.js";
+import { startShell } from "./shell.js";
 import { initStore, storeEvents } from "./store.js";
 import { startSync, syncEvents, getSyncState, requestSync } from "./sync.js";
 import { currentRoute, startRouter } from "./router.js";
@@ -150,6 +151,7 @@ pill.addEventListener("click", () => {
 });
 
 async function boot() {
+  startShell();
   if (new URL(location.href).searchParams.has("signin")) history.replaceState({}, "", location.pathname);
   applyLanguage();
   applyTheme();
