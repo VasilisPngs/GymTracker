@@ -212,14 +212,45 @@ async function behindAccess(request, url, ctx) {
   return false;
 }
 
+const REPORT_WINDOW_MS = 60000;
+const REPORT_LIMIT = 20;
+const ERROR_RETENTION_MS = 30 * 86400000;
+let reportWindow = 0;
+let reportCount = 0;
+
+async function handleReport(request, env) {
+  const now = Date.now();
+  if (now - reportWindow > REPORT_WINDOW_MS) {
+    reportWindow = now;
+    reportCount = 0;
+  }
+  if (reportCount >= REPORT_LIMIT) return json({ ok: true });
+  reportCount += 1;
+  const payload = await request.json().catch(() => null);
+  const message = payload && typeof payload.message === "string" ? payload.message.trim() : "";
+  if (!message) return json({ ok: true });
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO errors (at, kind, message, stack, route, agent) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").bind(
+      now,
+      String(payload.kind || "error").slice(0, 20),
+      message.slice(0, 300),
+      String(payload.stack || "").slice(0, 1000) || null,
+      String(payload.route || "").slice(0, 120) || null,
+      (request.headers.get("user-agent") || "").slice(0, 200) || null
+    ),
+    env.DB.prepare("DELETE FROM errors WHERE at < ?1").bind(now - ERROR_RETENTION_MS)
+  ]).catch(() => {});
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname !== "/api/sync") return json({ error: "not_found" }, 404);
+    if (url.pathname !== "/api/sync" && url.pathname !== "/api/report") return json({ error: "not_found" }, 404);
     if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
     if (!(await behindAccess(request, url, ctx))) return json({ error: "forbidden" }, 403);
     try {
-      return await sync(request, env);
+      return url.pathname === "/api/report" ? await handleReport(request, env) : await sync(request, env);
     } catch (error) {
       return json({ error: "sync_failed", detail: String(error && error.message) }, 500);
     }
