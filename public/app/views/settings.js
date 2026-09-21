@@ -16,7 +16,7 @@ async function download() {
 }
 
 export function renderSettings(container) {
-  container.append(el("h1", { text: t("settingsTitle") }));
+  container.append(el("div", { class: "list-bar" }, [el("h1", { text: t("settingsTitle") })]));
 
   container.append(
     el("div", { class: "card" }, [

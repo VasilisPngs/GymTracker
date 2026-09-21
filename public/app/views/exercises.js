@@ -23,15 +23,17 @@ export function renderExerciseDetail(container, params) {
   const records = personalRecords(exercise.id);
 
   container.append(
-    el("div", { class: "row between" }, [
-      el("div", { class: "grow" }, [
-        el("h1", { text: exercise.name }),
-        el("div", {
-          class: "tiny",
-          text: muscleGroupName(exercise.muscle_group)
-        })
-      ]),
-      el("button", { class: "btn small ghost", type: "button", text: "···", onclick: () => openMenu(exercise) })
+    el("div", { class: "list-bar" }, [
+      el("div", { class: "row between" }, [
+        el("div", { class: "grow" }, [
+          el("h1", { text: exercise.name }),
+          el("div", {
+            class: "tiny",
+            text: muscleGroupName(exercise.muscle_group)
+          })
+        ]),
+        el("button", { class: "btn small ghost", type: "button", text: "···", onclick: () => openMenu(exercise) })
+      ])
     ])
   );
 

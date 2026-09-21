@@ -27,7 +27,7 @@ export function renderStats(container) {
   const current = buckets[buckets.length - 1];
   const previous = buckets[buckets.length - 2];
 
-  container.append(el("h1", { text: t("statsTitle") }));
+  container.append(el("div", { class: "list-bar" }, [el("h1", { text: t("statsTitle") })]));
 
   container.append(
     el("div", { class: "stat-grid" }, [
