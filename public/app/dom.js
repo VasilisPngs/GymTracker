@@ -144,6 +144,7 @@ export function stepper(value, step, min, onCommit, options = {}) {
   const input = el("input", {
     type: "text",
     inputMode: options.decimal ? "decimal" : "numeric",
+    placeholder: "0",
     value: value === null || value === undefined ? "" : String(value),
     onchange: (event) => {
       const raw = event.target.value.replace(",", ".").trim();
