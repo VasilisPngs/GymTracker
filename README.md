@@ -6,9 +6,9 @@ Single-user hypertrophy training log. Cloudflare Worker with static assets, D1 d
 offline-first PWA client, Cloudflare Access for authentication.
 
 The interface ships in English and Greek. It follows the browser language on first run and
-can be switched any time in Stats → Settings → Language; the choice is stored per device.
-Exercise names, muscle groups, split days, equipment and all dates follow the selected
-language, while the database keeps canonical English values.
+can be switched any time in Settings → Language; the choice is stored per device.
+Muscle groups, equipment and all dates follow the selected language, while the database
+keeps canonical English values.
 
 ## Architecture
 
@@ -24,7 +24,11 @@ Browser (PWA)                       Cloudflare edge
 ```
 
 The UI never waits for the network. Every read and write hits IndexedDB; the sync layer
-drains an outbox to `/api/sync` whenever connectivity allows. Static assets are served
+drains an outbox to `/api/sync` whenever connectivity allows: on a change, on coming
+back online, and whenever the app returns to the foreground. Parent-to-child lookups
+(a workout's exercises, an exercise's sets, a programme's plan) are served from indexes
+rebuilt whenever the cache changes, so a screen costs the rows it draws rather than the
+whole database. Static assets are served
 directly by the edge (free, no Worker invocation); the Worker only runs for `/api/*`.
 
 ## Data model
@@ -32,9 +36,12 @@ directly by the edge (free, no Worker invocation); the Worker only runs for `/ap
 | Table | Purpose |
 | --- | --- |
 | `exercises` | Catalog: name, muscle group, equipment, archived flag |
-| `workouts` | Session: date, title (split day), notes, started/finished timestamps |
+| `workouts` | Session: date, title, notes, programme it came from, started/finished timestamps |
 | `workout_exercises` | Exercise inside a session, with ordering |
-| `sets` | Reps, weight (kg), RIR, warm-up flag, completion timestamp, ordering |
+| `sets` | Reps, weight (kg), warm-up flag, completion timestamp, ordering |
+| `programs` | A reusable split: title, notes, ordering |
+| `program_exercises` | Planned exercise in a programme, with target sets, reps, weight and rest |
+| `errors` | What the browser reported went wrong, kept for thirty days |
 | `sync_rev` | Single-row monotonic revision counter driving incremental pulls |
 
 Every row carries a client-generated UUID, so offline writes have stable identity.
@@ -58,8 +65,8 @@ row that still has a pending outbox entry.
 
 ## Setup
 
-Prerequisites: Node.js 20+, a Cloudflare account, Wrangler authenticated
-(`npx wrangler login`).
+Prerequisites: Node on the version in `.nvmrc`, a Cloudflare account, Wrangler
+authenticated (`npx wrangler login`).
 
 ```sh
 npm install
@@ -75,9 +82,13 @@ npm run deploy
 
 ### Cloudflare Access
 
-The Worker contains no login code. It rejects any request that does not carry the
-`Cf-Access-Jwt-Assertion` header injected by Access, so protection must be enabled
-before the app is usable:
+The Worker contains no login code. It verifies the token Access issues: the assertion
+header or the `CF_Authorization` cookie is parsed, checked against the team's published
+RS256 keys, and rejected unless the signature, the issuer, the audience tag and the
+expiry all hold. The keys are fetched once an hour and re-fetched on an unknown key id;
+if they cannot be fetched at all the Worker answers 503 rather than guessing. The team
+domain and the audience tag live in `vars` in `wrangler.jsonc`. Access still stands in
+front of the hostname, so this is the second lock, not the first:
 
 1. Enable Zero Trust on the account (free plan covers up to 50 users).
 2. Cloudflare dashboard → **Workers & Pages** → `gymtracker` → **Access** tab.
@@ -99,9 +110,9 @@ Verified against Cloudflare documentation (September 2026):
 | D1 rows read | 5,000,000/day | Incremental pulls return only changed rows |
 | D1 rows written | 100,000/day | One row per logged set |
 | D1 storage | 5 GB account / 500 MB per database | A set row is well under 100 bytes |
-| D1 queries per invocation | 50 | Capped at 45 (1 revision bump + ≤40 upserts + 4 pulls) |
+| D1 queries per invocation | 50 | Capped at 47 (1 revision bump + ≤40 upserts + 6 pulls) |
 | D1 bound parameters per query | 100 | Batches chunked to ≤90 |
-| Static asset files | 20,000 | 20 |
+| Static asset files | 20,000 | 27 |
 
 ## Toolchain
 
@@ -139,15 +150,15 @@ Worker με static assets και βάση D1, με PWA που δουλεύει o
 Access. Δεν υπάρχει κώδικας σύνδεσης στην εφαρμογή.
 
 **Γλώσσα:** η διεπαφή είναι στα αγγλικά και στα ελληνικά. Στην πρώτη εκτέλεση ακολουθεί τη
-γλώσσα του browser και αλλάζει από Στατιστικά → Ρυθμίσεις → Γλώσσα. Μεταφράζονται και τα
-ονόματα ασκήσεων, οι μυϊκές ομάδες, οι μέρες του split, ο εξοπλισμός και οι ημερομηνίες. Στη
-βάση αποθηκεύονται πάντα οι αγγλικές τιμές, οπότε η αλλαγή γλώσσας δεν αγγίζει τα δεδομένα.
+γλώσσα του browser και αλλάζει από Ρυθμίσεις → Γλώσσα. Μεταφράζονται οι μυϊκές ομάδες, ο
+εξοπλισμός και οι ημερομηνίες. Στη βάση αποθηκεύονται πάντα οι αγγλικές τιμές, οπότε η
+αλλαγή γλώσσας δεν αγγίζει τα δεδομένα.
 
-**Τι καταγράφει:** ασκήσεις (όνομα, μυϊκή ομάδα, εξοπλισμός), προπονήσεις (ημερομηνία, μέρα
-split, σημειώσεις) και σετ (επαναλήψεις, κιλά, RIR, σήμανση ζεστάματος). Δείχνει την
-προηγούμενη επίδοση σε κάθε άσκηση, εκτιμώμενο 1RM, εβδομαδιαίο όγκο και κύρια σετ ανά μυϊκή
-ομάδα. Όλοι οι υπολογισμοί γίνονται στον browser, ώστε ο Worker να μένει κάτω από το όριο των
-10 ms CPU.
+**Τι καταγράφει:** ασκήσεις (όνομα, μυϊκή ομάδα, εξοπλισμός), προγράμματα με στόχους ανά
+άσκηση, προπονήσεις (ημερομηνία, τίτλος, σημειώσεις) και σετ (επαναλήψεις, κιλά, σήμανση
+ζεστάματος). Δείχνει την προηγούμενη επίδοση σε κάθε άσκηση, τα ρεκόρ της, τον εβδομαδιαίο
+όγκο και τα κύρια σετ ανά μυϊκή ομάδα. Όλοι οι υπολογισμοί γίνονται στον browser, ώστε ο
+Worker να μένει κάτω από το όριο των 10 ms CPU.
 
 **Offline:** το IndexedDB είναι η πηγή αλήθειας. Κάθε αλλαγή γράφεται τοπικά και μπαίνει σε
 ουρά που αδειάζει μόλις υπάρξει δίκτυο, οπότε η καταγραφή σετ στο γυμναστήριο δουλεύει χωρίς
@@ -165,7 +176,8 @@ npm run deploy
 
 **Cloudflare Access (υποχρεωτικό):** Workers & Pages → `gymtracker` → καρτέλα Access →
 Protect this Worker behind Access → All traffic → πολιτική Google μόνο για το email σου →
-διάρκεια συνεδρίας έως έναν μήνα. Χωρίς αυτό το `/api/sync` απαντάει 403 σε όλους.
+διάρκεια συνεδρίας έως έναν μήνα. Ο Worker επαληθεύει και ο ίδιος την υπογραφή του token,
+οπότε χωρίς Access το `/api/sync` απαντάει 403 σε όλους.
 
 **Στο κινητό:** άνοιξέ το στο Safari και Προσθήκη στην αρχική οθόνη, ώστε να εγκατασταθεί ως
 PWA.

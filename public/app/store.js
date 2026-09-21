@@ -30,6 +30,41 @@ const cache = {
   program_exercises: new Map()
 };
 
+let indexes = null;
+
+function bucket(map, key, row) {
+  const rows = map.get(key);
+  if (rows) rows.push(row);
+  else map.set(key, [row]);
+}
+
+function buildIndexes() {
+  const setsByLink = new Map();
+  const linksByWorkout = new Map();
+  const linksByExercise = new Map();
+  const plannedByProgram = new Map();
+  for (const row of cache.sets.values()) if (!row.deleted_at) bucket(setsByLink, row.workout_exercise_id, row);
+  for (const row of cache.workout_exercises.values()) {
+    if (row.deleted_at) continue;
+    bucket(linksByWorkout, row.workout_id, row);
+    bucket(linksByExercise, row.exercise_id, row);
+  }
+  for (const row of cache.program_exercises.values()) if (!row.deleted_at) bucket(plannedByProgram, row.program_id, row);
+  const byPosition = (a, b) => a.position - b.position;
+  for (const map of [setsByLink, linksByWorkout, linksByExercise, plannedByProgram]) {
+    for (const rows of map.values()) rows.sort(byPosition);
+  }
+  indexes = { setsByLink, linksByWorkout, linksByExercise, plannedByProgram };
+  return indexes;
+}
+
+const index = () => indexes || buildIndexes();
+
+const children = (map, key) => {
+  const rows = map.get(key);
+  return rows ? rows.slice() : [];
+};
+
 const uid = () => crypto.randomUUID();
 export const now = () => Date.now();
 
@@ -44,6 +79,7 @@ function announce() {
 
 async function commit(entries) {
   for (const entry of entries) cache[entry.table].set(entry.row.id, entry.row);
+  indexes = null;
   await writeRows(entries);
   announce();
   scheduleSync();
@@ -54,6 +90,7 @@ async function hydrate() {
     const rows = await readAll(table);
     cache[table] = new Map(rows.map((row) => [row.id, row]));
   }
+  indexes = null;
 }
 
 export async function initStore() {
@@ -114,15 +151,11 @@ export function workoutsSorted() {
 }
 
 export function workoutExercises(workoutId) {
-  return list("workout_exercises")
-    .filter((row) => row.workout_id === workoutId)
-    .sort((a, b) => a.position - b.position);
+  return children(index().linksByWorkout, workoutId);
 }
 
 export function setsOf(workoutExerciseId) {
-  return list("sets")
-    .filter((row) => row.workout_exercise_id === workoutExerciseId)
-    .sort((a, b) => a.position - b.position);
+  return children(index().setsByLink, workoutExerciseId);
 }
 
 export async function updateWorkout(id, patch) {
@@ -273,9 +306,7 @@ export async function deleteSet(id) {
 }
 
 export function programExercises(programId) {
-  return list("program_exercises")
-    .filter((row) => row.program_id === programId && byId("exercises", row.exercise_id))
-    .sort((a, b) => a.position - b.position);
+  return children(index().plannedByProgram, programId).filter((row) => byId("exercises", row.exercise_id));
 }
 
 export async function createProgram(title) {
@@ -433,8 +464,7 @@ export async function deleteExercise(id) {
   for (const row of list("program_exercises")) {
     if (row.exercise_id === id) entries.push({ table: "program_exercises", row: { ...row, deleted_at: stamp } });
   }
-  for (const link of list("workout_exercises")) {
-    if (link.exercise_id !== id) continue;
+  for (const link of children(index().linksByExercise, id)) {
     entries.push({ table: "workout_exercises", row: { ...link, deleted_at: stamp } });
     for (const set of setsOf(link.id)) entries.push({ table: "sets", row: { ...set, deleted_at: stamp } });
   }
@@ -469,7 +499,7 @@ export function summarizeSets(sets) {
 }
 
 export function exerciseSessions(exerciseId) {
-  const links = list("workout_exercises").filter((row) => row.exercise_id === exerciseId);
+  const links = index().linksByExercise.get(exerciseId) || [];
   const sessions = [];
   for (const link of links) {
     const workout = byId("workouts", link.workout_id);
@@ -530,24 +560,25 @@ export function weeklyBreakdown(weeks = 8) {
       byMuscle: Object.fromEntries(MUSCLE_GROUPS.map((group) => [group, 0]))
     });
   }
+  const linksByWorkout = index().linksByWorkout;
   for (const workout of list("workouts")) {
     const performed = new Date(`${workout.performed_on}T00:00:00`);
-    const bucket = buckets.find((item) => performed >= item.start && performed < item.end);
-    if (!bucket) continue;
+    const week = buckets.find((item) => performed >= item.start && performed < item.end);
+    if (!week) continue;
     let counted = false;
-    for (const link of workoutExercises(workout.id)) {
+    for (const link of linksByWorkout.get(workout.id) || []) {
       const exercise = cache.exercises.get(link.exercise_id);
       const sets = workingSets(link.id);
       if (sets.length === 0) continue;
       counted = true;
       const summary = summarizeSets(sets);
-      bucket.volume += summary.volume;
-      bucket.sets += sets.length;
-      if (exercise && bucket.byMuscle[exercise.muscle_group] !== undefined) {
-        bucket.byMuscle[exercise.muscle_group] += sets.length;
+      week.volume += summary.volume;
+      week.sets += sets.length;
+      if (exercise && week.byMuscle[exercise.muscle_group] !== undefined) {
+        week.byMuscle[exercise.muscle_group] += sets.length;
       }
     }
-    if (counted) bucket.workouts += 1;
+    if (counted) week.workouts += 1;
   }
   return buckets;
 }

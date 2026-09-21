@@ -1,3 +1,5 @@
+import { checkAccess } from "./access.js";
+
 const MAX_BOUND_PARAMS = 90;
 const MAX_INSERT_STATEMENTS = 40;
 const PULL_LIMIT = 400;
@@ -200,18 +202,6 @@ async function sync(request, env) {
   return json({ rev, cursors: nextCursors, changes, hasMore, serverTime: Date.now() });
 }
 
-const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
-
-async function behindAccess(request, url, ctx) {
-  if (LOCAL_HOSTS.has(url.hostname)) return true;
-  if (request.headers.has("cf-access-jwt-assertion")) return true;
-  try {
-    const identity = ctx && ctx.access ? await ctx.access.getIdentity() : null;
-    if (identity && identity.email) return true;
-  } catch {}
-  return false;
-}
-
 const REPORT_WINDOW_MS = 60000;
 const REPORT_LIMIT = 20;
 const ERROR_RETENTION_MS = 30 * 86400000;
@@ -244,11 +234,13 @@ async function handleReport(request, env) {
 }
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname !== "/api/sync" && url.pathname !== "/api/report") return json({ error: "not_found" }, 404);
     if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    if (!(await behindAccess(request, url, ctx))) return json({ error: "forbidden" }, 403);
+    const access = await checkAccess(request, url, env);
+    if (access === "unavailable") return json({ error: "access_unavailable" }, 503);
+    if (access !== "ok") return json({ error: "forbidden" }, 403);
     try {
       return url.pathname === "/api/report" ? await handleReport(request, env) : await sync(request, env);
     } catch (error) {

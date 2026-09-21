@@ -782,6 +782,12 @@ textarea {
 }
 
 .banner {
+  position: fixed;
+  top: calc(var(--topbar) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  width: min(100% - 32px, 34rem);
   border-radius: var(--radius-m);
   padding: 11px 13px;
   font-size: 13px;
@@ -789,8 +795,10 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  background: color-mix(in srgb, var(--danger) 14%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
+  background: color-mix(in srgb, var(--danger) 22%, color-mix(in srgb, var(--surface) 80%, transparent));
+  backdrop-filter: saturate(180%) blur(18px);
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  box-shadow: var(--shadow);
 }
 
 @media (min-width: 56.25rem) {

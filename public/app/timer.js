@@ -9,7 +9,7 @@ let wakeWanted = false;
 
 function beep() {
   try {
-    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext) audioContext = new AudioContext();
     const gain = audioContext.createGain();
     gain.connect(audioContext.destination);
     gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
@@ -28,9 +28,22 @@ function beep() {
 
 function warmAudio() {
   try {
-    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext) audioContext = new AudioContext();
     if (audioContext.state === "suspended") audioContext.resume();
   } catch {}
+}
+
+let value = null;
+
+function build(bar) {
+  clear(bar);
+  value = el("span", { class: "timer-value num" });
+  bar.append(
+    value,
+    el("button", { class: "btn small ghost", type: "button", text: "-30", onclick: () => adjust(-30) }),
+    el("button", { class: "btn small ghost", type: "button", text: "+30", onclick: () => adjust(30) }),
+    el("button", { class: "btn small primary", type: "button", text: t("timerSkip"), onclick: stopRest })
+  );
 }
 
 function paint() {
@@ -39,6 +52,7 @@ function paint() {
   if (deadline === null) {
     bar.hidden = true;
     clear(bar);
+    value = null;
     return;
   }
   const remaining = (deadline - Date.now()) / 1000;
@@ -47,14 +61,9 @@ function paint() {
     stopRest();
     return;
   }
+  if (!value || !bar.contains(value)) build(bar);
   bar.hidden = false;
-  clear(bar);
-  bar.append(
-    el("span", { class: "timer-value num", text: formatDuration(remaining) }),
-    el("button", { class: "btn small ghost", type: "button", text: "-30", onclick: () => adjust(-30) }),
-    el("button", { class: "btn small ghost", type: "button", text: "+30", onclick: () => adjust(30) }),
-    el("button", { class: "btn small primary", type: "button", text: t("timerSkip"), onclick: stopRest })
-  );
+  value.textContent = formatDuration(remaining);
 }
 
 function adjust(delta) {

@@ -94,7 +94,7 @@ function paintBanner(state) {
       el("span", { text: t("sessionExpired") }),
       el("button", { class: "btn small", type: "button", text: t("statusSignIn"), onclick: signIn })
     ]);
-    view.before(banner);
+    document.body.append(banner);
   }
   if (state.status !== "auth" && banner) {
     banner.remove();

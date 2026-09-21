@@ -4,6 +4,10 @@
   "main": "src/index.js",
   "compatibility_date": "2026-09-13",
   "workers_dev": true,
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "vasilispngs.cloudflareaccess.com",
+    "ACCESS_AUD": "458ef3f9ff0d01f4b9c7311a29e40128ff293865dbb0307c6fe0fac7bbb8a5f7"
+  },
   "preview_urls": false,
   "assets": {
     "directory": "./public",

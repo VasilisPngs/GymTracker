@@ -5,7 +5,6 @@ const PUSH_BATCH = 100;
 const REQUEST_TIMEOUT = 15000;
 const RETRY_BASE = 4000;
 const RETRY_MAX = 120000;
-const IDLE_INTERVAL = 60000;
 
 export const syncEvents = new EventTarget();
 
@@ -20,7 +19,6 @@ let running = false;
 let rerun = false;
 let failures = 0;
 let retryTimer = null;
-let intervalTimer = null;
 
 export function getSyncState() {
   return { ...state };
@@ -153,8 +151,4 @@ export async function startSync() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") requestSync();
   });
-  clearInterval(intervalTimer);
-  intervalTimer = setInterval(() => {
-    if (document.visibilityState === "visible") requestSync();
-  }, IDLE_INTERVAL);
 }

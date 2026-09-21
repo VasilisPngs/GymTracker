@@ -1,5 +1,5 @@
 const DB_NAME = "gymtracker";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 export const TABLES = ["exercises", "workouts", "workout_exercises", "sets", "programs", "program_exercises"];
 
@@ -18,20 +18,17 @@ function openDatabase() {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
-      const ensure = (name, indexes = [], keyPath = "id") => {
-        if (db.objectStoreNames.contains(name)) return;
-        const store = db.createObjectStore(name, { keyPath });
-        for (const [indexName, path] of indexes) store.createIndex(indexName, path);
+      const ensure = (name, keyPath = "id") => {
+        if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath });
       };
-      ensure("exercises", [["muscle_group", "muscle_group"]]);
-      ensure("workouts", [["performed_on", "performed_on"]]);
-      ensure("workout_exercises", [["workout_id", "workout_id"]]);
-      ensure("sets", [["workout_exercise_id", "workout_exercise_id"]]);
+      for (const name of TABLES) ensure(name);
       if (db.objectStoreNames.contains("plan")) db.deleteObjectStore("plan");
-      ensure("programs");
-      ensure("program_exercises", [["program_id", "program_id"]]);
-      ensure("outbox", [], ["table", "id"]);
-      ensure("meta", [], "key");
+      ensure("outbox", ["table", "id"]);
+      ensure("meta", "key");
+      for (const name of db.objectStoreNames) {
+        const store = request.transaction.objectStore(name);
+        for (const indexName of [...store.indexNames]) store.deleteIndex(indexName);
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
