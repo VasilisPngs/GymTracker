@@ -6,13 +6,11 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "npx wrangler d1 migrations apply DB --remote && npx wrangler deploy",
-    "db:create": "wrangler d1 create gymtracker",
-    "db:migrate": "wrangler d1 migrations apply gymtracker --local",
-    "db:migrate:remote": "wrangler d1 migrations apply gymtracker --remote",
-    "db:console": "wrangler d1 execute gymtracker --remote --command",
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "tail": "wrangler tail"
   },
   "devDependencies": {
-    "wrangler": "4.131.2"
+    "wrangler": "4.136.3"
   }
 }

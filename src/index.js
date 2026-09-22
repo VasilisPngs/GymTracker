@@ -158,7 +158,7 @@ async function sync(request, env) {
       grouped.get(table).set(row.id, row);
     }
   } catch (error) {
-    return json({ error: "invalid_row", detail: error.message }, 400);
+    return json({ error: "invalid_row", detail: String(error.message).slice(0, 200) }, 400);
   }
 
   let rev = null;
@@ -208,6 +208,21 @@ const ERROR_RETENTION_MS = 30 * 86400000;
 let reportWindow = 0;
 let reportCount = 0;
 
+function recordError(env, entry) {
+  const now = Date.now();
+  return env.DB.batch([
+    env.DB.prepare("INSERT INTO errors (at, kind, message, stack, route, agent) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").bind(
+      now,
+      String(entry.kind || "error").slice(0, 20),
+      String(entry.message || "").slice(0, 300),
+      String(entry.stack || "").slice(0, 1000) || null,
+      String(entry.route || "").slice(0, 120) || null,
+      String(entry.agent || "").slice(0, 200) || null
+    ),
+    env.DB.prepare("DELETE FROM errors WHERE at < ?1").bind(now - ERROR_RETENTION_MS)
+  ]).catch(() => {});
+}
+
 async function handleReport(request, env) {
   const now = Date.now();
   if (now - reportWindow > REPORT_WINDOW_MS) {
@@ -219,32 +234,28 @@ async function handleReport(request, env) {
   const payload = await request.json().catch(() => null);
   const message = payload && typeof payload.message === "string" ? payload.message.trim() : "";
   if (!message) return json({ ok: true });
-  await env.DB.batch([
-    env.DB.prepare("INSERT INTO errors (at, kind, message, stack, route, agent) VALUES (?1, ?2, ?3, ?4, ?5, ?6)").bind(
-      now,
-      String(payload.kind || "error").slice(0, 20),
-      message.slice(0, 300),
-      String(payload.stack || "").slice(0, 1000) || null,
-      String(payload.route || "").slice(0, 120) || null,
-      (request.headers.get("user-agent") || "").slice(0, 200) || null
-    ),
-    env.DB.prepare("DELETE FROM errors WHERE at < ?1").bind(now - ERROR_RETENTION_MS)
-  ]).catch(() => {});
+  await recordError(env, { ...payload, message, agent: request.headers.get("user-agent") });
   return json({ ok: true });
 }
+
+const ROUTES = {
+  "/api/report": handleReport,
+  "/api/sync": sync
+};
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname !== "/api/sync" && url.pathname !== "/api/report") return json({ error: "not_found" }, 404);
+    const route = ROUTES[url.pathname];
+    if (!route) return json({ error: "not_found" }, 404);
     if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
     const access = await checkAccess(request, url, env);
     if (access === "unavailable") return json({ error: "access_unavailable" }, 503);
     if (access !== "ok") return json({ error: "forbidden" }, 403);
     try {
-      return url.pathname === "/api/report" ? await handleReport(request, env) : await sync(request, env);
+      return await route(request, env);
     } catch (error) {
-      return json({ error: "sync_failed", detail: String(error && error.message) }, 500);
+      return json({ error: "request_failed", detail: String(error && error.message).slice(0, 200) }, 500);
     }
   }
 };
