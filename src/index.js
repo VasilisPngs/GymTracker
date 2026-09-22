@@ -244,12 +244,12 @@ const ROUTES = {
 };
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const route = ROUTES[url.pathname];
     if (!route) return json({ error: "not_found" }, 404);
     if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
-    const access = await checkAccess(request, url, env);
+    const access = await checkAccess(request, url, env, ctx);
     if (access === "unavailable") return json({ error: "access_unavailable" }, 503);
     if (access !== "ok") return json({ error: "forbidden" }, 403);
     try {

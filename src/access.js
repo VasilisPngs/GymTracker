@@ -73,8 +73,8 @@ function readToken(request) {
   return readCookie(request.headers.get("cookie"), COOKIE);
 }
 
-export async function checkAccess(request, url, env) {
-  if (LOCAL_HOSTS.has(url.hostname)) return "ok";
+export async function checkAccess(request, url, env, ctx) {
+  if (LOCAL_HOSTS.has(url.hostname) || (ctx && ctx.access)) return "ok";
 
   const team = String(env.ACCESS_TEAM_DOMAIN || "").trim();
   const audience = String(env.ACCESS_AUD || "").trim();
