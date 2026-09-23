@@ -7,7 +7,7 @@
   "preview_urls": false,
   "vars": {
     "ACCESS_TEAM_DOMAIN": "vasilispngs.cloudflareaccess.com",
-    "ACCESS_AUD": "458ef3f9ff0d01f4b9c7311a29e40128ff293865dbb0307c6fe0fac7bbb8a5f7"
+    "ACCESS_AUD": "4f792d7de653fa38d86a34275b077189147ff0b54f766c2f2f67c9d30d93155e"
   },
   "assets": {
     "directory": "./public",
