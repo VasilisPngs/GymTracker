@@ -226,7 +226,7 @@ export function renderPrograms(container, repaint) {
           onchange: (event) => updateProgram(active.id, { title: event.target.value.trim() || active.title })
         }),
         el("button", {
-          class: "btn small ghost",
+          class: "btn ghost",
           type: "button",
           text: "···",
           "aria-label": t("programOptions"),

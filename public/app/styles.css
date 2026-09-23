@@ -894,8 +894,7 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   transform: translateY(-50%);
 }
 
-.btn:not(.small),
-.stepper button {
+.btn:not(.small) {
   min-height: 44px;
 }
 
@@ -982,10 +981,6 @@ body:has(.timer-bar:not([hidden])) .toast-host {
 .field {
   display: grid;
   gap: 4px;
-}
-
-.field > .tiny {
-  padding-left: 2px;
 }
 
 @media (min-width: 38.75rem) {
