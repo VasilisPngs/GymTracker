@@ -165,7 +165,7 @@ svg {
 .pill {
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--muted);
+  color: var(--text);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12.5px;
@@ -271,14 +271,13 @@ svg {
   padding: 6px 0;
   border-radius: var(--radius-m);
   text-decoration: none;
-  color: var(--muted);
+  color: var(--text);
   font-size: 11px;
   font-weight: 560;
   transition: color var(--speed) var(--ease), background var(--speed) var(--ease);
 }
 
 .tab[aria-current="page"] {
-  color: var(--text);
   background: var(--surface-2);
 }
 
@@ -336,13 +335,13 @@ h3 {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--text);
   font-size: 13px;
 }
 
 .tiny {
   font-size: 12px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .num {
@@ -488,7 +487,7 @@ textarea {
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--surface-3);
-  color: var(--muted);
+  color: var(--text);
 }
 
 .hint {
@@ -496,7 +495,7 @@ textarea {
   padding: 8px 11px;
   border-radius: var(--radius-s);
   background: var(--surface-2);
-  color: var(--muted);
+  color: var(--text);
   font-size: 12.5px;
   display: flex;
   gap: 8px;
@@ -512,7 +511,7 @@ textarea {
 }
 
 .set-grid.header {
-  color: var(--muted);
+  color: var(--text);
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -529,7 +528,7 @@ textarea {
 
 .set-index {
   font-weight: 620;
-  color: var(--muted);
+  color: var(--text);
   font-size: 13px;
   text-align: center;
 }
@@ -547,7 +546,7 @@ textarea {
   border: 0;
   flex: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--text);
   width: 36px;
   height: 42px;
   font-size: 17px;
@@ -586,7 +585,7 @@ textarea {
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--surface-2);
-  color: var(--muted);
+  color: var(--text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -631,7 +630,7 @@ textarea {
 
 .empty {
   text-align: center;
-  color: var(--muted);
+  color: var(--text);
   padding: 34px 16px;
   border: 1px dashed var(--border);
   border-radius: var(--radius-l);
@@ -1018,7 +1017,7 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   border: 1px solid var(--border);
   border-radius: var(--radius-m) var(--radius-m) 0 0;
   background: var(--surface-2);
-  color: var(--muted);
+  color: var(--text);
   font-size: 13.5px;
   font-weight: 560;
   cursor: pointer;
@@ -1028,7 +1027,6 @@ body:has(.timer-bar:not([hidden])) .toast-host {
 .prog-tab.current {
   background: var(--surface);
   border-bottom-color: var(--surface);
-  color: var(--text);
 }
 
 .prog-tab.add {
@@ -1074,7 +1072,6 @@ input.setup-note {
 .prog-tab-when {
   font-size: 11px;
   font-weight: 500;
-  opacity: 0.75;
 }
 
 .prog-tab.add {
