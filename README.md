@@ -15,7 +15,7 @@ keeps canonical English values.
 ```
 Browser (PWA)                       Cloudflare edge
 ┌──────────────────────────┐        ┌───────────────────────────┐
-│ IndexedDB  ← source of   │        │ Cloudflare Access (Google)│
+│ IndexedDB  ← source of   │        │ Cloudflare Access         │
 │            truth for UI  │        │            ↓              │
 │ outbox     ← queued      │  HTTPS │ Worker  /api/sync         │
 │              mutations   │ ─────► │            ↓              │
@@ -91,13 +91,16 @@ domain and the audience tag live in `vars` in `wrangler.jsonc`. Access still sta
 front of the hostname, so this is the second lock, not the first:
 
 1. Enable Zero Trust on the account (free plan covers up to 50 users).
-2. Cloudflare dashboard → **Workers & Pages** → `gymtracker` → **Access** tab.
-3. **Protect this Worker behind Access** → **All traffic**.
-4. Authentication policy: Google login restricted to the owner's email address.
-5. Session duration: up to one month.
+2. Self-hosted application `GymTracker` for `gymtracker.<subdomain>.workers.dev`, with its own Allow
+   policy `GymTracker` (the owner's email address) and a session of one month. Its audience tag
+   goes into `ACCESS_AUD` in `wrangler.jsonc`.
+3. Self-hosted application `GymTracker icons` for the same hostname with path `icons`, with its
+   own Bypass policy `GymTracker bypass` for Everyone. iOS fetches the home-screen icon without
+   the Access cookie; behind Access it would get the login page and draw a letter instead.
 
-Worker-level Access covers routes, custom domains, the `workers.dev` hostname and
-previews in one policy. Preview URLs are disabled in `wrangler.jsonc` anyway.
+Access sits on the hostname rather than on the Worker: Worker-level Access is checked after
+any path rule and cannot be bypassed, so the icons would stay locked. No policy is shared
+with the other apps.
 
 ## Free plan budget
 
@@ -174,9 +177,11 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-**Cloudflare Access (υποχρεωτικό):** Workers & Pages → `gymtracker` → καρτέλα Access →
-Protect this Worker behind Access → All traffic → πολιτική Google μόνο για το email σου →
-διάρκεια συνεδρίας έως έναν μήνα. Ο Worker επαληθεύει και ο ίδιος την υπογραφή του token,
+**Cloudflare Access (υποχρεωτικό):** self-hosted εφαρμογή `GymTracker` για το
+`gymtracker.<subdomain>.workers.dev` με δική της πολιτική Allow `GymTracker` (μόνο το email σου) και
+συνεδρία ενός μήνα· το audience tag της μπαίνει στο `ACCESS_AUD`. Δεύτερη εφαρμογή
+`GymTracker icons` με path `icons` και δική της πολιτική Bypass `GymTracker bypass`, για να κατεβάζει
+το iOS το εικονίδιο της αρχικής οθόνης. Καμία πολιτική δεν μοιράζεται με τις άλλες εφαρμογές. Ο Worker επαληθεύει και ο ίδιος την υπογραφή του token,
 οπότε χωρίς Access το `/api/sync` απαντάει 403 σε όλους.
 
 **Στο κινητό:** άνοιξέ το στο Safari και Προσθήκη στην αρχική οθόνη, ώστε να εγκατασταθεί ως
