@@ -94,8 +94,8 @@ front of the hostname, so this is the second lock, not the first:
 2. Self-hosted application `GymTracker` for `gymtracker.<subdomain>.workers.dev`, with its own Allow
    policy `GymTracker` (the owner's email address) and a session of one month. Its audience tag
    goes into `ACCESS_AUD` in `wrangler.jsonc`.
-3. Self-hosted application `GymTracker icons` for the same hostname with path `icons`, with its
-   own Bypass policy `GymTracker bypass` for Everyone. iOS fetches the home-screen icon without
+3. Self-hosted application `GymTracker public` for the same hostname with path `icons`, with its
+   own Bypass policy `GymTracker public` for Everyone. iOS fetches the home-screen icon without
    the Access cookie; behind Access it would get the login page and draw a letter instead.
 
 Access sits on the hostname rather than on the Worker: Worker-level Access is checked after
@@ -180,7 +180,7 @@ npm run deploy
 **Cloudflare Access (υποχρεωτικό):** self-hosted εφαρμογή `GymTracker` για το
 `gymtracker.<subdomain>.workers.dev` με δική της πολιτική Allow `GymTracker` (μόνο το email σου) και
 συνεδρία ενός μήνα· το audience tag της μπαίνει στο `ACCESS_AUD`. Δεύτερη εφαρμογή
-`GymTracker icons` με path `icons` και δική της πολιτική Bypass `GymTracker bypass`, για να κατεβάζει
+`GymTracker public` με path `icons` και δική της πολιτική Bypass `GymTracker public`, για να κατεβάζει
 το iOS το εικονίδιο της αρχικής οθόνης. Καμία πολιτική δεν μοιράζεται με τις άλλες εφαρμογές. Ο Worker επαληθεύει και ο ίδιος την υπογραφή του token,
 οπότε χωρίς Access το `/api/sync` απαντάει 403 σε όλους.
 
