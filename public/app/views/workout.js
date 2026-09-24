@@ -20,7 +20,7 @@ import {
   lastPerformance,
   describeSets
 } from "../store.js";
-import { startRest, keepAwake } from "../timer.js";
+import { startRest, stopRest, keepAwake } from "../timer.js";
 import { openExercisePicker } from "./picker.js";
 import { renderPrograms } from "./programs.js";
 import { navigate } from "../router.js";
@@ -229,7 +229,7 @@ export function renderWorkout(container, params) {
     return;
   }
 
-  keepAwake(true);
+  keepAwake(!workout.finished_at);
   const totals = workoutTotals(workout);
   const links = workoutExercises(workout.id);
 
@@ -306,6 +306,7 @@ export function renderWorkout(container, params) {
         text: t("finishWorkout"),
         onclick: async () => {
           await updateWorkout(workout.id, { finished_at: now() });
+          stopRest();
           keepAwake(false);
           toast(t("workoutFinished"));
           navigate("/");
@@ -338,6 +339,7 @@ function openWorkoutMenu(workout) {
         const confirmed = await confirmSheet(t("deleteWorkout"), t("deleteWorkoutBody"), t("delete"));
         if (confirmed) {
           await deleteWorkout(workout.id);
+          if (!workout.finished_at) stopRest();
           navigate("/");
         }
       }

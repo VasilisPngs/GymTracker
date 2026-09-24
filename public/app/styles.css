@@ -150,7 +150,7 @@ svg {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: saturate(180%) blur(18px);
   border-bottom: 1px solid var(--border);
@@ -467,6 +467,7 @@ textarea {
   border-radius: var(--radius-m);
   padding: 10px var(--field-pad);
   outline: none;
+  text-overflow: ellipsis;
   transition: border-color var(--speed) var(--ease), background var(--speed) var(--ease);
 }
 
@@ -531,12 +532,20 @@ textarea {
 
 .set-grid {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr var(--control);
-  gap: var(--space-2);
+  grid-template-columns: 28px minmax(0, 1.25fr) minmax(0, 1fr) var(--control);
+  gap: 6px;
   align-items: center;
-  margin: 0 var(--space-2);
-  padding: 6px var(--space-2);
+  margin: 0 6px;
+  padding: 6px var(--space-1);
   border-radius: var(--radius-m);
+}
+
+@media (max-width: 22.5rem) {
+  .set-grid {
+    grid-template-columns: 24px minmax(0, 1.2fr) minmax(0, 1fr) var(--control);
+    margin: 0 var(--space-1);
+    padding-inline: 2px;
+  }
 }
 
 .set-grid.header {
@@ -584,7 +593,7 @@ textarea {
   flex: none;
   background: transparent;
   color: var(--text);
-  width: 36px;
+  width: clamp(28px, 8.5vw, 34px);
   height: 42px;
   font-size: 17px;
   cursor: pointer;
@@ -659,12 +668,11 @@ textarea {
   border-radius: var(--radius-m);
   text-decoration: none;
   color: inherit;
-  cursor: pointer;
-  transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
 }
 
-.list-item:active {
-  transform: scale(0.99);
+:is(a, button).list-item {
+  cursor: pointer;
+  transition: opacity var(--speed-fast) var(--ease), border-color var(--speed) var(--ease);
 }
 
 .empty {
@@ -802,6 +810,9 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: max-content;
+  max-width: min(100vw - 32px, 34rem);
+  text-align: center;
   pointer-events: none;
 }
 
@@ -937,13 +948,12 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   transform: scale(0.96);
 }
 
-.tab,
-.list-item {
+.tab {
   transition: opacity var(--speed-fast) var(--ease), background var(--speed) var(--ease), color var(--speed) var(--ease);
 }
 
 .tab:active,
-.list-item:active {
+:is(a, button).list-item:active {
   opacity: 0.55;
 }
 
@@ -1168,7 +1178,7 @@ input.date-title[type] {
     filter: brightness(1.08);
   }
 
-  .list-item:hover {
+  :is(a, button).list-item:hover {
     border-color: color-mix(in srgb, var(--border), var(--text) 22%);
   }
 
