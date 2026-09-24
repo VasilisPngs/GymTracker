@@ -21,7 +21,7 @@ const VIEWS = {
   settings: renderSettings
 };
 
-const TAB_LABELS = { workout: "tabTrain", stats: "tabStats", settings: "tabSettings" };
+const TAB_LABELS = { workout: "tabWorkout", stats: "tabStats", settings: "tabSettings" };
 
 const TAB_FOR_ROUTE = {
   workout: "workout",

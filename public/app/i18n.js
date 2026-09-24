@@ -2,7 +2,7 @@ const STORAGE_KEY = "gymtracker.lang";
 const LANGUAGES = ["en", "el"];
 
 const STRINGS = {
-  tabTrain: ["Train", "Προπόνηση"],
+  tabWorkout: ["Workout", "Προπόνηση"],
   tabSettings: ["Settings", "Ρυθμίσεις"],
   tabStats: ["Stats", "Στατιστικά"],
 
