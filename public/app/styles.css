@@ -509,7 +509,9 @@ textarea {
   grid-template-columns: 30px 1fr 1fr 40px;
   gap: 8px;
   align-items: center;
-  padding: 7px 14px;
+  margin: 0 6px;
+  padding: 7px 8px;
+  border-radius: var(--radius-m);
 }
 
 .set-grid.header {
@@ -1039,7 +1041,7 @@ body:has(.timer-bar:not([hidden])) .toast-host {
 }
 
 .list-bar > .card,
-.list-bar .prog-tab,
+.list-bar .prog-tab:not(.add),
 .list-bar .chip:not([aria-pressed="true"]),
 .list-bar input,
 .list-bar input[type],
@@ -1074,4 +1076,21 @@ input.setup-note {
 .prog-tab.add {
   justify-content: center;
   align-items: center;
+}
+
+@media (min-width: 37.5rem) {
+  .sheet-backdrop {
+    padding: 0 16px max(24px, env(safe-area-inset-bottom));
+  }
+
+  .sheet {
+    border-radius: var(--radius-l);
+    padding-bottom: 18px;
+  }
+}
+
+@media (min-width: 56.25rem) {
+  .tabbar {
+    box-shadow: none;
+  }
 }
