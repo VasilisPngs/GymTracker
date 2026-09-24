@@ -42,7 +42,6 @@ function setRow(set, index, rest) {
       type: "button",
       text: set.is_warmup ? t("warmupMark") : String(index + 1),
       title: t("setOptions"),
-      style: "background:none;border:0;cursor:pointer",
       onclick: () => openSetMenu(set)
     }),
     stepper(set.weight_kg, 2.5, 0, (value) => updateSet(set.id, { weight_kg: value }), { decimal: true }),
@@ -148,7 +147,7 @@ function exerciseBlock(workout, link) {
   }
 
   block.append(
-    el("div", { style: "padding:10px 14px 14px;display:flex;gap:8px" }, [
+    el("div", { class: "exercise-foot" }, [
       el("button", {
         class: "btn small grow",
         type: "button",
@@ -242,8 +241,8 @@ export function renderWorkout(container, params) {
       el("div", { class: "row between" }, [
         el("input", {
           type: "date",
+          class: "date-title",
           value: workout.performed_on,
-          style: "width:auto;min-height:0;background:transparent;border:0;padding:0;font-weight:600",
           onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
         }),
         el("button", {

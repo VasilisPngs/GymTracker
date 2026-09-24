@@ -62,7 +62,6 @@ export function renderExerciseDetail(container, params) {
     return;
   }
 
-  container.append(el("h2", { text: t("sessionsHeading") }));
   const list = el("div", { class: "list" });
   for (const session of [...sessions].reverse()) {
     list.append(
@@ -75,7 +74,7 @@ export function renderExerciseDetail(container, params) {
       ])
     );
   }
-  container.append(list);
+  container.append(el("div", { class: "card" }, [el("h2", { text: t("sessionsHeading") }), list]));
 }
 
 function openMenu(exercise) {
