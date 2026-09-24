@@ -515,6 +515,7 @@ textarea {
 }
 
 .set-grid.header {
+  text-align: center;
   color: var(--text);
   font-size: 11.5px;
   text-transform: uppercase;
