@@ -317,7 +317,6 @@ export async function createProgram(title) {
   const row = {
     id: uid(),
     title,
-    notes: null,
     position: programsSorted().length,
     created_at: now(),
     deleted_at: null
@@ -434,13 +433,11 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
   return workout;
 }
 
-export async function createExercise(name, muscle_group, equipment) {
+export async function createExercise(name, muscle_group) {
   const row = {
     id: uid(),
     name,
     muscle_group,
-    equipment: equipment || null,
-    notes: null,
     is_archived: 0,
     created_at: now(),
     deleted_at: null

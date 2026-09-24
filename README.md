@@ -7,7 +7,7 @@ offline-first PWA client, Cloudflare Access for authentication.
 
 The interface ships in English and Greek. It follows the browser language on first run and
 can be switched any time in Settings → Language; the choice is stored per device.
-Muscle groups, equipment and all dates follow the selected language, while the database
+Muscle groups and all dates follow the selected language, while the database
 keeps canonical English values.
 
 ## Architecture
@@ -35,11 +35,11 @@ directly by the edge (free, no Worker invocation); the Worker only runs for `/ap
 
 | Table | Purpose |
 | --- | --- |
-| `exercises` | Catalog: name, muscle group, equipment, archived flag |
+| `exercises` | Catalog: name, muscle group, archived flag |
 | `workouts` | Session: date, title, notes, programme it came from, started/finished timestamps |
 | `workout_exercises` | Exercise inside a session, with ordering |
 | `sets` | Reps, weight (kg), warm-up flag, completion timestamp, ordering |
-| `programs` | A reusable split: title, notes, ordering |
+| `programs` | A reusable split: title, ordering |
 | `program_exercises` | Planned exercise in a programme, with target sets, reps, weight and rest |
 | `errors` | What the browser reported went wrong, kept for thirty days |
 | `sync_rev` | Single-row monotonic revision counter driving incremental pulls |

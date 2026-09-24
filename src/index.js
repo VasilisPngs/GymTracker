@@ -23,8 +23,6 @@ const SCHEMA = {
     id: { cast: text, required: true },
     name: { cast: text, required: true },
     muscle_group: { cast: text, required: true },
-    equipment: { cast: text },
-    notes: { cast: text },
     is_archived: { cast: bool, required: true },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
@@ -53,7 +51,6 @@ const SCHEMA = {
   programs: {
     id: { cast: text, required: true },
     title: { cast: text, required: true },
-    notes: { cast: text },
     position: { cast: int, required: true },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }

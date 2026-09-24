@@ -113,7 +113,7 @@ function openExerciseCreator(initialName, onCreated) {
       text: t("create"),
       onclick: async () => {
         if (!name.trim()) return toast(t("nameRequired"));
-        const exercise = await createExercise(name.trim(), group, null);
+        const exercise = await createExercise(name.trim(), group);
         close();
         if (onCreated) onCreated(exercise);
       }
