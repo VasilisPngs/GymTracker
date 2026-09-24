@@ -1034,7 +1034,7 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   padding: 8px 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-m) var(--radius-m) 0 0;
-  background: var(--surface-2);
+  background: transparent;
   color: var(--text);
   font-size: 14px;
   font-weight: var(--fw-medium);
@@ -1054,35 +1054,12 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   padding: 0 var(--space-3);
   font-size: 17px;
   font-weight: 400;
-  background: transparent;
   border-color: transparent;
 }
 
 .prog-tabs + .card {
   margin-top: calc(-1 * var(--space-3) - 1px);
   border-top-left-radius: 0;
-}
-
-.list-bar > .card,
-.list-bar .prog-tab:not(.add),
-.list-bar .chip:not([aria-pressed="true"]),
-.list-bar input,
-.list-bar input[type],
-.list-bar select {
-  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-}
-
-.list-bar .prog-tab:not(.current):not(.add) {
-  background: transparent;
-}
-
-.list-bar .prog-tab.current,
-.list-bar .prog-tabs + .card {
-  background: var(--surface-2);
-}
-
-.list-bar .prog-tab.current {
-  border-bottom-color: var(--surface-2);
 }
 
 input.setup-note {
