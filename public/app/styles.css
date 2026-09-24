@@ -12,16 +12,13 @@
   --success: #23c56e;
   --warning: #ffb020;
   --danger: #ff5470;
-  --radius-xs: 8px;
   --radius-s: 12px;
   --radius-m: 14px;
   --radius-l: 30px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
-  --space-4: 16px;
   --space-5: 20px;
-  --space-6: 24px;
   --pad: 16px;
   --field-pad: 12px;
   --control: 44px;
@@ -314,17 +311,6 @@ svg {
   gap: var(--space-2);
 }
 
-.card.flush {
-  padding: 0;
-  gap: 0;
-  overflow: hidden;
-}
-
-.card.flush > .empty {
-  border: 0;
-  border-radius: 0;
-}
-
 .row {
   display: flex;
   align-items: center;
@@ -351,7 +337,6 @@ h2 {
   letter-spacing: -0.01em;
   margin: 0;
 }
-
 
 .muted {
   color: var(--text);
@@ -448,10 +433,6 @@ textarea:disabled {
   overflow-x: auto;
   padding-bottom: 2px;
   scrollbar-width: none;
-}
-
-.chips::-webkit-scrollbar {
-  display: none;
 }
 
 input[type="text"],
@@ -705,7 +686,6 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
-
 .spark {
   width: 100%;
   height: 92px;
@@ -717,7 +697,6 @@ textarea {
   stroke-width: 2;
   fill: none;
 }
-
 
 .spark .area {
   fill: var(--accent-soft);
@@ -1016,10 +995,6 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   overflow-x: auto;
   scrollbar-width: none;
   padding: 0;
-}
-
-.prog-tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .prog-tab {

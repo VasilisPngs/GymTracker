@@ -22,13 +22,8 @@ function openDatabase() {
         if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath });
       };
       for (const name of TABLES) ensure(name);
-      if (db.objectStoreNames.contains("plan")) db.deleteObjectStore("plan");
       ensure("outbox", ["table", "id"]);
       ensure("meta", "key");
-      for (const name of db.objectStoreNames) {
-        const store = request.transaction.objectStore(name);
-        for (const indexName of [...store.indexNames]) store.deleteIndex(indexName);
-      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
