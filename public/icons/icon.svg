@@ -1,16 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="GymTracker">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#3d7bff"/>
       <stop offset="1" stop-color="#6a5cff"/>
     </linearGradient>
   </defs>
-  <rect width="100" height="100" rx="22.5" fill="url(#bg)"/>
-  <g fill="#fff" transform="translate(50 50) scale(0.942) translate(-50 -50)">
-    <rect x="30" y="44" width="40" height="12" rx="3.5"/>
-    <rect x="20.5" y="30" width="10.5" height="40" rx="4"/>
-    <rect x="69" y="30" width="10.5" height="40" rx="4"/>
-    <rect x="10.5" y="37" width="8.5" height="26" rx="3.5"/>
-    <rect x="81" y="37" width="8.5" height="26" rx="3.5"/>
+  <rect width="100" height="100" rx="22.5" fill="url(#g)"/>
+  <g transform="translate(50 50) scale(1) translate(-50 -50)">
+    <g fill="#ffffff">
+      <rect x="30" y="44" width="40" height="12" rx="3.5"/>
+      <rect x="20.5" y="30" width="10.5" height="40" rx="4"/>
+      <rect x="69" y="30" width="10.5" height="40" rx="4"/>
+      <rect x="10.5" y="37" width="8.5" height="26" rx="3.5"/>
+      <rect x="81" y="37" width="8.5" height="26" rx="3.5"/>
+    </g>
   </g>
 </svg>
