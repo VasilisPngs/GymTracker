@@ -149,7 +149,7 @@ export function stepper(value, step, min, onCommit, options = {}) {
     onchange: (event) => {
       const raw = event.target.value.replace(",", ".").trim();
       if (raw === "") return onCommit(null);
-      const parsed = Number(raw);
+      const parsed = options.decimal ? Number(raw) : Math.round(Number(raw));
       onCommit(Number.isFinite(parsed) ? Math.max(min, parsed) : null);
     },
     onfocus: (event) => event.target.select()

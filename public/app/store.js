@@ -66,6 +66,15 @@ const children = (map, key) => {
 };
 
 const uid = () => crypto.randomUUID();
+const nextPosition = (rows) => (rows.length > 0 ? rows[rows.length - 1].position + 1 : 0);
+
+function reorder(table, siblings, from, to) {
+  if (from < 0 || to < 0 || to >= siblings.length) return [];
+  const order = siblings.slice();
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
+  return order.flatMap((row, position) => (row.position === position ? [] : [{ table, row: { ...row, position } }]));
+}
 export const now = () => Date.now();
 
 function todayISO(date = new Date()) {
@@ -177,7 +186,7 @@ export async function deleteWorkout(id) {
 }
 
 export async function addExerciseToWorkout(workoutId, exerciseId) {
-  const position = workoutExercises(workoutId).length;
+  const position = nextPosition(workoutExercises(workoutId));
   const row = {
     id: uid(),
     workout_id: workoutId,
@@ -221,13 +230,8 @@ export async function moveWorkoutExercise(id, direction) {
   if (!current) return;
   const siblings = workoutExercises(current.workout_id);
   const index = siblings.findIndex((row) => row.id === id);
-  const target = index + direction;
-  if (target < 0 || target >= siblings.length) return;
-  const other = siblings[target];
-  await commit([
-    { table: "workout_exercises", row: { ...current, position: other.position } },
-    { table: "workout_exercises", row: { ...other, position: current.position } }
-  ]);
+  const entries = reorder("workout_exercises", siblings, index, index + direction);
+  if (entries.length > 0) await commit(entries);
 }
 
 export async function addSet(workoutExerciseId, values = {}) {
@@ -237,7 +241,7 @@ export async function addSet(workoutExerciseId, values = {}) {
   const row = {
     id: uid(),
     workout_exercise_id: workoutExerciseId,
-    position: existing.length,
+    position: nextPosition(existing),
     reps: values.reps ?? previous?.reps ?? null,
     weight_kg: values.weight_kg ?? previous?.weight_kg ?? null,
     is_warmup: warmup,
@@ -343,7 +347,7 @@ export async function addProgramExercise(programId, exerciseId) {
     id: uid(),
     program_id: programId,
     exercise_id: exerciseId,
-    position: siblings.length,
+    position: nextPosition(siblings),
     target_sets: null,
     target_reps: null,
     target_weight_kg: null,
@@ -373,13 +377,8 @@ export async function moveProgramExercise(id, direction) {
   if (!current) return;
   const siblings = programExercises(current.program_id);
   const index = siblings.findIndex((row) => row.id === id);
-  const target = index + direction;
-  if (target < 0 || target >= siblings.length) return;
-  const other = siblings[target];
-  await commit([
-    { table: "program_exercises", row: { ...current, position: other.position } },
-    { table: "program_exercises", row: { ...other, position: current.position } }
-  ]);
+  const entries = reorder("program_exercises", siblings, index, index + direction);
+  if (entries.length > 0) await commit(entries);
 }
 
 export async function startWorkoutFromProgram(programId, performed_on = todayISO()) {
@@ -515,7 +514,9 @@ export function exerciseSessions(exerciseId) {
       best: summary.best
     });
   }
-  return sessions.sort((a, b) => (a.workout.performed_on < b.workout.performed_on ? -1 : 1));
+  return sessions.sort((a, b) =>
+    a.workout.performed_on < b.workout.performed_on ? -1 : a.workout.performed_on > b.workout.performed_on ? 1 : a.workout.created_at - b.workout.created_at
+  );
 }
 
 export function lastPerformance(exerciseId, excludeWorkoutId) {

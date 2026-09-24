@@ -108,7 +108,7 @@ function normalizeRow(table, input) {
   return row;
 }
 
-function buildUpserts(table, rows, rev) {
+function buildUpserts(table, rows) {
   const columns = Object.keys(SCHEMA[table]);
   const perStatement = Math.max(1, Math.floor(MAX_BOUND_PARAMS / columns.length));
   const assignments = columns
@@ -119,7 +119,7 @@ function buildUpserts(table, rows, rev) {
   const statements = [];
   for (let i = 0; i < rows.length; i += perStatement) {
     const chunk = rows.slice(i, i + perStatement);
-    const placeholders = chunk.map(() => `(${columns.map(() => "?").join(", ")}, ${rev})`).join(", ");
+    const placeholders = chunk.map(() => `(${columns.map(() => "?").join(", ")}, (SELECT value FROM sync_rev WHERE id = 1))`).join(", ");
     const params = [];
     for (const row of chunk) for (const column of columns) params.push(row[column]);
     statements.push({
@@ -163,17 +163,16 @@ async function sync(request, env) {
 
   let rev = null;
   if (grouped.size > 0) {
-    const bumped = await env.DB.prepare("UPDATE sync_rev SET value = value + 1 WHERE id = 1 RETURNING value").first();
-    rev = bumped.value;
-
     const statements = [];
     for (const [table, rows] of grouped) {
-      statements.push(...buildUpserts(table, [...rows.values()], rev));
+      statements.push(...buildUpserts(table, [...rows.values()]));
     }
     if (statements.length > MAX_INSERT_STATEMENTS) return json({ error: "batch_too_large" }, 413);
-    if (statements.length > 0) {
-      await env.DB.batch(statements.map((s) => env.DB.prepare(s.sql).bind(...s.params)));
-    }
+    const results = await env.DB.batch([
+      env.DB.prepare("UPDATE sync_rev SET value = value + 1 WHERE id = 1 RETURNING value"),
+      ...statements.map((s) => env.DB.prepare(s.sql).bind(...s.params))
+    ]);
+    rev = results[0].results[0].value;
   }
 
   const cursors = payload.cursors || {};

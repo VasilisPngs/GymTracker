@@ -5,6 +5,7 @@ let deadline = null;
 let ticker = null;
 let audioContext = null;
 let wakeLock = null;
+let wakeRequest = null;
 let wakeWanted = false;
 
 function beep() {
@@ -91,13 +92,21 @@ function stopRest() {
 export async function keepAwake(enabled) {
   wakeWanted = enabled;
   if (!("wakeLock" in navigator)) return;
-  if (enabled && !wakeLock && document.visibilityState === "visible") {
-    try {
-      wakeLock = await navigator.wakeLock.request("screen");
-      wakeLock.addEventListener("release", () => {
-        wakeLock = null;
+  if (enabled && !wakeLock && !wakeRequest && document.visibilityState === "visible") {
+    wakeRequest = navigator.wakeLock
+      .request("screen")
+      .then((sentinel) => {
+        wakeLock = sentinel;
+        sentinel.addEventListener("release", () => {
+          if (wakeLock === sentinel) wakeLock = null;
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        wakeRequest = null;
       });
-    } catch {}
+    await wakeRequest;
+    if (!wakeWanted) return keepAwake(false);
   }
   if (!enabled && wakeLock) {
     try {
