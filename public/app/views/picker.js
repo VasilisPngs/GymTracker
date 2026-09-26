@@ -3,7 +3,7 @@ import { t, muscleGroupName } from "../i18n.js";
 import { MUSCLE_GROUPS, exercisesByRecent, createExercise } from "../store.js";
 import { openExerciseMenu } from "./exercises.js";
 
-export function openExercisePicker(onPick) {
+export function openExercisePicker(onPick, title = t("addExercise")) {
   let query = "";
   let group = "";
   const listNode = el("div", { class: "list" });
@@ -58,7 +58,7 @@ export function openExercisePicker(onPick) {
   paint();
 
   closeSheet = openSheet(() => [
-    el("h2", { text: t("addExercise") }),
+    el("h2", { text: title }),
     searchField({
       placeholder: t("searchExercises"),
       oninput: (event) => {

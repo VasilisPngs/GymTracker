@@ -13,6 +13,7 @@ import {
   addProgramExercise,
   updateProgramExercise,
   removeProgramExercise,
+  replaceProgramExercise,
   moveProgramExercise,
   startWorkoutFromProgram
 } from "../store.js";
@@ -72,12 +73,19 @@ function programRow(item) {
         el("div", { class: "exercise-title", text: exercise.name }),
         el("div", { class: "tiny" }, [el("span", { class: "badge", text: muscleGroupName(exercise.muscle_group) })])
       ]),
-      el("button", {
-        class: "btn small ghost",
-        type: "button",
-        "aria-label": t("ariaExerciseOptions"),
-        onclick: () => openProgramExerciseMenu(item, exercise)
-      }, icon("more"))
+      el("div", { class: "row" }, [
+        el("button", {
+          class: "btn small ghost",
+          type: "button",
+          onclick: () => openExercisePicker((exerciseId) => replaceProgramExercise(item.id, exerciseId), t("replaceExercise"))
+        }, [icon("swap"), t("replace")]),
+        el("button", {
+          class: "btn small ghost",
+          type: "button",
+          "aria-label": t("ariaExerciseOptions"),
+          onclick: () => openProgramExerciseMenu(item, exercise)
+        }, icon("more"))
+      ])
     ]),
     el("input", {
       type: "text",

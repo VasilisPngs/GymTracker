@@ -64,6 +64,7 @@ const SCHEMA = {
     target_weight_kg: { cast: real },
     rest_seconds: { cast: int },
     notes: { cast: text },
+    edited_at: { cast: int },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
   },

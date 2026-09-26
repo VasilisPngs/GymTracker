@@ -13,6 +13,7 @@ import {
   summarizeSets,
   addExerciseToWorkout,
   removeWorkoutExercise,
+  replaceWorkoutExercise,
   moveWorkoutExercise,
   addSet,
   updateSet,
@@ -127,12 +128,19 @@ function exerciseBlock(workout, link) {
           summary.count > 0 ? ` ${plural(summary.count, "set")}` : ` ${t("noWorkingSets")}`
         ])
       ]),
-      el("button", {
-        class: "btn small ghost",
-        type: "button",
-        "aria-label": t("ariaExerciseOptions"),
-        onclick: () => openExerciseMenu(workout, link, exercise)
-      }, icon("more"))
+      el("div", { class: "row" }, [
+        el("button", {
+          class: "btn small ghost",
+          type: "button",
+          onclick: () => openExercisePicker((exerciseId) => replaceWorkoutExercise(link.id, exerciseId), t("replaceExercise"))
+        }, [icon("swap"), t("replace")]),
+        el("button", {
+          class: "btn small ghost",
+          type: "button",
+          "aria-label": t("ariaExerciseOptions"),
+          onclick: () => openExerciseMenu(workout, link, exercise)
+        }, icon("more"))
+      ])
     ])
   ]);
 

@@ -81,6 +81,8 @@ const STRINGS = {
   moveUp: ["Move up", "Μετακίνηση πάνω"],
   moveDown: ["Move down", "Μετακίνηση κάτω"],
   moveEarlier: ["Move earlier", "Μετακίνηση πιο μπροστά"],
+  replace: ["Replace", "Αλλαγή"],
+  replaceExercise: ["Replace exercise", "Αλλαγή άσκησης"],
   moveLater: ["Move later", "Μετακίνηση πιο μετά"],
   removeFromWorkout: ["Remove from workout", "Αφαίρεση από την προπόνηση"],
   removeExercise: ["Remove exercise", "Αφαίρεση άσκησης"],

@@ -183,20 +183,86 @@ export async function deleteWorkout(id) {
   await commit(entries);
 }
 
+function latestOfProgram(workout) {
+  if (!workout || !workout.program_id) return false;
+  return workoutsSorted().find((row) => row.program_id === workout.program_id)?.id === workout.id;
+}
+
+function plannedForLatest(link) {
+  const workout = byId("workouts", link.workout_id);
+  return latestOfProgram(workout) ? plannedFor(link, workout.program_id) : null;
+}
+
+function latestSets(exerciseId, workoutId) {
+  const previous = lastPerformance(exerciseId, workoutId);
+  if (!previous) return null;
+  const sets = setsOf(previous.link.id);
+  return { previous, sets: sets.filter((set) => set.is_warmup).concat(sets.filter((set) => !set.is_warmup)) };
+}
+
+function setRows(linkId, template, stamp, from = 0) {
+  return template.map((set, index) => ({
+    table: "sets",
+    row: {
+      id: uid(),
+      workout_exercise_id: linkId,
+      position: from + index,
+      reps: set.reps ?? null,
+      weight_kg: set.weight_kg ?? null,
+      is_warmup: set.is_warmup ? 1 : 0,
+      rest_seconds: set.is_warmup ? null : set.rest_seconds ?? null,
+      completed_at: null,
+      created_at: stamp,
+      deleted_at: null
+    }
+  }));
+}
+
 export async function addExerciseToWorkout(workoutId, exerciseId) {
-  const position = nextPosition(workoutExercises(workoutId));
+  const latest = latestSets(exerciseId, workoutId);
+  const stamp = now();
   const row = {
     id: uid(),
     workout_id: workoutId,
     exercise_id: exerciseId,
-    position,
-    rest_after_seconds: lastPerformance(exerciseId, workoutId)?.link.rest_after_seconds ?? null,
-    notes: null,
-    created_at: now(),
+    position: nextPosition(workoutExercises(workoutId)),
+    rest_after_seconds: latest?.previous.link.rest_after_seconds ?? null,
+    notes: latest?.previous.link.notes ?? null,
+    created_at: stamp,
     deleted_at: null
   };
-  await commit([{ table: "workout_exercises", row }]);
+  await commit([{ table: "workout_exercises", row }].concat(latest ? setRows(row.id, latest.sets, stamp) : []));
   return row;
+}
+
+export async function replaceWorkoutExercise(linkId, exerciseId) {
+  const link = byId("workout_exercises", linkId);
+  if (!link || link.exercise_id === exerciseId) return;
+  const stamp = now();
+  const sets = setsOf(link.id);
+  const open = sets.filter((set) => !set.completed_at);
+  const latest = latestSets(exerciseId, link.workout_id);
+  const entries = [];
+  let target;
+  if (open.length < sets.length) {
+    const siblings = workoutExercises(link.workout_id);
+    for (const row of siblings.slice(siblings.findIndex((row) => row.id === link.id) + 1)) {
+      entries.push({ table: "workout_exercises", row: { ...row, position: row.position + 1 } });
+    }
+    target = { id: uid(), workout_id: link.workout_id, exercise_id: exerciseId, position: link.position + 1, created_at: stamp, deleted_at: null };
+  } else {
+    target = { ...link, exercise_id: exerciseId };
+  }
+  target.rest_after_seconds = latest ? latest.previous.link.rest_after_seconds ?? null : link.rest_after_seconds;
+  target.notes = latest?.previous.link.notes ?? null;
+  entries.push({ table: "workout_exercises", row: target });
+  if (latest) {
+    for (const set of open) entries.push({ table: "sets", row: { ...set, deleted_at: stamp } });
+    entries.push(...setRows(target.id, latest.sets, stamp));
+  } else {
+    for (const set of open) entries.push({ table: "sets", row: { ...set, workout_exercise_id: target.id, weight_kg: null } });
+  }
+  await commit(entries);
 }
 
 export async function updateWorkoutExercise(id, patch) {
@@ -204,13 +270,8 @@ export async function updateWorkoutExercise(id, patch) {
   if (!current) return;
   const row = { ...current, ...patch };
   const entries = [{ table: "workout_exercises", row }];
-  const workout = byId("workouts", row.workout_id);
-  if (workout && workout.program_id) {
-    const planned = plannedFor(row, workout.program_id);
-    if (planned && planned.notes !== row.notes) {
-      entries.push({ table: "program_exercises", row: { ...planned, notes: row.notes } });
-    }
-  }
+  const planned = plannedForLatest(row);
+  if (planned && planned.notes !== row.notes) entries.push({ table: "program_exercises", row: { ...planned, notes: row.notes } });
   await commit(entries);
 }
 
@@ -290,9 +351,7 @@ export async function addSet(workoutExerciseId, values = {}) {
 }
 
 function targetFromRows(link, rows) {
-  const workout = byId("workouts", link.workout_id);
-  if (!workout || !workout.program_id) return null;
-  const planned = plannedFor(link, workout.program_id);
+  const planned = plannedForLatest(link);
   if (!planned || rows === 0 || planned.target_sets === rows) return null;
   return { ...planned, target_sets: rows };
 }
@@ -304,9 +363,7 @@ function plannedFor(link, programId) {
 function targetFromSets(row) {
   const link = byId("workout_exercises", row.workout_exercise_id);
   if (!link) return null;
-  const workout = byId("workouts", link.workout_id);
-  if (!workout || !workout.program_id) return null;
-  const planned = plannedFor(link, workout.program_id);
+  const planned = plannedForLatest(link);
   if (!planned) return null;
   const done = setsOf(link.id)
     .map((set) => (set.id === row.id ? row : set))
@@ -377,6 +434,19 @@ export async function deleteProgram(id) {
   await commit(entries);
 }
 
+function latestTargets(exerciseId) {
+  const latest = latestSets(exerciseId, null);
+  const working = latest ? latest.sets.filter((set) => !set.is_warmup) : [];
+  const last = working[working.length - 1];
+  return {
+    target_sets: working.length || null,
+    target_reps: last?.reps ?? null,
+    target_weight_kg: last?.weight_kg ?? null,
+    rest_seconds: working[0]?.rest_seconds ?? null,
+    notes: latest?.previous.link.notes ?? null
+  };
+}
+
 export async function addProgramExercise(programId, exerciseId) {
   const siblings = programExercises(programId);
   const row = {
@@ -384,11 +454,8 @@ export async function addProgramExercise(programId, exerciseId) {
     program_id: programId,
     exercise_id: exerciseId,
     position: nextPosition(siblings),
-    target_sets: null,
-    target_reps: null,
-    target_weight_kg: null,
-    rest_seconds: null,
-    notes: null,
+    ...latestTargets(exerciseId),
+    edited_at: null,
     created_at: now(),
     deleted_at: null
   };
@@ -396,10 +463,34 @@ export async function addProgramExercise(programId, exerciseId) {
   return row;
 }
 
+const PLANNED_TARGETS = ["target_sets", "target_reps", "target_weight_kg", "rest_seconds"];
+
 export async function updateProgramExercise(id, patch) {
   const current = byId("program_exercises", id);
   if (!current) return;
-  await commit([{ table: "program_exercises", row: { ...current, ...patch } }]);
+  const edited = PLANNED_TARGETS.some((key) => key in patch) ? { edited_at: now() } : {};
+  await commit([{ table: "program_exercises", row: { ...current, ...patch, ...edited } }]);
+}
+
+export async function replaceProgramExercise(id, exerciseId) {
+  const current = byId("program_exercises", id);
+  if (!current || current.exercise_id === exerciseId) return;
+  const latest = latestTargets(exerciseId);
+  await commit([
+    {
+      table: "program_exercises",
+      row: {
+        ...current,
+        exercise_id: exerciseId,
+        target_sets: latest.target_sets ?? current.target_sets,
+        target_reps: latest.target_reps ?? current.target_reps,
+        target_weight_kg: latest.target_weight_kg,
+        rest_seconds: latest.rest_seconds ?? current.rest_seconds,
+        notes: latest.notes,
+        edited_at: null
+      }
+    }
+  ]);
 }
 
 export async function removeProgramExercise(id) {
@@ -436,36 +527,32 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
   let position = 0;
   for (const planned of programExercises(programId)) {
     if (!byId("exercises", planned.exercise_id)) continue;
+    const latest = latestSets(planned.exercise_id, workout.id);
     const link = {
       id: uid(),
       workout_id: workout.id,
       exercise_id: planned.exercise_id,
       position,
-      rest_after_seconds: lastPerformance(planned.exercise_id, workout.id)?.link.rest_after_seconds ?? null,
-      notes: planned.notes,
+      rest_after_seconds: latest?.previous.link.rest_after_seconds ?? null,
+      notes: planned.notes ?? latest?.previous.link.notes ?? null,
       created_at: stamp,
       deleted_at: null
     };
     entries.push({ table: "workout_exercises", row: link });
-    const count = Math.max(planned.target_sets || 0, 0);
+    const edited = latest && planned.edited_at > (latest.previous.workout.started_at || latest.previous.workout.created_at);
     const plan = restPlan(planned.exercise_id, workout.id);
-    for (let index = 0; index < count; index += 1) {
-      entries.push({
-        table: "sets",
-        row: {
-          id: uid(),
-          workout_exercise_id: link.id,
-          position: index,
-          reps: planned.target_reps,
-          weight_kg: planned.target_weight_kg,
-          is_warmup: 0,
-          rest_seconds: restFor(plan, index, planned.rest_seconds),
-          completed_at: null,
-          created_at: stamp,
-          deleted_at: null
-        }
-      });
-    }
+    const template =
+      latest && !edited
+        ? latest.sets
+        : (latest ? latest.sets.filter((set) => set.is_warmup) : []).concat(
+            Array.from({ length: Math.max(planned.target_sets || 0, 0) }, (_, index) => ({
+              reps: planned.target_reps,
+              weight_kg: planned.target_weight_kg,
+              is_warmup: 0,
+              rest_seconds: restFor(plan, index, planned.rest_seconds)
+            }))
+          );
+    entries.push(...setRows(link.id, template, stamp));
     position += 1;
   }
   await commit(entries);
