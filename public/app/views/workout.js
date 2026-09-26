@@ -75,10 +75,14 @@ function restRow(seconds, title, onCommit, extra) {
           el("label", { class: "field" }, [el("span", { class: "tiny", text: t("colRest") }), stepper(seconds, 15, 0, onCommit)])
         ])
     },
-    el("span", { class: "rest-pill" }, [
-      icon(seconds ? "timer" : "plus"),
-      el("span", { class: "num", text: seconds ? formatDuration(seconds) : t("addRest") })
-    ])
+    el(
+      "span",
+      { class: "rest-track" },
+      el("span", { class: "rest-pill" }, [
+        icon(seconds ? "timer" : "plus"),
+        el("span", { class: "num", text: seconds ? formatDuration(seconds) : t("addRest") })
+      ])
+    )
   );
 }
 
@@ -157,14 +161,16 @@ function exerciseBlock(workout, link) {
     );
   }
 
-  block.append(
-    el("div", { class: "set-grid header" }, [
-      el("span", { text: t("colSet") }),
-      el("span", { text: t("colKg") }),
-      el("span", { text: t("colReps") }),
-      el("span", { text: "" })
-    ])
-  );
+  if (sets.length > 0) {
+    block.append(
+      el("div", { class: "set-grid header" }, [
+        el("span", { text: t("colSet") }),
+        el("span", { text: t("colKg") }),
+        el("span", { text: t("colReps") }),
+        el("span", { text: "" })
+      ])
+    );
+  }
 
   let index = 0;
   const lastWorking = working[working.length - 1];
