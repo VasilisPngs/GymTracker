@@ -190,6 +190,7 @@ export async function addExerciseToWorkout(workoutId, exerciseId) {
     workout_id: workoutId,
     exercise_id: exerciseId,
     position,
+    rest_after_seconds: lastPerformance(exerciseId, workoutId)?.link.rest_after_seconds ?? null,
     notes: null,
     created_at: now(),
     deleted_at: null
@@ -418,6 +419,7 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
       workout_id: workout.id,
       exercise_id: planned.exercise_id,
       position,
+      rest_after_seconds: lastPerformance(planned.exercise_id, workout.id)?.link.rest_after_seconds ?? null,
       notes: planned.notes,
       created_at: stamp,
       deleted_at: null

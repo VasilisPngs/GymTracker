@@ -34,7 +34,7 @@ function openWorkout() {
   return workoutsSorted().find((workout) => !workout.finished_at && (workout.started_at || 0) >= cutoff) || null;
 }
 
-function setRow(set, index) {
+function setRow(set, index, rest) {
   const classes = ["set-grid"];
   if (set.completed_at) classes.push("done");
   if (set.is_warmup) classes.push("warmup");
@@ -56,29 +56,26 @@ function setRow(set, index) {
       onclick: () => {
         const completing = !set.completed_at;
         updateSet(set.id, { completed_at: completing ? now() : null });
-        if (completing && !set.is_warmup) startRest(set.rest_seconds);
+        if (completing && !set.is_warmup) startRest(rest);
       }
     }, icon("check"))
   ]);
 }
 
-function restRow(set, number) {
+function restRow(seconds, title, onCommit, extra) {
   return el(
     "button",
     {
-      class: "rest-row",
+      class: extra ? `rest-row ${extra}` : "rest-row",
       type: "button",
-      "aria-label": t("restAfterSet", { n: number }),
+      "aria-label": title,
       onclick: () =>
         openSheet(() => [
-          el("h2", { text: t("restAfterSet", { n: number }) }),
-          el("label", { class: "field" }, [
-            el("span", { class: "tiny", text: t("colRest") }),
-            stepper(set.rest_seconds, 15, 0, (value) => updateSet(set.id, { rest_seconds: value }))
-          ])
+          el("h2", { text: title }),
+          el("label", { class: "field" }, [el("span", { class: "tiny", text: t("colRest") }), stepper(seconds, 15, 0, onCommit)])
         ])
     },
-    [icon("timer"), el("span", { class: "num", text: set.rest_seconds ? formatDuration(set.rest_seconds) : t("noRest") })]
+    [icon("timer"), el("span", { class: "num", text: seconds ? formatDuration(seconds) : t("noRest") })]
   );
 }
 
@@ -167,9 +164,13 @@ function exerciseBlock(workout, link) {
   );
 
   let index = 0;
+  const lastWorking = working[working.length - 1];
   for (const set of sets.filter((set) => set.is_warmup).concat(working)) {
-    block.append(setRow(set, set.is_warmup ? index : index++));
-    if (!set.is_warmup) block.append(restRow(set, index));
+    const last = set === lastWorking;
+    block.append(setRow(set, set.is_warmup ? index : index++, last ? link.rest_after_seconds : set.rest_seconds));
+    if (!set.is_warmup && !last) {
+      block.append(restRow(set.rest_seconds, t("restAfterSet", { n: index }), (value) => updateSet(set.id, { rest_seconds: value })));
+    }
   }
 
   block.append(
@@ -333,10 +334,15 @@ export function renderWorkout(container, params) {
     container.append(el("div", { class: "empty", text: t("noExercisesYet") }));
   }
 
-  for (const link of links) {
-    const block = exerciseBlock(workout, link);
-    if (block) container.append(block);
-  }
+  const blocks = links.map((link) => [link, exerciseBlock(workout, link)]).filter(([, block]) => block);
+  blocks.forEach(([link, block], position) => {
+    container.append(block);
+    if (position < blocks.length - 1) {
+      container.append(
+        restRow(link.rest_after_seconds, t("restBeforeNext"), (value) => updateWorkoutExercise(link.id, { rest_after_seconds: value }), "between")
+      );
+    }
+  });
 
   container.append(
     el("button", {

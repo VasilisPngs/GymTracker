@@ -646,6 +646,12 @@ textarea {
   height: 14px;
 }
 
+.rest-row.between {
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--pad);
+}
+
 .set-grid.header {
   text-align: center;
   color: var(--text);

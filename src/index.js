@@ -42,6 +42,7 @@ const SCHEMA = {
     workout_id: { cast: text, required: true },
     exercise_id: { cast: text, required: true },
     position: { cast: int, required: true },
+    rest_after_seconds: { cast: int },
     notes: { cast: text },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
