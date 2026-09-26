@@ -6,7 +6,6 @@
   --surface-3: #232733;
   --border: #272b35;
   --text: #eef1f6;
-  --calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eef1f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 5h10a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 17 19H7a2.5 2.5 0 0 1-2.5-2.5v-9A2.5 2.5 0 0 1 7 5zM4.5 10h15M9 3v4M15 3v4'/%3E%3C/svg%3E");
   --muted: #97a0b2;
   --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2397a0b2' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
   --accent: #266bff;
@@ -50,7 +49,6 @@
     --surface-3: #e6e9ef;
     --border: #dfe3ea;
     --text: #131720;
-    --calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23131720' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 5h10a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 17 19H7a2.5 2.5 0 0 1-2.5-2.5v-9A2.5 2.5 0 0 1 7 5zM4.5 10h15M9 3v4M15 3v4'/%3E%3C/svg%3E");
     --muted: #5f6878;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f6878' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
     --warning: #905d00;
@@ -68,7 +66,6 @@
   --surface-3: #e6e9ef;
   --border: #dfe3ea;
   --text: #131720;
-  --calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23131720' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 5h10a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 17 19H7a2.5 2.5 0 0 1-2.5-2.5v-9A2.5 2.5 0 0 1 7 5zM4.5 10h15M9 3v4M15 3v4'/%3E%3C/svg%3E");
   --muted: #5f6878;
   --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f6878' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
   --warning: #905d00;
@@ -90,7 +87,6 @@
   --surface-3: #1a1c23;
   --border: #23262f;
   --text: #f2f5fa;
-  --calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2f5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 5h10a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 17 19H7a2.5 2.5 0 0 1-2.5-2.5v-9A2.5 2.5 0 0 1 7 5zM4.5 10h15M9 3v4M15 3v4'/%3E%3C/svg%3E");
   --muted: #8d95a6;
   --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238d95a6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
@@ -1208,18 +1204,31 @@ input.setup-note {
   padding: var(--space-1) var(--pad) var(--pad);
 }
 
-input.date-title[type]::-webkit-calendar-picker-indicator {
-  opacity: 0;
+.date-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control);
+  font-weight: var(--fw-semibold);
   cursor: pointer;
 }
 
-input.date-title[type] {
-  width: auto;
-  min-height: var(--control);
+.date-text {
+  white-space: nowrap;
+}
+
+input.date-input[type] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   padding: 0;
   border: 0;
-  background: var(--calendar) no-repeat right center / 18px 18px;
-  font-weight: var(--fw-semibold);
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .prog-tab-name {

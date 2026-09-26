@@ -128,6 +128,7 @@ const STRINGS = {
   ariaExerciseOptions: ["exercise options", "επιλογές άσκησης"],
   ariaWorkoutOptions: ["workout options", "επιλογές προπόνησης"],
   workoutDuration: ["Workout duration", "Διάρκεια προπόνησης"],
+  workoutDate: ["Workout date", "Ημερομηνία προπόνησης"],
 
   timerSkip: ["Skip", "Παράλειψη"]
 };

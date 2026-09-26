@@ -1,4 +1,4 @@
-import { el, icon, append, clear, formatDate, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, icon, append, clear, formatDate, formatDay, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
@@ -284,12 +284,23 @@ export function renderWorkout(container, params) {
     el("div", { class: "card tight" }, [
       el("div", { class: "row between" }, [
         el("div", { class: "row" }, [
-          el("input", {
-            type: "date",
-            class: "date-title",
-            value: workout.performed_on,
-            onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
-          }),
+          el("label", { class: "date-field" }, [
+            el("span", { class: "date-text", text: formatDay(workout.performed_on) }),
+            icon("calendar"),
+            el("input", {
+              type: "date",
+              class: "date-input",
+              "aria-label": t("workoutDate"),
+              value: workout.performed_on,
+              onclick: (event) => {
+                if (matchMedia("(pointer: coarse)").matches) return;
+                try {
+                  event.target.showPicker();
+                } catch {}
+              },
+              onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
+            })
+          ]),
           workoutClock(workout)
         ]),
         el("button", {

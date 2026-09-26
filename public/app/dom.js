@@ -40,6 +40,7 @@ const ICON_PATHS = {
   up: "M12 6.5l6 10H6z",
   down: "M12 17.5l-6-10h12z",
   close: "M7 7l10 10M17 7L7 17",
+  calendar: "M7 5h10a2.5 2.5 0 0 1 2.5 2.5v9A2.5 2.5 0 0 1 17 19H7a2.5 2.5 0 0 1-2.5-2.5v-9A2.5 2.5 0 0 1 7 5zM4.5 10h15M9 3v4M15 3v4",
   timer: "M19.5 13.5a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0zM12 10v3.5l2.3 1.7M9.8 3h4.4"
 };
 
@@ -100,6 +101,15 @@ function dateFormatter(long) {
 
 export function formatDate(iso, long = false) {
   return dateFormatter(long).format(new Date(`${iso}T00:00:00`));
+}
+
+export function formatDay(iso) {
+  const date = new Date(`${iso}T00:00:00`);
+  const options =
+    date.getFullYear() === new Date().getFullYear()
+      ? { weekday: "short", day: "numeric", month: "short" }
+      : { day: "numeric", month: "short", year: "numeric" };
+  return new Intl.DateTimeFormat(locale(), options).format(date);
 }
 
 export function formatNumber(value, digits = 1) {
