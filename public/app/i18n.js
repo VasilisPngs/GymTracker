@@ -43,6 +43,8 @@ const STRINGS = {
   colTargetReps: ["Reps", "Επαναλήψεις"],
   colTargetWeight: ["Kg", "Κιλά"],
   colRest: ["Rest (seconds)", "Διάλειμμα (δευτερόλεπτα)"],
+  restAfterSet: ["Rest after set {n}", "Διάλειμμα μετά το σετ {n}"],
+  noRest: ["No rest", "Χωρίς διάλειμμα"],
   topSet: ["Top set", "Βαρύτερο σετ"],
   setupPlaceholder: ["Note for this exercise", "Σχόλιο για τη συγκεκριμένη άσκηση"],
   neverTrained: ["Never", "Ποτέ"],

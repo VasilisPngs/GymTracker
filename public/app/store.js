@@ -190,7 +190,6 @@ export async function addExerciseToWorkout(workoutId, exerciseId) {
     workout_id: workoutId,
     exercise_id: exerciseId,
     position,
-    rest_seconds: null,
     notes: null,
     created_at: now(),
     deleted_at: null
@@ -207,8 +206,8 @@ export async function updateWorkoutExercise(id, patch) {
   const workout = byId("workouts", row.workout_id);
   if (workout && workout.program_id) {
     const planned = plannedFor(row, workout.program_id);
-    if (planned && (planned.notes !== row.notes || planned.rest_seconds !== row.rest_seconds)) {
-      entries.push({ table: "program_exercises", row: { ...planned, notes: row.notes, rest_seconds: row.rest_seconds } });
+    if (planned && planned.notes !== row.notes) {
+      entries.push({ table: "program_exercises", row: { ...planned, notes: row.notes } });
     }
   }
   await commit(entries);
@@ -232,10 +231,27 @@ export async function moveWorkoutExercise(id, direction) {
   if (entries.length > 0) await commit(entries);
 }
 
+function restPlan(exerciseId, workoutId) {
+  const previous = lastPerformance(exerciseId, workoutId);
+  return previous ? setsOf(previous.link.id).filter((set) => !set.is_warmup).map((set) => set.rest_seconds ?? null) : [];
+}
+
+function restFor(plan, index, fallback) {
+  return plan.length > 0 ? plan[Math.min(index, plan.length - 1)] : fallback ?? null;
+}
+
 export async function addSet(workoutExerciseId, values = {}) {
   const existing = setsOf(workoutExerciseId);
   const warmup = values.is_warmup ?? 0;
-  const previous = warmup ? null : existing.filter((set) => !set.is_warmup).pop();
+  const working = existing.filter((set) => !set.is_warmup);
+  const previous = warmup ? null : working[working.length - 1];
+  const link = byId("workout_exercises", workoutExerciseId);
+  let rest = null;
+  if (!warmup && link) {
+    const workout = byId("workouts", link.workout_id);
+    const planned = workout && workout.program_id ? plannedFor(link, workout.program_id) : null;
+    rest = previous ? previous.rest_seconds ?? null : restFor(restPlan(link.exercise_id, link.workout_id), working.length, planned?.rest_seconds);
+  }
   const row = {
     id: uid(),
     workout_exercise_id: workoutExerciseId,
@@ -243,11 +259,11 @@ export async function addSet(workoutExerciseId, values = {}) {
     reps: values.reps ?? previous?.reps ?? null,
     weight_kg: values.weight_kg ?? previous?.weight_kg ?? null,
     is_warmup: warmup,
+    rest_seconds: rest,
     completed_at: null,
     created_at: now(),
     deleted_at: null
   };
-  const link = byId("workout_exercises", workoutExerciseId);
   const entries = [{ table: "sets", row }];
   if (link && !row.is_warmup) {
     const target = targetFromRows(link, existing.filter((set) => !set.is_warmup).length + 1);
@@ -402,13 +418,13 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
       workout_id: workout.id,
       exercise_id: planned.exercise_id,
       position,
-      rest_seconds: planned.rest_seconds,
       notes: planned.notes,
       created_at: stamp,
       deleted_at: null
     };
     entries.push({ table: "workout_exercises", row: link });
     const count = Math.max(planned.target_sets || 0, 0);
+    const plan = restPlan(planned.exercise_id, workout.id);
     for (let index = 0; index < count; index += 1) {
       entries.push({
         table: "sets",
@@ -419,6 +435,7 @@ export async function startWorkoutFromProgram(programId, performed_on = todayISO
           reps: planned.target_reps,
           weight_kg: planned.target_weight_kg,
           is_warmup: 0,
+          rest_seconds: restFor(plan, index, planned.rest_seconds),
           completed_at: null,
           created_at: stamp,
           deleted_at: null

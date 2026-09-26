@@ -39,7 +39,8 @@ const ICON_PATHS = {
   minus: "M5 12h14",
   up: "M12 6.5l6 10H6z",
   down: "M12 17.5l-6-10h12z",
-  close: "M7 7l10 10M17 7L7 17"
+  close: "M7 7l10 10M17 7L7 17",
+  timer: "M19.5 13.5a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0zM12 10v3.5l2.3 1.7M9.8 3h4.4"
 };
 
 const SOLID_ICONS = new Set(["up", "down"]);

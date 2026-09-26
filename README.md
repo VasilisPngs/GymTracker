@@ -38,7 +38,7 @@ directly by the edge (free, no Worker invocation); the Worker only runs for `/ap
 | `exercises` | Catalog: name, muscle group |
 | `workouts` | Session: date, title, notes, programme it came from, started/finished timestamps |
 | `workout_exercises` | Exercise inside a session, with ordering |
-| `sets` | Reps, weight (kg), warm-up flag, completion timestamp, ordering |
+| `sets` | Reps, weight (kg), warm-up flag, rest after the set, completion timestamp, ordering |
 | `programs` | A reusable split: title, ordering |
 | `program_exercises` | Planned exercise in a programme, with target sets, reps, weight and rest |
 | `errors` | What the browser reported went wrong, kept for thirty days |

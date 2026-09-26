@@ -621,6 +621,35 @@ textarea {
   }
 }
 
+.rest-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 12px);
+  min-height: 28px;
+  margin: 0 6px;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+}
+
+.rest-row::before,
+.rest-row::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.rest-row .icon {
+  width: 14px;
+  height: 14px;
+}
+
 .set-grid.header {
   text-align: center;
   color: var(--text);

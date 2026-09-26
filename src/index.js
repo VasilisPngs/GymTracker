@@ -42,7 +42,6 @@ const SCHEMA = {
     workout_id: { cast: text, required: true },
     exercise_id: { cast: text, required: true },
     position: { cast: int, required: true },
-    rest_seconds: { cast: int },
     notes: { cast: text },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
@@ -74,6 +73,7 @@ const SCHEMA = {
     reps: { cast: int },
     weight_kg: { cast: real },
     is_warmup: { cast: bool, required: true },
+    rest_seconds: { cast: int },
     completed_at: { cast: int },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }

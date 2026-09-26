@@ -34,7 +34,7 @@ function openWorkout() {
   return workoutsSorted().find((workout) => !workout.finished_at && (workout.started_at || 0) >= cutoff) || null;
 }
 
-function setRow(set, index, rest) {
+function setRow(set, index) {
   const classes = ["set-grid"];
   if (set.completed_at) classes.push("done");
   if (set.is_warmup) classes.push("warmup");
@@ -56,10 +56,30 @@ function setRow(set, index, rest) {
       onclick: () => {
         const completing = !set.completed_at;
         updateSet(set.id, { completed_at: completing ? now() : null });
-        if (completing && !set.is_warmup) startRest(rest);
+        if (completing && !set.is_warmup) startRest(set.rest_seconds);
       }
     }, icon("check"))
   ]);
+}
+
+function restRow(set, number) {
+  return el(
+    "button",
+    {
+      class: "rest-row",
+      type: "button",
+      "aria-label": t("restAfterSet", { n: number }),
+      onclick: () =>
+        openSheet(() => [
+          el("h2", { text: t("restAfterSet", { n: number }) }),
+          el("label", { class: "field" }, [
+            el("span", { class: "tiny", text: t("colRest") }),
+            stepper(set.rest_seconds, 15, 0, (value) => updateSet(set.id, { rest_seconds: value }))
+          ])
+        ])
+    },
+    [icon("timer"), el("span", { class: "num", text: set.rest_seconds ? formatDuration(set.rest_seconds) : t("noRest") })]
+  );
 }
 
 function openSetMenu(set) {
@@ -148,7 +168,8 @@ function exerciseBlock(workout, link) {
 
   let index = 0;
   for (const set of sets.filter((set) => set.is_warmup).concat(working)) {
-    block.append(setRow(set, set.is_warmup ? index : index++, link.rest_seconds));
+    block.append(setRow(set, set.is_warmup ? index : index++));
+    if (!set.is_warmup) block.append(restRow(set, index));
   }
 
   block.append(
@@ -172,10 +193,6 @@ function exerciseBlock(workout, link) {
 function openExerciseMenu(workout, link, exercise) {
   openSheet((close) => [
     el("h2", { text: exercise.name }),
-    el("label", { class: "field" }, [
-      el("span", { class: "tiny", text: t("colRest") }),
-      stepper(link.rest_seconds, 15, 0, (value) => updateWorkoutExercise(link.id, { rest_seconds: value }))
-    ]),
     el("button", {
       class: "btn block",
       type: "button",
