@@ -190,7 +190,9 @@ function latestOfProgram(workout) {
 
 function plannedForLatest(link) {
   const workout = byId("workouts", link.workout_id);
-  return latestOfProgram(workout) ? plannedFor(link, workout.program_id) : null;
+  if (!latestOfProgram(workout)) return null;
+  const first = workoutExercises(link.workout_id).find((row) => row.exercise_id === link.exercise_id);
+  return !first || first.id === link.id ? plannedFor(link, workout.program_id) : null;
 }
 
 function latestSets(exerciseId, workoutId) {
@@ -219,19 +221,22 @@ function setRows(linkId, template, stamp, from = 0) {
 }
 
 export async function addExerciseToWorkout(workoutId, exerciseId) {
-  const latest = latestSets(exerciseId, workoutId);
+  const links = workoutExercises(workoutId);
+  const earlier = links.filter((link) => link.exercise_id === exerciseId).pop();
+  const latest = earlier ? null : latestSets(exerciseId, workoutId);
+  const today = earlier ? setsOf(earlier.id).filter((set) => !set.is_warmup).slice(-1) : [];
   const stamp = now();
   const row = {
     id: uid(),
     workout_id: workoutId,
     exercise_id: exerciseId,
-    position: nextPosition(workoutExercises(workoutId)),
+    position: nextPosition(links),
     rest_after_seconds: latest?.previous.link.rest_after_seconds ?? null,
-    notes: latest?.previous.link.notes ?? null,
+    notes: earlier ? earlier.notes : latest?.previous.link.notes ?? null,
     created_at: stamp,
     deleted_at: null
   };
-  await commit([{ table: "workout_exercises", row }].concat(latest ? setRows(row.id, latest.sets, stamp) : []));
+  await commit([{ table: "workout_exercises", row }].concat(setRows(row.id, earlier ? today : latest ? latest.sets : [], stamp)));
   return row;
 }
 
@@ -620,22 +625,27 @@ export function summarizeSets(sets) {
 }
 
 export function exerciseSessions(exerciseId) {
-  const links = index().linksByExercise.get(exerciseId) || [];
-  const sessions = [];
-  for (const link of links) {
+  const byWorkout = new Map();
+  for (const link of index().linksByExercise.get(exerciseId) || []) {
     const workout = byId("workouts", link.workout_id);
     if (!workout) continue;
     const sets = workingSets(link.id);
     if (sets.length === 0) continue;
-    const summary = summarizeSets(sets);
-    sessions.push({
-      workout,
-      link,
-      sets,
-      volume: summary.volume,
-      best: summary.best
-    });
+    const session = byWorkout.get(workout.id);
+    if (!session) {
+      byWorkout.set(workout.id, { workout, link, main: sets.length, sets: sets.slice() });
+      continue;
+    }
+    if (sets.length > session.main || (sets.length === session.main && link.position < session.link.position)) {
+      session.link = link;
+      session.main = sets.length;
+    }
+    session.sets.push(...sets);
   }
+  const sessions = [...byWorkout.values()].map(({ workout, link, sets }) => {
+    const summary = summarizeSets(sets);
+    return { workout, link, sets, volume: summary.volume, best: summary.best };
+  });
   return sessions.sort((a, b) =>
     a.workout.performed_on < b.workout.performed_on ? -1 : a.workout.performed_on > b.workout.performed_on ? 1 : a.workout.created_at - b.workout.created_at
   );
