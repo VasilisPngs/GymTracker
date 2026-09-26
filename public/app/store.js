@@ -237,6 +237,19 @@ function restPlan(exerciseId, workoutId) {
   return previous ? setsOf(previous.link.id).filter((set) => !set.is_warmup).map((set) => set.rest_seconds ?? null) : [];
 }
 
+function usualRest(workoutId, excludeLinkId) {
+  const counts = new Map();
+  for (const link of workoutExercises(workoutId)) {
+    if (link.id === excludeLinkId) continue;
+    for (const set of setsOf(link.id)) {
+      if (!set.is_warmup && set.rest_seconds) counts.set(set.rest_seconds, (counts.get(set.rest_seconds) || 0) + 1);
+    }
+  }
+  let usual = null;
+  for (const [value, count] of counts) if (usual === null || count > counts.get(usual)) usual = value;
+  return usual;
+}
+
 function restFor(plan, index, fallback) {
   return plan.length > 0 ? plan[Math.min(index, plan.length - 1)] : fallback ?? null;
 }
@@ -251,7 +264,9 @@ export async function addSet(workoutExerciseId, values = {}) {
   if (!warmup && link) {
     const workout = byId("workouts", link.workout_id);
     const planned = workout && workout.program_id ? plannedFor(link, workout.program_id) : null;
-    rest = previous ? previous.rest_seconds ?? null : restFor(restPlan(link.exercise_id, link.workout_id), working.length, planned?.rest_seconds);
+    rest =
+      previous?.rest_seconds ??
+      restFor(restPlan(link.exercise_id, link.workout_id), working.length, planned?.rest_seconds ?? usualRest(link.workout_id, link.id));
   }
   const row = {
     id: uid(),
