@@ -1,4 +1,5 @@
 :root {
+  --set-columns: 32px minmax(0, 1fr) minmax(0, 1fr) var(--control);
   color-scheme: dark light;
   --bg: #0b0c0f;
   --surface: #14161b;
@@ -558,7 +559,6 @@ textarea {
 }
 
 .exercise-block {
-  --set-columns: 28px minmax(0, 1fr) minmax(0, 1fr) var(--control);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-l);
@@ -664,19 +664,14 @@ textarea {
 }
 
 .rest-row.between {
-  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   margin: 0;
-  padding: 0 var(--pad);
-}
-
-.rest-row.between .rest-track {
-  grid-column: 1 / -1;
+  padding: 0 calc(7px + var(--space-1));
 }
 
 @media (max-width: 22.5rem) {
-  .exercise-block {
-    --set-columns: 20px minmax(0, 1fr) minmax(0, 1fr) var(--control);
+  :root {
+    --set-columns: 24px minmax(0, 1fr) minmax(0, 1fr) var(--control);
   }
 
   .set-grid,
@@ -690,8 +685,12 @@ textarea {
     width: calc(100% - 2 * var(--space-1));
   }
 
+  .rest-row.between {
+    padding: 0 calc(3px + var(--space-1));
+  }
+
   .stepper button {
-    width: 26px;
+    width: 25px;
   }
 }
 
@@ -717,9 +716,11 @@ textarea {
   width: 100%;
   min-height: var(--control);
   padding: 0;
-  border: 0;
-  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
   cursor: pointer;
+  transition: transform var(--speed-fast) var(--ease), background var(--speed) var(--ease);
   font-weight: var(--fw-semibold);
   color: var(--text);
   font-size: 13px;
@@ -790,6 +791,10 @@ textarea {
   background: var(--success);
   border-color: transparent;
   color: #04140a;
+}
+
+.set-index:active {
+  transform: scale(0.94);
 }
 
 .check:active {
@@ -1341,6 +1346,10 @@ input.date-input[type] {
 }
 
 @media (hover: hover) {
+  .set-index:hover {
+    background: color-mix(in srgb, var(--surface-2), var(--text) 7%);
+  }
+
   .rest-row:hover .rest-pill {
     background: color-mix(in srgb, var(--accent) 22%, transparent);
   }
