@@ -3,7 +3,8 @@ import { startShell, scrollViewTop } from "./shell.js";
 import { initStore, storeEvents } from "./store.js";
 import { startSync, syncEvents, getSyncState, requestSync } from "./sync.js";
 import { currentRoute, startRouter } from "./router.js";
-import { renderWorkout } from "./views/workout.js";
+import { renderWorkout, openWorkout } from "./views/workout.js";
+import { renderHistory } from "./views/history.js";
 import { renderExerciseDetail } from "./views/exercises.js";
 import { renderStats } from "./views/stats.js";
 import { renderSettings } from "./views/settings.js";
@@ -17,15 +18,17 @@ const tabs = [...document.querySelectorAll(".tab")];
 const VIEWS = {
   workout: renderWorkout,
   exercise: renderExerciseDetail,
+  history: renderHistory,
   stats: renderStats,
   settings: renderSettings
 };
 
-const TAB_LABELS = { workout: "tabWorkout", stats: "tabStats", settings: "tabSettings" };
+const TAB_LABELS = { workout: "tabWorkout", history: "tabHistory", stats: "tabStats", settings: "tabSettings" };
 
 const TAB_FOR_ROUTE = {
   workout: "workout",
   exercise: "workout",
+  history: "history",
   stats: "stats",
   settings: "settings"
 };
@@ -33,6 +36,11 @@ const TAB_FOR_ROUTE = {
 let lastRouteKey = "";
 let deferredRender = false;
 let banner = null;
+
+function tabFor(route) {
+  if (route.name === "workout" && route.params.id && route.params.id !== openWorkout()?.id) return "history";
+  return TAB_FOR_ROUTE[route.name];
+}
 
 function isEditing() {
   const active = document.activeElement;
@@ -48,7 +56,7 @@ function render() {
   const route = currentRoute();
   const key = `${route.name}:${route.params.id || ""}`;
   for (const tab of tabs) {
-    tab.setAttribute("aria-current", tab.dataset.route === TAB_FOR_ROUTE[route.name] ? "page" : "false");
+    tab.setAttribute("aria-current", tab.dataset.route === tabFor(route) ? "page" : "false");
     const label = tab.querySelector("span");
     if (label) label.textContent = t(TAB_LABELS[tab.dataset.route]);
   }

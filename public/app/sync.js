@@ -11,7 +11,6 @@ export const syncEvents = new EventTarget();
 const state = {
   status: "idle",
   pending: 0,
-  lastSyncedAt: null,
   error: null
 };
 
@@ -105,9 +104,6 @@ export async function requestSync() {
   try {
     await cycle();
     failures = 0;
-    syncEvents.dispatchEvent(new CustomEvent("synced"));
-    state.lastSyncedAt = Date.now();
-    await setMeta("last_synced_at", state.lastSyncedAt);
     await refreshPending();
     setStatus("idle");
   } catch (error) {
@@ -138,7 +134,6 @@ export function scheduleSync(delay = 1200) {
 }
 
 export async function startSync() {
-  state.lastSyncedAt = await getMeta("last_synced_at", null);
   await refreshPending();
   requestSync();
   addEventListener("online", () => {

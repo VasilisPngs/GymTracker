@@ -597,6 +597,15 @@ export async function deleteExercise(id) {
   await commit(entries);
 }
 
+export function exerciseUsage(id) {
+  const sessions = exerciseSessions(id);
+  const programs = new Set();
+  for (const row of list("program_exercises")) {
+    if (row.exercise_id === id && byId("programs", row.program_id)) programs.add(row.program_id);
+  }
+  return { sessions: sessions.length, sets: sessions.reduce((sum, session) => sum + session.sets.length, 0), programs: programs.size };
+}
+
 export function workingSets(workoutExerciseId) {
   return setsOf(workoutExerciseId).filter((set) => !set.is_warmup && set.completed_at && set.reps > 0);
 }

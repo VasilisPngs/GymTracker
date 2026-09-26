@@ -115,7 +115,7 @@ Verified against Cloudflare documentation (September 2026):
 | D1 storage | 5 GB account / 500 MB per database | A set row is well under 100 bytes |
 | D1 queries per invocation | 50 | Capped at 47 (1 revision bump + ≤40 upserts + 6 pulls) |
 | D1 bound parameters per query | 100 | Batches chunked to ≤90 |
-| Static asset files | 20,000 | 27 |
+| Static asset files | 20,000 | 28 |
 
 ## Toolchain
 
@@ -141,8 +141,11 @@ Local requests bypass the Access check by hostname.
 
 ## Backup
 
-Stats → Export backup writes a JSON snapshot of every table from the browser database,
-so it costs nothing on the server and works offline.
+Settings → Export backup writes a JSON snapshot of every table from the browser database,
+so it costs nothing on the server and works offline. It is for taking the data elsewhere;
+recovery rests on D1 itself: deletes are soft, so deleted rows stay in the database, and
+Time Travel restores the whole database to any minute of the last 7 days on the Free plan
+(30 on Workers Paid).
 
 ---
 
@@ -153,14 +156,15 @@ Worker με static assets και βάση D1, με PWA που δουλεύει o
 Access. Δεν υπάρχει κώδικας σύνδεσης στην εφαρμογή.
 
 **Γλώσσα:** η διεπαφή είναι στα αγγλικά και στα ελληνικά. Στην πρώτη εκτέλεση ακολουθεί τη
-γλώσσα του browser και αλλάζει από Ρυθμίσεις → Γλώσσα. Μεταφράζονται οι μυϊκές ομάδες, ο
-εξοπλισμός και οι ημερομηνίες. Στη βάση αποθηκεύονται πάντα οι αγγλικές τιμές, οπότε η
+γλώσσα του browser και αλλάζει από Ρυθμίσεις → Γλώσσα. Μεταφράζονται οι μυϊκές ομάδες και
+οι ημερομηνίες. Στη βάση αποθηκεύονται πάντα οι αγγλικές τιμές, οπότε η
 αλλαγή γλώσσας δεν αγγίζει τα δεδομένα.
 
-**Τι καταγράφει:** ασκήσεις (όνομα, μυϊκή ομάδα, εξοπλισμός), προγράμματα με στόχους ανά
-άσκηση, προπονήσεις (ημερομηνία, τίτλος, σημειώσεις) και σετ (επαναλήψεις, κιλά, σήμανση
-ζεστάματος). Δείχνει την προηγούμενη επίδοση σε κάθε άσκηση, τα ρεκόρ της, τον εβδομαδιαίο
-όγκο και τα κύρια σετ ανά μυϊκή ομάδα. Όλοι οι υπολογισμοί γίνονται στον browser, ώστε ο
+**Τι καταγράφει:** ασκήσεις (όνομα, μυϊκή ομάδα), προγράμματα με στόχους ανά άσκηση,
+προπονήσεις (ημερομηνία, τίτλος, σημειώσεις, διάρκεια) και σετ (επαναλήψεις, κιλά, σήμανση
+ζεστάματος, διάλειμμα). Το Ιστορικό δείχνει όλες τις προπονήσεις ανά μήνα, με όσες έμειναν
+ανολοκλήρωτες σημαδεμένες. Δείχνει την προηγούμενη επίδοση σε κάθε άσκηση, τα ρεκόρ της,
+τον εβδομαδιαίο όγκο και τα κύρια σετ ανά μυϊκή ομάδα. Όλοι οι υπολογισμοί γίνονται στον browser, ώστε ο
 Worker να μένει κάτω από το όριο των 10 ms CPU.
 
 **Offline:** το IndexedDB είναι η πηγή αλήθειας. Κάθε αλλαγή γράφεται τοπικά και μπαίνει σε
@@ -183,6 +187,10 @@ npm run deploy
 `GymTracker public` με path `icons` και δική της πολιτική Bypass `GymTracker public`, για να κατεβάζει
 το iOS το εικονίδιο της αρχικής οθόνης. Καμία πολιτική δεν μοιράζεται με τις άλλες εφαρμογές. Ο Worker επαληθεύει και ο ίδιος την υπογραφή του token,
 οπότε χωρίς Access το `/api/sync` απαντάει 403 σε όλους.
+
+**Αντίγραφο:** Ρυθμίσεις → Εξαγωγή αντιγράφου, για μεταφορά των δεδομένων αλλού. Η ανάκτηση
+στηρίζεται στη D1: οι διαγραφές είναι soft και οι γραμμές μένουν στη βάση, και το Time Travel
+επαναφέρει ολόκληρη τη βάση σε οποιοδήποτε λεπτό των τελευταίων 7 ημερών (30 στο Workers Paid).
 
 **Στο κινητό:** άνοιξέ το στο Safari και Προσθήκη στην αρχική οθόνη, ώστε να εγκατασταθεί ως
 PWA.

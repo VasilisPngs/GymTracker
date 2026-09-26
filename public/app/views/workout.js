@@ -30,9 +30,20 @@ const RESUME_WINDOW_MS = 12 * 60 * 60 * 1000;
 
 let clock = null;
 
-function openWorkout() {
-  const cutoff = now() - RESUME_WINDOW_MS;
-  return workoutsSorted().find((workout) => !workout.finished_at && (workout.started_at || 0) >= cutoff) || null;
+export function isRunning(workout) {
+  return !workout.finished_at && (workout.started_at || 0) >= now() - RESUME_WINDOW_MS;
+}
+
+export function openWorkout() {
+  return workoutsSorted().find(isRunning) || null;
+}
+
+function lastActivity(workout) {
+  let last = 0;
+  for (const link of workoutExercises(workout.id)) {
+    for (const set of setsOf(link.id)) if (set.completed_at > last) last = set.completed_at;
+  }
+  return last || workout.started_at || now();
 }
 
 function setRow(set, index, rest) {
@@ -250,7 +261,7 @@ function openExerciseMenu(workout, link, exercise) {
 function workoutClock(workout) {
   clearInterval(clock);
   clock = null;
-  const running = !workout.finished_at && workout.started_at >= now() - RESUME_WINDOW_MS;
+  const running = isRunning(workout);
   if (!workout.started_at || (!workout.finished_at && !running)) return null;
   const elapsed = () => formatDuration(((workout.finished_at || now()) - workout.started_at) / 1000);
   const node = el("span", {
@@ -285,7 +296,7 @@ export function renderWorkout(container, params) {
     return;
   }
 
-  keepAwake(!workout.finished_at);
+  keepAwake(isRunning(workout));
   const totals = workoutTotals(workout);
   const links = workoutExercises(workout.id);
 
@@ -378,10 +389,12 @@ export function renderWorkout(container, params) {
         type: "button",
         text: t("finishWorkout"),
         onclick: async () => {
-          await updateWorkout(workout.id, { finished_at: now() });
+          const running = isRunning(workout);
+          await updateWorkout(workout.id, { finished_at: running ? now() : lastActivity(workout) });
+          toast(t("workoutFinished"));
+          if (!running) return;
           stopRest();
           keepAwake(false);
-          toast(t("workoutFinished"));
           navigate("/");
         }
       })
@@ -411,9 +424,10 @@ function openWorkoutMenu(workout) {
         close();
         const confirmed = await confirmSheet(t("deleteWorkout"), t("deleteWorkoutBody"), t("delete"));
         if (confirmed) {
+          const running = isRunning(workout);
           await deleteWorkout(workout.id);
-          if (!workout.finished_at) stopRest();
-          navigate("/");
+          if (running) stopRest();
+          navigate(running ? "/" : "/history");
         }
       }
     })

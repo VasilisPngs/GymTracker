@@ -3,6 +3,7 @@ const LANGUAGES = ["en", "el"];
 
 const STRINGS = {
   tabWorkout: ["Workout", "Προπόνηση"],
+  tabHistory: ["History", "Ιστορικό"],
   tabSettings: ["Settings", "Ρυθμίσεις"],
   tabStats: ["Stats", "Στατιστικά"],
 
@@ -61,6 +62,9 @@ const STRINGS = {
   finishWorkout: ["Finish workout", "Ολοκλήρωση προπόνησης"],
   workoutFinished: ["Workout finished", "Η προπόνηση ολοκληρώθηκε"],
   finished: ["Finished", "Ολοκληρωμένη"],
+  inProgress: ["In progress", "Σε εξέλιξη"],
+  unfinished: ["Unfinished", "Ανολοκλήρωτη"],
+  noWorkoutsYet: ["No workouts yet. Start one from a program.", "Καμία προπόνηση ακόμα. Ξεκίνα μία από ένα πρόγραμμα."],
   workoutOptions: ["Workout options", "Επιλογές προπόνησης"],
   reopenWorkout: ["Reopen workout", "Άνοιγμα ξανά"],
   deleteWorkout: ["Delete workout", "Διαγραφή προπόνησης"],
@@ -94,7 +98,6 @@ const STRINGS = {
   exerciseNamePlaceholder: ["Exercise name", "Όνομα άσκησης"],
 
 
-  search: ["Search", "Αναζήτηση"],
   exerciseNotFound: ["Exercise not found.", "Η άσκηση δεν βρέθηκε."],
   heaviest: ["Heaviest (kg)", "Μέγιστα κιλά"],
   sessionsLabel: ["Sessions", "Προπονήσεις"],
@@ -102,10 +105,9 @@ const STRINGS = {
   noLoggedSets: ["No logged sets for this exercise.", "Δεν υπάρχουν καταγεγραμμένα σετ για αυτή την άσκηση."],
   exerciseOptions: ["Exercise options", "Επιλογές άσκησης"],
   deleteExercise: ["Delete exercise", "Διαγραφή άσκησης"],
-  deleteExerciseBody: [
-    "Every set logged for it is deleted too.",
-    "Διαγράφονται και όλα τα σετ που έχεις καταγράψει."
-  ],
+  deleteExerciseHistory: ["Its history is deleted too: {sessions}, {sets}.", "Διαγράφεται και το ιστορικό της: {sessions}, {sets}."],
+  deleteExerciseNoHistory: ["It has no logged sets, so nothing else is lost.", "Δεν έχει καταγεγραμμένα σετ, οπότε δεν χάνεται τίποτα άλλο."],
+  deleteExercisePrograms: ["It is also removed from {programs}.", "Αφαιρείται επίσης από {programs}."],
 
   statsTitle: ["Stats", "Στατιστικά"],
   workoutsThisWeek: ["Workouts this week", "Προπονήσεις αυτή την εβδομάδα"],
@@ -142,7 +144,8 @@ const PLURALS = {
   set: [["set", "sets"], ["σετ", "σετ"]],
   exercise: [["exercise", "exercises"], ["άσκηση", "ασκήσεις"]],
   workingSet: [["working set", "working sets"], ["κύριο σετ", "κύρια σετ"]],
-  session: [["session", "sessions"], ["προπόνηση", "προπονήσεις"]]
+  session: [["session", "sessions"], ["προπόνηση", "προπονήσεις"]],
+  program: [["program", "programs"], ["πρόγραμμα", "προγράμματα"]]
 };
 
 const MUSCLE_GROUPS = {

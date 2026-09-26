@@ -6,6 +6,7 @@ import {
   personalRecords,
   updateExercise,
   deleteExercise,
+  exerciseUsage,
   describeSets
 } from "../store.js";
 import { sparkline } from "../chart.js";
@@ -105,7 +106,12 @@ export function openExerciseMenu(exercise, onChange) {
       text: t("deleteExercise"),
       onclick: async () => {
         close();
-        const confirmed = await confirmSheet(t("deleteExercise"), t("deleteExerciseBody"), t("delete"));
+        const usage = exerciseUsage(exercise.id);
+        const body = [
+          usage.sessions ? t("deleteExerciseHistory", { sessions: plural(usage.sessions, "session"), sets: plural(usage.sets, "workingSet") }) : t("deleteExerciseNoHistory"),
+          usage.programs ? t("deleteExercisePrograms", { programs: plural(usage.programs, "program") }) : null
+        ].filter(Boolean).join(" ");
+        const confirmed = await confirmSheet(t("deleteExercise"), body, t("delete"));
         if (confirmed) {
           await deleteExercise(exercise.id);
           onChange(true);
