@@ -101,15 +101,6 @@ export function openExerciseMenu(exercise, onChange) {
       MUSCLE_GROUPS.map((item) => el("option", { value: item, text: muscleGroupName(item), selected: item === exercise.muscle_group }))
     ),
     el("button", {
-      class: "btn block",
-      type: "button",
-      text: exercise.is_archived ? t("unarchive") : t("archive"),
-      onclick: () => {
-        updateExercise(exercise.id, { is_archived: exercise.is_archived ? 0 : 1 });
-        close();
-      }
-    }),
-    el("button", {
       class: "btn block danger",
       type: "button",
       text: t("deleteExercise"),

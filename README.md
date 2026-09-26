@@ -35,7 +35,7 @@ directly by the edge (free, no Worker invocation); the Worker only runs for `/ap
 
 | Table | Purpose |
 | --- | --- |
-| `exercises` | Catalog: name, muscle group, archived flag |
+| `exercises` | Catalog: name, muscle group |
 | `workouts` | Session: date, title, notes, programme it came from, started/finished timestamps |
 | `workout_exercises` | Exercise inside a session, with ordering |
 | `sets` | Reps, weight (kg), warm-up flag, completion timestamp, ordering |

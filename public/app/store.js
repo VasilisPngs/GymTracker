@@ -120,9 +120,7 @@ export function byId(table, id) {
 }
 
 function exercisesSorted() {
-  return list("exercises")
-    .filter((row) => !row.is_archived)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  return list("exercises").sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function programsSorted() {
@@ -438,7 +436,6 @@ export async function createExercise(name, muscle_group) {
     id: uid(),
     name,
     muscle_group,
-    is_archived: 0,
     created_at: now(),
     deleted_at: null
   };

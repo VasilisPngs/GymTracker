@@ -93,12 +93,10 @@ const STRINGS = {
   sessionsHeading: ["Sessions", "Προπονήσεις"],
   noLoggedSets: ["No logged sets for this exercise.", "Δεν υπάρχουν καταγεγραμμένα σετ για αυτή την άσκηση."],
   exerciseOptions: ["Exercise options", "Επιλογές άσκησης"],
-  archive: ["Archive", "Αρχειοθέτηση"],
-  unarchive: ["Unarchive", "Επαναφορά από αρχείο"],
   deleteExercise: ["Delete exercise", "Διαγραφή άσκησης"],
   deleteExerciseBody: [
-    "Every set logged for it is deleted too. Archive keeps the history.",
-    "Διαγράφονται και όλα τα σετ που έχεις καταγράψει. Η αρχειοθέτηση κρατά το ιστορικό."
+    "Every set logged for it is deleted too.",
+    "Διαγράφονται και όλα τα σετ που έχεις καταγράψει."
   ],
 
   statsTitle: ["Stats", "Στατιστικά"],

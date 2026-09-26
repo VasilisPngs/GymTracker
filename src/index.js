@@ -23,7 +23,6 @@ const SCHEMA = {
     id: { cast: text, required: true },
     name: { cast: text, required: true },
     muscle_group: { cast: text, required: true },
-    is_archived: { cast: bool, required: true },
     created_at: { cast: int, required: true },
     deleted_at: { cast: int }
   },
