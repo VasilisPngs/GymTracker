@@ -898,6 +898,10 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   bottom: calc(var(--tabbar) + 74px);
 }
 
+body:has(.timer-bar:not([hidden])) .view {
+  padding-bottom: calc(var(--tabbar) + 96px);
+}
+
 .timer-bar {
   position: fixed;
   left: 50%;
