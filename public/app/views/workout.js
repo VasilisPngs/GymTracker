@@ -66,7 +66,7 @@ function restRow(seconds, title, onCommit, extra) {
   return el(
     "button",
     {
-      class: ["rest-row", extra, seconds ? null : "empty"].filter(Boolean).join(" "),
+      class: ["rest-row", extra, seconds ? null : "unset"].filter(Boolean).join(" "),
       type: "button",
       "aria-label": title,
       onclick: () =>
