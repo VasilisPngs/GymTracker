@@ -32,7 +32,13 @@ export function renderExerciseDetail(container, params) {
             text: muscleGroupName(exercise.muscle_group)
           })
         ]),
-        el("button", { class: "btn small ghost", type: "button", text: "···", onclick: () => openMenu(exercise) })
+        el("button", {
+          class: "btn small ghost",
+          type: "button",
+          text: "···",
+          "aria-label": t("exerciseOptions"),
+          onclick: () => openExerciseMenu(exercise, (deleted) => deleted && navigate("/"))
+        })
       ])
     ])
   );
@@ -77,13 +83,17 @@ export function renderExerciseDetail(container, params) {
   container.append(el("div", { class: "card" }, [el("h2", { text: t("sessionsHeading") }), list]));
 }
 
-function openMenu(exercise) {
+export function openExerciseMenu(exercise, onChange) {
+  let name = exercise.name;
   openSheet((close) => [
     el("h2", { text: t("exerciseOptions") }),
     el("input", {
       type: "text",
       value: exercise.name,
-      onchange: (event) => updateExercise(exercise.id, { name: event.target.value.trim() || exercise.name })
+      oninput: (event) => {
+        name = event.target.value;
+      },
+      onkeydown: (event) => event.key === "Enter" && close()
     }),
     el(
       "select",
@@ -108,9 +118,13 @@ function openMenu(exercise) {
         const confirmed = await confirmSheet(t("deleteExercise"), t("deleteExerciseBody"), t("delete"));
         if (confirmed) {
           await deleteExercise(exercise.id);
-          navigate("/");
+          onChange(true);
         }
       }
     })
-  ]);
+  ], () => {
+    const trimmed = name.trim();
+    if (trimmed && trimmed !== exercise.name) updateExercise(exercise.id, { name: trimmed });
+    onChange(false);
+  });
 }
