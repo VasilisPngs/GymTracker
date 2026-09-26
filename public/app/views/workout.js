@@ -1,4 +1,4 @@
-import { el, append, clear, formatDate, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, icon, append, clear, formatDate, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
@@ -53,13 +53,12 @@ function setRow(set, index, rest) {
       type: "button",
       "aria-pressed": set.completed_at ? "true" : "false",
       "aria-label": t("ariaCompleteSet"),
-      text: "✓",
       onclick: () => {
         const completing = !set.completed_at;
         updateSet(set.id, { completed_at: completing ? now() : null });
         if (completing && !set.is_warmup) startRest(rest);
       }
-    })
+    }, icon("check"))
   ]);
 }
 
@@ -108,9 +107,8 @@ function exerciseBlock(workout, link) {
         class: "btn small ghost",
         type: "button",
         "aria-label": t("ariaExerciseOptions"),
-        text: "···",
         onclick: () => openExerciseMenu(workout, link, exercise)
-      })
+      }, icon("more"))
     ])
   ]);
 
@@ -126,10 +124,15 @@ function exerciseBlock(workout, link) {
 
   if (previous) {
     const delta = previous.volume > 0 ? ((summary.volume - previous.volume) / previous.volume) * 100 : 0;
-    const trend = summary.volume > 0 && previous.volume > 0 ? ` · ${delta >= 0 ? "▲" : "▼"} ${formatNumber(Math.abs(delta), 0)}%` : "";
+    const trend = summary.volume > 0 && previous.volume > 0;
     block.append(
       el("div", { class: "hint" }, [
-        `${t("lastSession", { date: formatDate(previous.workout.performed_on), sets: describeSets(previous.sets) })}${trend}`
+        el("span", {}, [
+          t("lastSession", { date: formatDate(previous.workout.performed_on), sets: describeSets(previous.sets) }),
+          trend ? " · " : null,
+          trend ? icon(delta >= 0 ? "up" : "down") : null,
+          trend ? ` ${formatNumber(Math.abs(delta), 0)}%` : null
+        ])
       ])
     );
   }
@@ -153,15 +156,13 @@ function exerciseBlock(workout, link) {
       el("button", {
         class: "btn small grow",
         type: "button",
-        text: t("addSet"),
         onclick: () => addSet(link.id)
-      }),
+      }, [icon("plus"), t("addSet")]),
       el("button", {
         class: "btn small",
         type: "button",
-        text: t("addWarmup"),
         onclick: () => addSet(link.id, { is_warmup: 1 })
-      })
+      }, [icon("plus"), t("addWarmup")])
     ])
   );
 
@@ -277,10 +278,9 @@ export function renderWorkout(container, params) {
         el("button", {
           class: "btn small ghost",
           type: "button",
-          text: "···",
           "aria-label": t("ariaWorkoutOptions"),
           onclick: () => openWorkoutMenu(workout)
-        })
+        }, icon("more"))
       ]),
       el("input", {
         type: "text",
@@ -314,9 +314,8 @@ export function renderWorkout(container, params) {
     el("button", {
       class: "btn primary block",
       type: "button",
-      text: t("addExercise"),
       onclick: () => openExercisePicker((exerciseId) => addExerciseToWorkout(workout.id, exerciseId))
-    })
+    }, [icon("plus"), t("addExercise")])
   );
 
   container.append(

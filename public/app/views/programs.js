@@ -1,4 +1,4 @@
-import { el, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, icon, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, muscleGroupName, relativeDay } from "../i18n.js";
 import {
   byId,
@@ -32,7 +32,7 @@ async function startProgram(programId) {
 function openProgramCreator() {
   let name = "";
   openSheet((close) => [
-    el("h2", { text: t("newProgram").replace("+ ", "") }),
+    el("h2", { text: t("newProgram") }),
     el("input", {
       type: "text",
       placeholder: t("programNamePlaceholder"),
@@ -74,10 +74,9 @@ function programRow(item) {
       el("button", {
         class: "btn small ghost",
         type: "button",
-        text: "···",
         "aria-label": t("ariaExerciseOptions"),
         onclick: () => openProgramExerciseMenu(item, exercise)
-      })
+      }, icon("more"))
     ]),
     el("input", {
       type: "text",
@@ -177,10 +176,9 @@ function programTabs(active, onSelect) {
     el("button", {
       class: "prog-tab add",
       type: "button",
-      text: "+",
       "aria-label": t("newProgram"),
       onclick: () => openProgramCreator()
-    })
+    }, icon("plus"))
   );
   return strip;
 }
@@ -194,9 +192,8 @@ export function renderPrograms(container, repaint) {
         el("button", {
           class: "btn primary block",
           type: "button",
-          text: t("newProgram"),
           onclick: () => openProgramCreator()
-        })
+        }, [icon("plus"), t("newProgram")])
       ])
     );
     return;
@@ -228,10 +225,9 @@ export function renderPrograms(container, repaint) {
         el("button", {
           class: "btn ghost",
           type: "button",
-          text: "···",
           "aria-label": t("programOptions"),
           onclick: () => openProgramMenu(active)
-        })
+        }, icon("more"))
       ]),
       el("div", {
         class: "tiny",
@@ -258,9 +254,8 @@ export function renderPrograms(container, repaint) {
     el("button", {
       class: "btn block",
       type: "button",
-      text: t("addExercise"),
       onclick: () => openExercisePicker((exerciseId) => addProgramExercise(active.id, exerciseId))
-    })
+    }, [icon("plus"), t("addExercise")])
   );
 }
 

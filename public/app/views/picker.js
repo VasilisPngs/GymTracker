@@ -1,4 +1,4 @@
-import { el, clear, openSheet, toast } from "../dom.js";
+import { el, icon, clear, openSheet, searchField, toast } from "../dom.js";
 import { t, muscleGroupName } from "../i18n.js";
 import { MUSCLE_GROUPS, exercisesByRecent, createExercise } from "../store.js";
 import { openExerciseMenu } from "./exercises.js";
@@ -20,7 +20,7 @@ export function openExercisePicker(onPick) {
       listNode.append(
         el("button", { class: "list-item", type: "button", onclick: () => createFromQuery() }, [
           el("span", { class: "grow", text: t("createNamed", { name: query.trim() }) }),
-          el("span", { class: "badge", text: "+" })
+          el("span", { class: "badge" }, icon("plus"))
         ])
       );
     }
@@ -37,10 +37,9 @@ export function openExercisePicker(onPick) {
           el("button", {
             class: "btn small",
             type: "button",
-            text: "···",
             "aria-label": t("exerciseOptions"),
             onclick: () => openExerciseMenu(exercise, paint)
-          })
+          }, icon("more"))
         ])
       );
     }
@@ -59,9 +58,8 @@ export function openExercisePicker(onPick) {
   paint();
 
   closeSheet = openSheet(() => [
-    el("h2", { text: t("addExercise").replace("+ ", "") }),
-    el("input", {
-      type: "search",
+    el("h2", { text: t("addExercise") }),
+    searchField({
       placeholder: t("searchExercises"),
       oninput: (event) => {
         query = event.target.value;

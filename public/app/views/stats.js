@@ -1,4 +1,4 @@
-import { el, clear, formatDate, formatNumber, plural } from "../dom.js";
+import { el, icon, clear, formatDate, formatNumber, plural, searchField } from "../dom.js";
 import { MUSCLE_GROUPS, list, weeklyBreakdown, exerciseSessions } from "../store.js";
 import { t, muscleGroupName } from "../i18n.js";
 
@@ -16,7 +16,7 @@ function progressRows() {
       weight,
       reps: last.best ? last.best.reps : 0,
       performed_on: last.workout.performed_on,
-      trend: before === null || weight === before ? "" : weight > before ? "▲" : "▼"
+      trend: before === null || weight === before ? null : weight > before ? "up" : "down"
     });
   }
   return rows.sort((a, b) => (a.performed_on < b.performed_on ? 1 : a.performed_on > b.performed_on ? -1 : 0));
@@ -97,7 +97,7 @@ export function renderStats(container) {
               el("div", { class: "tiny", text: muscleGroupName(row.exercise.muscle_group) })
             ]),
             el("span", { class: "tiny num", style: "text-align:right" }, [
-              el("div", { text: `${formatNumber(row.weight)} kg × ${row.reps} ${row.trend}`.trim() })
+              el("div", {}, [`${formatNumber(row.weight)} kg × ${row.reps}`, row.trend ? " " : null, row.trend ? icon(row.trend) : null])
             ])
           ])
         );
@@ -108,8 +108,7 @@ export function renderStats(container) {
     container.append(
       el("div", { class: "card" }, [
         el("h2", { text: t("progressPerExercise") }),
-        el("input", {
-          type: "search",
+        searchField({
           placeholder: t("searchExercises"),
           oninput: (event) => {
             query = event.target.value;

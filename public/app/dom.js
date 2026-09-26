@@ -33,6 +33,47 @@ export function svg(tag, props = {}, children = []) {
   return node;
 }
 
+const ICON_PATHS = {
+  check: "M5 12.5l4.5 4.5L19 7.5",
+  plus: "M12 5v14M5 12h14",
+  minus: "M5 12h14",
+  up: "M12 6.5l6 10H6z",
+  down: "M12 17.5l-6-10h12z",
+  close: "M7 7l10 10M17 7L7 17"
+};
+
+const SOLID_ICONS = new Set(["up", "down"]);
+
+export function icon(name) {
+  if (name === "more") {
+    return svg("svg", { class: "icon solid", viewBox: "0 0 24 24", "aria-hidden": "true" }, [5, 12, 19].map((cx) => svg("circle", { cx, cy: 12, r: 1.9 })));
+  }
+  const kind = SOLID_ICONS.has(name) ? "icon solid trend" : "icon";
+  return svg("svg", { class: kind, viewBox: "0 0 24 24", "aria-hidden": "true" }, svg("path", { d: ICON_PATHS[name] }));
+}
+
+export function searchField(props) {
+  const { class: extra, ...rest } = props;
+  const input = el("input", { type: "search", ...rest });
+  return el("div", { class: extra ? `search-field ${extra}` : "search-field" }, [
+    input,
+    el(
+      "button",
+      {
+        class: "search-clear",
+        type: "button",
+        "aria-label": t("clearSearch"),
+        onclick: () => {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.focus();
+        }
+      },
+      icon("close")
+    )
+  ]);
+}
+
 export function clear(node) {
   while (node.firstChild) node.firstChild.remove();
   return node;
@@ -165,8 +206,8 @@ export function stepper(value, step, min, onCommit, options = {}) {
     onCommit(next);
   };
   return el("div", { class: "stepper" }, [
-    el("button", { type: "button", text: "−", "aria-label": t("ariaDecrease"), onclick: () => bump(-step) }),
+    el("button", { type: "button", "aria-label": t("ariaDecrease"), onclick: () => bump(-step) }, icon("minus")),
     input,
-    el("button", { type: "button", text: "+", "aria-label": t("ariaIncrease"), onclick: () => bump(step) })
+    el("button", { type: "button", "aria-label": t("ariaIncrease"), onclick: () => bump(step) }, icon("plus"))
   ]);
 }

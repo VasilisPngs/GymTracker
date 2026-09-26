@@ -1,4 +1,4 @@
-import { el, formatDate, formatNumber, plural, confirmSheet, openSheet } from "../dom.js";
+import { el, icon, formatDate, formatNumber, plural, confirmSheet, openSheet } from "../dom.js";
 import {
   MUSCLE_GROUPS,
   byId,
@@ -35,10 +35,9 @@ export function renderExerciseDetail(container, params) {
         el("button", {
           class: "btn small ghost",
           type: "button",
-          text: "···",
           "aria-label": t("exerciseOptions"),
           onclick: () => openExerciseMenu(exercise, (deleted) => deleted && navigate("/"))
-        })
+        }, icon("more"))
       ])
     ])
   );
