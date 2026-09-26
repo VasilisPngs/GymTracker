@@ -734,6 +734,27 @@ body:has(.timer-bar:not([hidden])) .toast-host {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+.workout-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--control-s);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+}
+
+.workout-clock.running::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .timer-value {
   font-variant-numeric: tabular-nums;
   font-weight: 650;

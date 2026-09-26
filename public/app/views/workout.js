@@ -1,4 +1,4 @@
-import { el, append, clear, formatDate, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, append, clear, formatDate, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
 import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
@@ -26,6 +26,8 @@ import { renderPrograms } from "./programs.js";
 import { navigate } from "../router.js";
 
 const RESUME_WINDOW_MS = 12 * 60 * 60 * 1000;
+
+let clock = null;
 
 function openWorkout() {
   const cutoff = now() - RESUME_WINDOW_MS;
@@ -215,6 +217,30 @@ function openExerciseMenu(workout, link, exercise) {
   ]);
 }
 
+function workoutClock(workout) {
+  clearInterval(clock);
+  clock = null;
+  const running = !workout.finished_at && workout.started_at >= now() - RESUME_WINDOW_MS;
+  if (!workout.started_at || (!workout.finished_at && !running)) return null;
+  const elapsed = () => formatDuration(((workout.finished_at || now()) - workout.started_at) / 1000);
+  const node = el("span", {
+    class: running ? "workout-clock running num" : "workout-clock num",
+    title: t("workoutDuration"),
+    "aria-label": t("workoutDuration"),
+    text: elapsed()
+  });
+  if (running) {
+    clock = setInterval(() => {
+      if (node.isConnected) node.textContent = elapsed();
+      else {
+        clearInterval(clock);
+        clock = null;
+      }
+    }, 1000);
+  }
+  return node;
+}
+
 function workoutTotals(workout) {
   let sets = 0;
   for (const link of workoutExercises(workout.id)) sets += workingSets(link.id).length;
@@ -239,12 +265,15 @@ export function renderWorkout(container, params) {
   bar.append(
     el("div", { class: "card tight" }, [
       el("div", { class: "row between" }, [
-        el("input", {
-          type: "date",
-          class: "date-title",
-          value: workout.performed_on,
-          onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
-        }),
+        el("div", { class: "row" }, [
+          el("input", {
+            type: "date",
+            class: "date-title",
+            value: workout.performed_on,
+            onchange: (event) => updateWorkout(workout.id, { performed_on: event.target.value || workout.performed_on })
+          }),
+          workoutClock(workout)
+        ]),
         el("button", {
           class: "btn small ghost",
           type: "button",

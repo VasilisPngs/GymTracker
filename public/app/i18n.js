@@ -126,6 +126,7 @@ const STRINGS = {
   ariaCompleteSet: ["complete set", "ολοκλήρωση σετ"],
   ariaExerciseOptions: ["exercise options", "επιλογές άσκησης"],
   ariaWorkoutOptions: ["workout options", "επιλογές προπόνησης"],
+  workoutDuration: ["Workout duration", "Διάρκεια προπόνησης"],
 
   timerSkip: ["Skip", "Παράλειψη"]
 };
