@@ -9,14 +9,16 @@ function progressRows() {
     if (sessions.length === 0) continue;
     const last = sessions[sessions.length - 1];
     const previous = sessions.length > 1 ? sessions[sessions.length - 2] : null;
-    const weight = last.best ? last.best.weight_kg : 0;
-    const before = previous && previous.best ? previous.best.weight_kg : null;
+    const weight = last.best ? last.best.weight_kg || 0 : 0;
+    const reps = last.best ? last.best.reps || 0 : 0;
+    const before = previous && previous.best ? [previous.best.weight_kg || 0, previous.best.reps || 0] : null;
+    const change = before === null ? 0 : weight - before[0] || reps - before[1];
     rows.push({
       exercise,
       weight,
-      reps: last.best ? last.best.reps : 0,
+      reps,
       performed_on: last.workout.performed_on,
-      trend: before === null || weight === before ? null : weight > before ? "up" : "down"
+      trend: change === 0 ? null : change > 0 ? "up" : "down"
     });
   }
   return rows.sort((a, b) => (a.performed_on < b.performed_on ? 1 : a.performed_on > b.performed_on ? -1 : 0));

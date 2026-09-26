@@ -129,7 +129,7 @@ export function programsSorted() {
 
 export function lastTrained(programId) {
   const dates = list("workouts")
-    .filter((workout) => workout.program_id === programId)
+    .filter((workout) => workout.program_id === programId && workoutExercises(workout.id).some((link) => workingSets(link.id).length > 0))
     .map((workout) => workout.performed_on)
     .sort();
   return dates.length > 0 ? dates[dates.length - 1] : null;
@@ -651,8 +651,15 @@ export function exerciseSessions(exerciseId) {
   );
 }
 
-export function lastPerformance(exerciseId, excludeWorkoutId) {
-  const sessions = exerciseSessions(exerciseId).filter((session) => session.workout.id !== excludeWorkoutId);
+export function lastPerformance(exerciseId, workoutId) {
+  const workout = workoutId ? byId("workouts", workoutId) : null;
+  const sessions = exerciseSessions(exerciseId).filter(
+    (session) =>
+      session.workout.id !== workoutId &&
+      (!workout ||
+        session.workout.performed_on < workout.performed_on ||
+        (session.workout.performed_on === workout.performed_on && session.workout.created_at < workout.created_at))
+  );
   return sessions.length > 0 ? sessions[sessions.length - 1] : null;
 }
 

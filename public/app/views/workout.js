@@ -155,8 +155,13 @@ function exerciseBlock(workout, link) {
   );
 
   if (previous) {
-    const delta = previous.volume > 0 ? ((summary.volume - previous.volume) / previous.volume) * 100 : 0;
-    const trend = summary.volume > 0 && previous.volume > 0;
+    const today = workoutExercises(workout.id)
+      .filter((row) => row.exercise_id === exercise.id)
+      .flatMap((row) => workingSets(row.id));
+    const done = summarizeSets(today).volume;
+    const before = summarizeSets(previous.sets.slice(0, Math.max(today.length, 1))).volume;
+    const delta = before > 0 ? ((done - before) / before) * 100 : 0;
+    const trend = done > 0 && before > 0;
     block.append(
       el("div", { class: "hint" }, [
         el("span", {}, [

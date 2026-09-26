@@ -1,4 +1,4 @@
-const VERSION = "v96";
+const VERSION = "v97";
 const CACHE = `gymtracker-${VERSION}`;
 
 const SHELL = [
