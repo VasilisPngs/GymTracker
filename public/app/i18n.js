@@ -80,6 +80,8 @@ const STRINGS = {
   openExerciseHistory: ["Open exercise history", "Άνοιγμα ιστορικού άσκησης"],
   moveUp: ["Move up", "Μετακίνηση πάνω"],
   moveDown: ["Move down", "Μετακίνηση κάτω"],
+  moveEarlier: ["Move earlier", "Μετακίνηση πιο μπροστά"],
+  moveLater: ["Move later", "Μετακίνηση πιο μετά"],
   removeFromWorkout: ["Remove from workout", "Αφαίρεση από την προπόνηση"],
   removeExercise: ["Remove exercise", "Αφαίρεση άσκησης"],
   removeExerciseBody: ["Remove {name} and its sets from this workout?", "Να αφαιρεθεί η {name} και τα σετ της από αυτή την προπόνηση;"],

@@ -1,4 +1,4 @@
-import { el, icon, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, icon, plural, stepper, openSheet, confirmSheet, moveRow, toast } from "../dom.js";
 import { t, muscleGroupName, relativeDay } from "../i18n.js";
 import {
   byId,
@@ -9,6 +9,7 @@ import {
   createProgram,
   updateProgram,
   deleteProgram,
+  moveProgram,
   addProgramExercise,
   updateProgramExercise,
   removeProgramExercise,
@@ -97,26 +98,15 @@ function programRow(item) {
 function openProgramExerciseMenu(item, exercise) {
   openSheet((close) => [
     el("h2", { text: exercise.name }),
-    el("div", { class: "row" }, [
-      el("button", {
-        class: "btn grow",
-        type: "button",
-        text: t("moveUp"),
-        onclick: () => {
-          moveProgramExercise(item.id, -1);
-          close();
-        }
-      }),
-      el("button", {
-        class: "btn grow",
-        type: "button",
-        text: t("moveDown"),
-        onclick: () => {
-          moveProgramExercise(item.id, 1);
-          close();
-        }
-      })
-    ]),
+    moveRow(
+      programExercises(item.program_id).findIndex((row) => row.id === item.id),
+      programExercises(item.program_id).length,
+      [t("moveUp"), t("moveDown")],
+      (direction) => {
+        moveProgramExercise(item.id, direction);
+        close();
+      }
+    ),
     el("button", {
       class: "btn block danger",
       type: "button",
@@ -260,8 +250,18 @@ export function renderPrograms(container, repaint) {
 }
 
 function openProgramMenu(program) {
+  const programs = programsSorted();
   openSheet((close) => [
     el("h2", { text: program.title }),
+    moveRow(
+      programs.findIndex((row) => row.id === program.id),
+      programs.length,
+      [t("moveEarlier"), t("moveLater")],
+      (direction) => {
+        moveProgram(program.id, direction);
+        close();
+      }
+    ),
     el("button", {
       class: "btn block danger",
       type: "button",

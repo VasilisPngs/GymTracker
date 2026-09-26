@@ -54,6 +54,14 @@ export function icon(name) {
   return svg("svg", { class: kind, viewBox: "0 0 24 24", "aria-hidden": "true" }, svg("path", { d: ICON_PATHS[name] }));
 }
 
+export function moveRow(index, count, labels, onMove) {
+  const buttons = [
+    index > 0 ? el("button", { class: "btn grow", type: "button", text: labels[0], onclick: () => onMove(-1) }) : null,
+    index >= 0 && index < count - 1 ? el("button", { class: "btn grow", type: "button", text: labels[1], onclick: () => onMove(1) }) : null
+  ].filter(Boolean);
+  return buttons.length > 0 ? el("div", { class: "row" }, buttons) : null;
+}
+
 export function searchField(props) {
   const { class: extra, ...rest } = props;
   const input = el("input", { type: "search", ...rest });

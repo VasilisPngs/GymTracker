@@ -346,6 +346,13 @@ export async function updateProgram(id, patch) {
   await commit([{ table: "programs", row: { ...current, ...patch } }]);
 }
 
+export async function moveProgram(id, direction) {
+  const siblings = programsSorted();
+  const index = siblings.findIndex((row) => row.id === id);
+  const entries = reorder("programs", siblings, index, index + direction);
+  if (entries.length > 0) await commit(entries);
+}
+
 export async function deleteProgram(id) {
   const current = byId("programs", id);
   if (!current) return;

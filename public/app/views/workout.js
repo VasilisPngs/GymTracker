@@ -1,4 +1,4 @@
-import { el, icon, append, clear, formatDate, formatDay, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, toast } from "../dom.js";
+import { el, icon, append, clear, formatDate, formatDay, formatDuration, formatNumber, plural, stepper, openSheet, confirmSheet, moveRow, toast } from "../dom.js";
 import { t, muscleGroupName } from "../i18n.js";
 import {
   byId,
@@ -212,26 +212,15 @@ function openExerciseMenu(workout, link, exercise) {
         navigate(`/exercise/${exercise.id}`);
       }
     }),
-    el("div", { class: "row" }, [
-      el("button", {
-        class: "btn grow",
-        type: "button",
-        text: t("moveUp"),
-        onclick: () => {
-          moveWorkoutExercise(link.id, -1);
-          close();
-        }
-      }),
-      el("button", {
-        class: "btn grow",
-        type: "button",
-        text: t("moveDown"),
-        onclick: () => {
-          moveWorkoutExercise(link.id, 1);
-          close();
-        }
-      })
-    ]),
+    moveRow(
+      workoutExercises(workout.id).findIndex((row) => row.id === link.id),
+      workoutExercises(workout.id).length,
+      [t("moveUp"), t("moveDown")],
+      (direction) => {
+        moveWorkoutExercise(link.id, direction);
+        close();
+      }
+    ),
     el("button", {
       class: "btn block danger",
       type: "button",
