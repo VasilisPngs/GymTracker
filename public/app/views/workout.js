@@ -66,7 +66,7 @@ function restRow(seconds, title, onCommit, extra) {
   return el(
     "button",
     {
-      class: extra ? `rest-row ${extra}` : "rest-row",
+      class: ["rest-row", extra, seconds ? null : "empty"].filter(Boolean).join(" "),
       type: "button",
       "aria-label": title,
       onclick: () =>
@@ -75,7 +75,10 @@ function restRow(seconds, title, onCommit, extra) {
           el("label", { class: "field" }, [el("span", { class: "tiny", text: t("colRest") }), stepper(seconds, 15, 0, onCommit)])
         ])
     },
-    [icon("timer"), el("span", { class: "num", text: seconds ? formatDuration(seconds) : t("noRest") })]
+    el("span", { class: "rest-pill" }, [
+      icon(seconds ? "timer" : "plus"),
+      el("span", { class: "num", text: seconds ? formatDuration(seconds) : t("addRest") })
+    ])
   );
 }
 
